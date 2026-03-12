@@ -211,9 +211,10 @@ USING (bucket_id = 'images');
 -- ── 초기 site_config 데이터 ──────────────────────────────────
 
 INSERT INTO site_config (key, value) VALUES
-    ('color_scheme', '"blue"'),
-    ('site_name',    '"FoliumOnline"'),
-    ('job_field',    '"game"'),
-    ('job_fields',   '[{"id":"web","name":"Web","emoji":"🌐"},{"id":"game","name":"Game","emoji":"🎮"}]'),
-    ('seo_config',   '{"default_title":"FoliumOnline","default_description":"포트폴리오 & 기술 블로그","default_og_image":""}')
+    ('color_scheme',    '"blue"'),
+    ('site_name',       '"FoliumOnline"'),
+    ('job_field',       '"game"'),
+    ('job_fields',      '[{"id":"web","name":"Web","emoji":"🌐"},{"id":"game","name":"Game","emoji":"🎮"}]'),
+    ('seo_config',      '{"default_title":"FoliumOnline","default_description":"포트폴리오 & 기술 블로그","default_og_image":""}'),
+    ('resume_layout',   '"modern"')
 ON CONFLICT (key) DO NOTHING;

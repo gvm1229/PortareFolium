@@ -69,6 +69,8 @@ function TextAreaField({
     );
 }
 
+type ResumeLayout = "classic" | "modern" | "minimal";
+
 export default function ResumePanel() {
     const [resumeData, setResumeData] = useState<Resume | null>(null);
     const [rowId, setRowId] = useState<string | null>(null);
@@ -78,6 +80,7 @@ export default function ResumePanel() {
         type: "error" | "success";
         msg: string;
     } | null>(null);
+    const [resumeLayout, setResumeLayout] = useState<ResumeLayout>("modern");
 
     // Edit states for arrays
     const [editingWork, setEditingWork] = useState<number | null>(null);
@@ -92,33 +95,36 @@ export default function ResumePanel() {
 
     useEffect(() => {
         if (!browserClient) return;
-        browserClient
-            .from("resume_data")
-            .select("id, data")
-            .eq("lang", "ko")
-            .limit(1)
-            .single()
-            .then(({ data: row, error }) => {
-                const defaultResume: Resume = {
-                    basics: {
-                        name: "",
-                        label: "",
-                        image: "",
-                        summary: "",
-                        email: "",
-                        phone: "",
-                        url: "",
-                    },
-                    work: [],
-                    projects: [],
-                    education: [],
-                    skills: [],
-                    languages: [],
-                };
-                if (error || !row) {
-                    setResumeData(defaultResume);
-                    return;
-                }
+        Promise.all([
+            browserClient
+                .from("resume_data")
+                .select("id, data")
+                .eq("lang", "ko")
+                .limit(1)
+                .single(),
+            browserClient
+                .from("site_config")
+                .select("value")
+                .eq("key", "resume_layout")
+                .single(),
+        ]).then(([{ data: row, error }, { data: layoutRow }]) => {
+            const defaultResume: Resume = {
+                basics: {
+                    name: "",
+                    label: "",
+                    image: "",
+                    summary: "",
+                    email: "",
+                    phone: "",
+                    url: "",
+                },
+                work: [],
+                projects: [],
+                education: [],
+                skills: [],
+                languages: [],
+            };
+            if (!error && row) {
                 setRowId(row.id);
                 setResumeData({ ...defaultResume, ...(row.data as Resume) });
                 setJsonInput(
@@ -128,7 +134,13 @@ export default function ResumePanel() {
                         2
                     )
                 );
-            });
+            } else {
+                setResumeData(defaultResume);
+            }
+            if (layoutRow?.value) {
+                setResumeLayout(layoutRow.value as ResumeLayout);
+            }
+        });
     }, []);
 
     const handleSave = async () => {
@@ -155,6 +167,13 @@ export default function ResumePanel() {
             }
 
             if (err) throw err;
+
+            // resume_layout site_config 저장
+            const { error: layoutErr } = await browserClient
+                .from("site_config")
+                .upsert({ key: "resume_layout", value: resumeLayout });
+            if (layoutErr) throw layoutErr;
+
             setStatus({
                 type: "success",
                 msg: "저장됐습니다. 이력서 페이지에 즉시 반영됩니다.",
@@ -232,6 +251,30 @@ export default function ResumePanel() {
                     {status.msg}
                 </p>
             )}
+
+            {/* 레이아웃 선택 */}
+            <section className="space-y-3 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
+                    레이아웃
+                </h3>
+                <div className="flex gap-3">
+                    {(["classic", "modern", "minimal"] as ResumeLayout[]).map(
+                        (l) => (
+                            <button
+                                key={l}
+                                onClick={() => setResumeLayout(l)}
+                                className={`rounded-lg px-4 py-2 text-sm font-semibold capitalize transition-opacity ${
+                                    resumeLayout === l
+                                        ? "bg-(--color-accent) text-(--color-on-accent)"
+                                        : "border border-(--color-border) text-(--color-muted) hover:text-(--color-foreground)"
+                                }`}
+                            >
+                                {l}
+                            </button>
+                        )
+                    )}
+                </div>
+            </section>
 
             {/* 기본 정보 */}
             <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
