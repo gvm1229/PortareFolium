@@ -215,7 +215,7 @@ export default function PostsPanel() {
         slug: form.slug,
         title: form.title,
         description: form.description || null,
-        pub_date: new Date(form.pub_date).toISOString(),
+        pub_date: new Date(form.pub_date + "+09:00").toISOString(),
         category: form.category || null,
         tags: form.tags
             .split(",")
@@ -237,7 +237,11 @@ export default function PostsPanel() {
             slug: post.slug,
             title: post.title,
             description: post.description ?? "",
-            pub_date: post.pub_date.slice(0, 16),
+            pub_date: new Date(
+                new Date(post.pub_date).getTime() + 9 * 60 * 60 * 1000
+            )
+                .toISOString()
+                .slice(0, 16),
             category: post.category ?? "",
             tags: post.tags.join(", "),
             jobField: Array.isArray(jf) ? jf : jf ? [jf] : [],

@@ -3,10 +3,10 @@
  * 저장값은 KST를 그대로 저장(ISO의 시·분은 KST 기준). 표시 시 변환 없이 그대로 한국어로 포맷.
  */
 
-/** 저장된 KST 시각(naive, UTC 필드에 KST 숫자 저장)을 한국어 날짜·시간으로 표시. 변환 없음. AM/PM은 오전/오후 */
+/** Date 객체를 KST(한국 표준시) 기준으로 한국어 날짜·시간 문자열로 포맷. AM/PM은 오전/오후 */
 export function formatPubDateKST(date: Date): string {
     const formatter = new Intl.DateTimeFormat("ko-KR", {
-        timeZone: "UTC",
+        timeZone: "Asia/Seoul",
         year: "numeric",
         month: "long",
         day: "numeric",

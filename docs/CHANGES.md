@@ -2,6 +2,14 @@
 
 ## 2026-03-22
 
+### Fix: Admin 포스트 발행일 KST 역변환 버그 수정 (v0.7.17)
+
+- `src/components/admin/panels/PostsPanel.tsx`: Admin 편집기에서 `pub_date`를 로드하거나 저장할 때 발생하는 시간대(Timezone) 오차 문제를 해결. 데이터베이스의 UTC 시간을 로컬 입력폼(datetime-local)에 매핑하기 전 임의로 KST(+09:00) 오프셋을 더하고(`getTime() + 9*60*60*1000`), 저장 시에는 명시적으로 `+09:00`을 문자열에 붙여 `new Date()` 파싱이 클라이언트 브라우저의 시간대 설정과 무관하게 항상 한국 시간으로 처리되도록 수정.
+
+### Fix: 블로그 포스트 KST 시간대 포맷팅 오류 수정 (v0.7.16)
+
+- `src/lib/blog.ts`: KST 기준으로 저장된 UTC 시각(예: `+00`)을 프론트엔드에서 표시할 때 기존 방식(`timeZone: "UTC"`) 대신 `timeZone: "Asia/Seoul"`을 적용하여 한국(KST) 표준시로 올바르게 표시되도록 수정. March 포스트 시간이 잘못 표시되던 문제 해결.
+
 ### Fix: 에디터 내 Folium Table 삽입 시 프론트엔드 렌더링 누락 버그 수정 (v0.7.15)
 
 - `src/lib/mdx-directive-converter.ts`: MDXEditor(remark-directive)가 JSON 데이터를 갖는 속성을 직렬화할 때 큰따옴표 대신 작은따옴표(`'`)를 사용할 경우 기존 정규식이 매칭하지 못하던 버그를 수정하여 `directiveToJsx` 변환 호환성 개선.
