@@ -161,21 +161,24 @@ ON CONFLICT (key) DO UPDATE SET value = '"0.6.17"';`,
         feature:
             "이력서 섹션 이모지 설정 per-section 중첩 구조 (ResumeSection<T>)",
         sql: `UPDATE resume_data
-SET data = (
-  SELECT jsonb_object_agg(
-    section_key,
-    CASE
-      WHEN section_key = 'basics' THEN section_val
-      WHEN jsonb_typeof(section_val) = 'array' THEN
-        jsonb_build_object(
-          'emoji',     COALESCE(data->'meta'->'sectionLabels'->section_key, '"✔️"'),
-          'showEmoji', COALESCE(data->'meta'->'showEmojis'->section_key, 'false'),
-          'entries',   section_val
-        )
-      ELSE section_val
-    END
-  )
-  FROM jsonb_each(data - 'meta') AS t(section_key, section_val)
+SET data = COALESCE(
+  (
+    SELECT jsonb_object_agg(
+      section_key,
+      CASE
+        WHEN section_key = 'basics' THEN section_val
+        WHEN jsonb_typeof(section_val) = 'array' THEN
+          jsonb_build_object(
+            'emoji',     COALESCE(data->'meta'->'sectionLabels'->section_key, '"✔️"'),
+            'showEmoji', COALESCE(data->'meta'->'showEmojis'->section_key, 'false'),
+            'entries',   section_val
+          )
+        ELSE section_val
+      END
+    )
+    FROM jsonb_each(data - 'meta') AS t(section_key, section_val)
+  ),
+  '{}'::jsonb
 )
 WHERE lang = 'ko';
 

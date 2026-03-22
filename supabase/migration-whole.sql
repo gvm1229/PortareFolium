@@ -124,7 +124,7 @@ $$;
 REVOKE ALL ON FUNCTION exec_sql(text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION exec_sql(text) TO service_role;
 
--- ── resume_data: sectionLabels/showEmojis → meta 이전 ─────────
+-- ── resume_data: sectionLabels/showEmojis → meta 이전 (v0.6.17) ──
 -- 이미 meta 구조인 경우 COALESCE로 기존 값을 보존하며 안전하게 병합
 
 UPDATE resume_data
@@ -139,12 +139,86 @@ SET data = (data - 'sectionLabels' - 'showEmojis') ||
     )
 WHERE lang = 'ko';
 
+-- ── resume_data: section → {emoji, showEmoji, entries} 구조 이전 (v0.6.18) ──
+-- data가 빈 객체일 때 jsonb_object_agg가 NULL을 반환하므로 COALESCE로 보호
+
+UPDATE resume_data
+SET data = COALESCE(
+    (
+        SELECT jsonb_object_agg(
+            section_key,
+            CASE
+                WHEN section_key = 'basics' THEN section_val
+                WHEN jsonb_typeof(section_val) = 'array' THEN
+                    jsonb_build_object(
+                        'emoji',     COALESCE(data->'meta'->'sectionLabels'->section_key, '"✔️"'),
+                        'showEmoji', COALESCE(data->'meta'->'showEmojis'->section_key, 'false'),
+                        'entries',   section_val
+                    )
+                ELSE section_val
+            END
+        )
+        FROM jsonb_each(data - 'meta') AS t(section_key, section_val)
+    ),
+    '{}'::jsonb
+)
+WHERE lang = 'ko';
+
+-- ── ai_agent_tokens + content_snapshots 테이블 생성 (v0.6.20) ──
+
+CREATE TABLE IF NOT EXISTS ai_agent_tokens (
+    id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    token_hash     TEXT        NOT NULL UNIQUE,
+    label          TEXT        NOT NULL,
+    duration_min   INTEGER     NOT NULL,
+    expires_at     TIMESTAMPTZ NOT NULL,
+    revoked        BOOLEAN     NOT NULL DEFAULT FALSE,
+    last_used_at   TIMESTAMPTZ,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE ai_agent_tokens ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS content_snapshots (
+    id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    source_table   TEXT        NOT NULL,
+    record_id      TEXT        NOT NULL,
+    data           JSONB       NOT NULL,
+    triggered_by   TEXT        NOT NULL DEFAULT 'mcp_agent',
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE content_snapshots ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS idx_snapshots_lookup
+    ON content_snapshots(source_table, record_id, created_at DESC);
+
+CREATE OR REPLACE FUNCTION prune_snapshots()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM content_snapshots
+    WHERE id IN (
+        SELECT id FROM content_snapshots
+        WHERE source_table = NEW.source_table AND record_id = NEW.record_id
+        ORDER BY created_at DESC
+        OFFSET 20
+    );
+    RETURN NEW;
+END;
+$$;
+
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_trigger
+        WHERE tgname = 'trg_prune_snapshots'
+    ) THEN
+        CREATE TRIGGER trg_prune_snapshots
+            AFTER INSERT ON content_snapshots
+            FOR EACH ROW EXECUTE FUNCTION prune_snapshots();
+    END IF;
+END $$;
+
 -- ── DB 스키마 버전 설정 ───────────────────────────────────────
--- 신규 설치: ON CONFLICT DO NOTHING으로 기존 값 유지
--- 전체 재적용: 아래 줄을 주석 해제하고 위 줄을 주석 처리
--- INSERT INTO site_config (key, value) VALUES ('db_schema_version', '"0.6.17"')
--- ON CONFLICT (key) DO UPDATE SET value = '"0.6.17"';
+-- 항상 최신 버전으로 덮어씀 (migration-whole.sql은 전체 재동기화 목적)
 
 INSERT INTO site_config (key, value)
-VALUES ('db_schema_version', '"0.6.17"')
-ON CONFLICT (key) DO NOTHING;
+VALUES ('db_schema_version', '"0.6.20"')
+ON CONFLICT (key) DO UPDATE SET value = '"0.6.20"';
