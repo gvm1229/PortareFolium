@@ -2,6 +2,14 @@
 
 ## 2026-03-23
 
+### Fix: unstable_cache 모듈 레벨 이동 — content가 cache key에 포함되도록 수정 (v0.7.32)
+
+- `src/lib/markdown.tsx`: `getCachedMarkdown`의 `unstable_cache`를 매 호출마다 클로저로 생성하던 방식에서 모듈 레벨 상수 `_renderCached`로 이동. 기존 방식은 `content`가 클로저로 캡처되어 cache key에 포함되지 않아 동일 slug라면 내용·코드 변경 후에도 stale(에러 포함) 결과를 3600초간 계속 서빙하는 문제가 있었음. 수정 후 `slug + content`가 실제 cache key의 일부로 포함되어 콘텐츠 변경 또는 배포 시 새 cache entry 생성.
+
+### Fix: MDX 콘텐츠 내 next/image import 제거 및 Image 컴포넌트 override 추가 (v0.7.31)
+
+- `src/lib/markdown.tsx`: `evaluate` 실행 전 `import ... from 'next/image'` 구문을 정규식으로 사전 제거. `console-engine-project-2-review` 포스트 MDX 콘텐츠에 `next/image` import가 직접 포함되어 있어 해당 포스트에서만 Image.prototype 서버 에러가 발생하던 문제 수정. `components`에 `Image: MarkdownImage` 추가 — 콘텐츠 내 `<Image>` JSX를 SSR 안전한 컴포넌트로 대체.
+
 ### Fix: MarkdownImage에서 next/image 제거 — renderToString 서버 호환 수정 (v0.7.30)
 
 - `src/components/MarkdownImage.tsx`: `next/image` 제거, 순수 `<img loading="lazy" decoding="async">` 로 교체. `renderToString` 서버 컨텍스트에서 클라이언트 모듈(`next/image`)을 import하면 "Cannot access Image.prototype on the server" 오류 발생 — 이로 인해 `unstable_cache`가 결과를 캐싱하지 못해 매 요청마다 MDX 렌더링이 재실행되는 근본 원인이었음.

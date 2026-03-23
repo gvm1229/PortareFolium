@@ -150,7 +150,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Structure
 
-**Project:** `portare-folium` — Next.js 16 App Router 기반 개인 포트폴리오 사이트 (v0.7.30)
+**Project:** `portare-folium` — Next.js 16 App Router 기반 개인 포트폴리오 사이트 (v0.7.32)
 
 **Stack:**
 
@@ -295,6 +295,14 @@ docs/CHANGES.md                         # 변경 이력 (기능/디자인 변경
 - 에디터 자동저장: `useAutoSave` + `useKeyboardSave` + `useUnsavedWarning` 훅 조합
 - 디자인 컨셉: "Editorial Minimal" — 대담한 타이포그래피, 여백, 서브틀 애니메이션
 - 전역 애니메이션 유틸리티: `.animate-fade-in-up`, `.animate-fade-in`, `.stagger-1~5`, `.card-lift` (`global.css`)
+- 페이지 레벨 ISR: `export const revalidate = 60` (blog/portfolio slug 페이지), `revalidate = 3600` (레이아웃)
+- 쿼리 중복 제거: 동일 request 내 `generateMetadata` + page 컴포넌트가 같은 데이터를 fetch할 때 `lib/queries.ts`의 React `cache()` 함수를 사용
+
+**Known Pitfalls:**
+
+- **`unstable_cache` 클로저 패턴 금지**: `unstable_cache(() => fn(arg), [key])()` 형태로 매 호출마다 새 클로저를 생성하면 `arg`가 cache key에 포함되지 않음. 동일 key라면 `arg` 변경·코드 수정 후에도 stale 결과(에러 포함)를 계속 서빙. **올바른 패턴**: 모듈 레벨에서 `const cached = unstable_cache(async (a, b) => fn(b), ['key'])` 선언 후 `cached(a, b)` 호출 — 인자가 실제 cache key의 일부가 됨.
+- **`renderToString` 컨텍스트에서 `next/image` 금지**: `next/image`는 `"use client"` 모듈이므로 `renderToString` (서버 전용 컨텍스트)에서 import하면 "Cannot access Image.prototype on the server" 에러 발생. MDX 렌더링 파이프라인 내 컴포넌트(`MarkdownImage` 등)는 반드시 plain `<img>`를 사용.
+- **MDX 콘텐츠 내 `next/image` import**: Supabase에 저장된 MDX 콘텐츠가 `import Image from 'next/image'`를 포함하면 `@mdx-js/mdx` `evaluate`가 실제 Node.js require로 처리해 동일 에러 발생. `renderMarkdown`에서 `evaluate` 전 해당 구문을 정규식으로 제거하고 `components`에 `Image: MarkdownImage`를 등록해 안전하게 대체.
 
 ## MCP Agent Guide
 
