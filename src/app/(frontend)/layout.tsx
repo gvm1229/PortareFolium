@@ -1,4 +1,4 @@
-import { serverClient } from "@/lib/supabase";
+import { getSiteConfig } from "@/lib/queries";
 import Header from "@/components/Header";
 
 export default async function FrontendLayout({
@@ -8,24 +8,18 @@ export default async function FrontendLayout({
 }) {
     let siteName = "";
 
-    if (serverClient) {
-        const { data } = await serverClient
-            .from("site_config")
-            .select("value")
-            .eq("key", "site_name")
-            .single();
-
-        if (data && data.value) {
-            let v = data.value;
-            if (typeof v === "string" && v.startsWith('"')) {
-                try {
-                    v = JSON.parse(v);
-                } catch (e) {}
-            }
-            if (typeof v === "string") {
-                siteName = v;
+    const configRows = await getSiteConfig();
+    const row = configRows.find((r) => r.key === "site_name");
+    if (row?.value) {
+        let v = row.value;
+        if (typeof v === "string" && v.startsWith('"')) {
+            try {
+                v = JSON.parse(v);
+            } catch {
+                // invalid JSON
             }
         }
+        if (typeof v === "string") siteName = v;
     }
 
     const isDev = process.env.NODE_ENV === "development";

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import "@/styles/global.css";
 import "katex/dist/katex.min.css";
-import { serverClient } from "@/lib/supabase";
+import { getSiteConfig } from "@/lib/queries";
 import FoliumTableColorSync from "@/components/FoliumTableColorSync";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
     title: "PortareFolium",
@@ -35,24 +35,13 @@ export default async function RootLayout({
     children: React.ReactNode;
 }) {
     let colorScheme: string = process.env.NEXT_PUBLIC_COLOR_SCHEME ?? "gray";
-    let siteName = "";
 
-    if (serverClient) {
-        const { data: rows } = await serverClient
-            .from("site_config")
-            .select("key, value")
-            .in("key", ["color_scheme", "site_name"]);
-        if (rows) {
-            for (const row of rows) {
-                let v = row.value;
-                if (typeof v === "string" && v.startsWith('"'))
-                    v = JSON.parse(v);
-                if (row.key === "color_scheme" && typeof v === "string")
-                    colorScheme = v;
-                else if (row.key === "site_name" && typeof v === "string")
-                    siteName = v;
-            }
-        }
+    const configRows = await getSiteConfig();
+    for (const row of configRows) {
+        let v = row.value;
+        if (typeof v === "string" && v.startsWith('"')) v = JSON.parse(v);
+        if (row.key === "color_scheme" && typeof v === "string")
+            colorScheme = v;
     }
 
     const validScheme = VALID_SCHEMES.includes(colorScheme)

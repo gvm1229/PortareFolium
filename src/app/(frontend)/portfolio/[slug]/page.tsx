@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { serverClient } from "@/lib/supabase";
+import { getPortfolioItem } from "@/lib/queries";
 import type { PortfolioProject } from "@/types/portfolio";
 import { renderMarkdown } from "@/lib/markdown";
 import { extractTocFromHtml } from "@/lib/toc";
@@ -7,9 +7,10 @@ import TableOfContents from "@/components/TableOfContents";
 import MermaidRenderer from "@/components/MermaidRenderer";
 import { ArrowLeft, Github, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export async function generateMetadata({
     params,
@@ -17,14 +18,7 @@ export async function generateMetadata({
     params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
     const { slug } = await params;
-    if (!serverClient) return {};
-    const { data: item } = await serverClient
-        .from("portfolio_items")
-        .select(
-            "title, meta_title, meta_description, og_image, description, thumbnail"
-        )
-        .eq("slug", slug)
-        .single();
+    const item = await getPortfolioItem(slug);
     if (!item) return {};
     return {
         title: item.meta_title || `${item.title} - Portfolio`,
@@ -42,14 +36,7 @@ export default async function PortfolioDetailPage({
     params: Promise<{ slug: string }>;
 }) {
     const { slug } = await params;
-    if (!serverClient) redirect("/portfolio");
-
-    const { data: item } = await serverClient
-        .from("portfolio_items")
-        .select("*")
-        .eq("slug", slug)
-        .single();
-
+    const item = await getPortfolioItem(slug);
     if (!item) redirect("/portfolio");
 
     const d = item.data ?? {};
@@ -87,13 +74,12 @@ export default async function PortfolioDetailPage({
 
                 {project.thumbnail ? (
                     <div className="mb-10 aspect-video overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-surface-subtle)">
-                        <img
+                        <Image
                             src={project.thumbnail}
                             alt=""
                             width={768}
                             height={432}
-                            loading="eager"
-                            decoding="async"
+                            priority
                             className="h-full w-full object-cover"
                         />
                     </div>

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { serverClient } from "@/lib/supabase";
+import { getPost, getTags, getSiteConfig } from "@/lib/queries";
 import { formatPubDateKST } from "@/lib/blog";
 import { renderMarkdown } from "@/lib/markdown";
 import { extractTocFromHtml } from "@/lib/toc";
@@ -8,9 +8,10 @@ import GithubToc from "@/components/GithubToc";
 import MermaidRenderer from "@/components/MermaidRenderer";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export async function generateMetadata({
     params,
@@ -18,14 +19,7 @@ export async function generateMetadata({
     params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
     const { slug } = await params;
-    if (!serverClient) return {};
-    const { data: post } = await serverClient
-        .from("posts")
-        .select(
-            "title, meta_title, meta_description, og_image, description, category"
-        )
-        .eq("slug", slug)
-        .single();
+    const post = await getPost(slug);
     if (!post) return {};
     const category = post.category?.trim() ?? "";
     const title =
@@ -44,40 +38,24 @@ export default async function BlogPostPage({
     params: Promise<{ slug: string }>;
 }) {
     const { slug } = await params;
-    if (!serverClient) redirect("/blog");
-
-    const { data: post } = await serverClient
-        .from("posts")
-        .select("*")
-        .eq("slug", slug)
-        .single();
-
+    const post = await getPost(slug);
     if (!post) redirect("/blog");
 
-    let slugToTagName = new Map<string, string>();
-    let slugToTagColor = new Map<string, string>();
-    const { data: tagsData } = await serverClient
-        .from("tags")
-        .select("slug, name, color");
-    if (tagsData) {
-        slugToTagName = new Map(tagsData.map((t) => [t.slug, t.name]));
-        slugToTagColor = new Map(
-            tagsData
-                .filter((t) => t.color?.trim())
-                .map((t) => [t.slug, t.color!.trim()])
-        );
-    }
+    const tagsData = await getTags();
+    const slugToTagName = new Map(tagsData.map((t) => [t.slug, t.name]));
+    const slugToTagColor = new Map(
+        tagsData
+            .filter((t) => t.color?.trim())
+            .map((t) => [t.slug, t.color!.trim()])
+    );
 
     const contentHtml = await renderMarkdown(post.content ?? "");
     const tocEntries = extractTocFromHtml(contentHtml);
 
     type TocStyle = "hover" | "github" | "both";
     let tocStyle: TocStyle = "hover";
-    const { data: tocRow } = await serverClient
-        .from("site_config")
-        .select("value")
-        .eq("key", "post_toc_styles")
-        .single();
+    const configRows = await getSiteConfig();
+    const tocRow = configRows.find((r) => r.key === "post_toc_styles");
     if (tocRow?.value && typeof tocRow.value === "object") {
         const styles = tocRow.value as Record<string, TocStyle>;
         if (slug in styles) tocStyle = styles[slug];
@@ -105,13 +83,12 @@ export default async function BlogPostPage({
 
                 {post.thumbnail && (
                     <div className="mb-10 aspect-video overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-surface-subtle)">
-                        <img
+                        <Image
                             src={post.thumbnail}
                             alt=""
                             width={768}
                             height={432}
-                            loading="eager"
-                            decoding="async"
+                            priority
                             className="h-full w-full object-cover"
                         />
                     </div>
