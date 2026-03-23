@@ -1,6 +1,5 @@
-import Image from "next/image";
-
-// 마크다운 본문 img 요소 대체 — next/image WebP 변환 + 지연 로딩
+// 마크다운 본문 img 요소 대체 — 서버 renderToString 호환, 지연 로딩 적용
+// next/image는 "use client" 경계로 인해 renderToString 컨텍스트에서 사용 불가
 export default function MarkdownImage({
     src,
     alt,
@@ -8,25 +7,16 @@ export default function MarkdownImage({
     src?: string;
     alt?: string;
 }) {
-    // http(s) URL이 아니면 일반 img로 fallback
-    if (!src || !src.startsWith("http")) {
-        // eslint-disable-next-line @next/next/no-img-element
-        return (
-            <img src={src} alt={alt ?? ""} loading="lazy" decoding="async" />
-        );
-    }
+    if (!src) return null;
     return (
-        <span
-            className="relative my-4 block w-full"
-            style={{ aspectRatio: "16/9" }}
-        >
-            <Image
+        <span className="my-4 block w-full" style={{ aspectRatio: "16/9" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
                 src={src}
                 alt={alt ?? ""}
-                fill
-                unoptimized
-                className="object-contain"
-                sizes="(max-width: 768px) 100vw, 768px"
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-contain"
             />
         </span>
     );
