@@ -207,6 +207,8 @@ const components = {
     FoliumTable,
     Mermaid,
     img: MarkdownImage,
+    // 콘텐츠 내 <Image> JSX 사용 시 next/image 대신 안전한 컴포넌트로 대체
+    Image: MarkdownImage,
 };
 
 // 코드 블록 밖의 홀로 남은 { } 를 라인 단위로 이스케이프
@@ -239,6 +241,11 @@ export async function renderMarkdown(content: string): Promise<string> {
         // directive → JSX 변환 + 남은 {} 이스케이프
         let mdx = directiveToJsx(content);
         mdx = transformOutsideCodeBlocks(mdx, escapeStrayCurlyBraces);
+        // 콘텐츠 내 next/image import 제거 — renderToString 서버 컨텍스트 호환
+        mdx = mdx.replace(
+            /^import\s+\S+\s+from\s+['"]next\/image['"]\s*;?\s*$/gm,
+            ""
+        );
 
         const { default: MDXContent } = await evaluate(mdx, {
             ...(runtime as any),
