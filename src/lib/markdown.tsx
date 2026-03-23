@@ -225,15 +225,20 @@ function escapeStrayCurlyBraces(chunk: string): string {
         .join("\n");
 }
 
-// slug + content를 key로 MDX 렌더링 결과 캐싱 (revalidate 시에만 재실행)
+// 모듈 레벨 선언 — slug + content가 실제 cache key의 일부로 포함됨
+// 클로저 방식(매 호출마다 새 함수 생성)은 content가 key에서 누락되어 stale 결과를 서빙
+const _renderCached = unstable_cache(
+    async (_slug: string, content: string) => renderMarkdown(content),
+    ["mdx-html"],
+    { revalidate: 3600 }
+);
+
+// slug + content를 key로 MDX 렌더링 결과 캐싱
 export function getCachedMarkdown(
     slug: string,
     content: string
 ): Promise<string> {
-    return unstable_cache(() => renderMarkdown(content), [`mdx-html-${slug}`], {
-        revalidate: 3600,
-        tags: [`post-${slug}`],
-    })();
+    return _renderCached(slug, content);
 }
 
 export async function renderMarkdown(content: string): Promise<string> {
