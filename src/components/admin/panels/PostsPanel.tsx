@@ -432,7 +432,8 @@ export default function PostsPanel() {
                     </button>
                 </div>
                 <p className="text-xs text-(--color-muted)">
-                    저장 후 미리보기를 한 번 방문하면 캐시가 갱신되어 방문자에게 즉시 제공됩니다.
+                    저장 후 미리보기를 한 번 방문하면 캐시가 갱신되어 방문자에게
+                    즉시 제공됩니다.
                 </p>
 
                 {/* 제목 입력 */}
@@ -485,24 +486,27 @@ export default function PostsPanel() {
                                 savedAt={autoSavedAt}
                                 isDirty={isDirty}
                             />
-                        <div className="flex items-center gap-3">
-                            {editTarget !== "new" && (
+                            <div className="flex items-center gap-3">
+                                {editTarget !== "new" && (
+                                    <button
+                                        onClick={() =>
+                                            handleDelete(
+                                                (editTarget as Post).id
+                                            )
+                                        }
+                                        className="rounded-lg bg-red-600 px-5 py-2 text-xl font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                                    >
+                                        삭제
+                                    </button>
+                                )}
                                 <button
-                                    onClick={() =>
-                                        handleDelete((editTarget as Post).id)
-                                    }
-                                    className="rounded-lg bg-red-600 px-5 py-2 text-xl font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                                    onClick={handleSave}
+                                    disabled={saving || !isDirty}
+                                    className="rounded-lg bg-(--color-accent) px-5 py-2 text-xl font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90 disabled:opacity-50"
                                 >
-                                    삭제
+                                    {saving ? "저장 중..." : "저장"}
                                 </button>
-                            )}
-                            <button
-                                onClick={handleSave}
-                                disabled={saving || !isDirty}
-                                className="rounded-lg bg-(--color-accent) px-5 py-2 text-xl font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90 disabled:opacity-50"
-                            >
-                                {saving ? "저장 중..." : "저장"}
-                            </button>
+                            </div>
                         </div>
                     </div>
                 </div>
