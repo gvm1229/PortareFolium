@@ -2,6 +2,27 @@
 
 ## 2026-03-23
 
+### Feat: 스킬 어드민 배치 액션 추가 (v0.7.25)
+
+- `src/components/admin/skills/SkillsAdminSection.tsx`: 각 스킬 행에 체크박스 추가. 카테고리별 뷰에서 카테고리 헤더에 카테고리 전체 선택 체크박스 추가. 1개 이상 선택 시 배치 액션 바 노출 — 숙련도 일괄 변경 (datalist 자동완성), 직무 분야 일괄 변경 (select), 카테고리 일괄 변경 (datalist, 신규 생성 지원), 일괄 삭제. 액션 선택 시 인라인 폼 표시, filter/sort 변경 시 선택 자동 초기화.
+
+### Feat: 스킬 어드민 섹션 전면 재설계 (v0.7.24)
+
+- `src/components/admin/skills/SkillEditorModal.tsx` (신규): 스킬 편집 전용 모달. 이름·카테고리·숙련도·직무분야·연결 경험(직장/프로젝트 탭)·아이콘(slug+color+SkillBadge 미리보기) 필드. Exit safeguard(dirty 체크 → 확인 다이얼로그). localStorage `resume_skill_draft` 키로 500ms debounce 자동저장 및 모달 열기 시 draft 복원 배너. `workRef`는 `"Position @ Company"` composite key 형식 사용.
+- `src/components/admin/skills/SkillsAdminSection.tsx` (신규): flat skill 리스트 (모든 카테고리 keywords 평탄화). 카테고리별/이름순 정렬, 카테고리 필터. 노란 draft 행 (클릭 시 모달 재개). 각 행: 아이콘·이름·숙련도 뱃지·카테고리 뱃지·경험 연결 뱃지·수정·삭제 버튼. 하단 카테고리 관리 패널 (접기/펼치기). SSR 가드 포함.
+- `src/components/admin/panels/ResumePanel.tsx`: 기존 스킬 섹션(~430줄) 제거, `<SkillsAdminSection />` 교체. `normalizeSkills()` 함수에서 레거시 category-level `jobField`/`level`을 각 keyword로 마이그레이션.
+
+### Feat: 스킬 타입 및 Phases 이력서 스킬 섹션 재설계 (v0.7.23)
+
+- `src/types/resume.ts`: `ResumeSkillKeyword`에 `jobField`, `level`, `workRef`, `projectRef` 필드 추가. `ResumeSkill` 카테고리에서 `jobField`/`level` 제거 — 직무 분야·숙련도는 개별 스킬 단위로 관리.
+- `src/components/resume/SkillsSection.tsx` (신규): Phases 이력서 전용 스킬 렌더러. "직무별"/"카테고리별" 뷰 토글 드롭다운. 직무별 뷰: `workRef`/`projectRef` 기준 그룹화, active jobField 그룹 우선 노출. `workRef` composite key `"Position @ Company"` 형식으로 다중 포지션 구분.
+- `src/components/resume/ResumePhases.tsx`: `activeJobField` prop 추가, `<SkillsSection />` 컴포넌트 사용으로 교체.
+
+### Feat: Phases 이력서 커리어 로드맵 섹션 추가 (v0.7.22)
+
+- `src/types/resume.ts`: `ResumeCareerPhase` 인터페이스 추가. `Resume`에 `careerPhases` 필드 추가
+- `src/components/resume/ResumePhases.tsx`: 커리어 로드맵 섹션 추가 (흰 배경 카드, Phase 컬럼 타임라인, phase 번호 내림차순 정렬)
+
 ### Feat: 프롬프트 라이브러리 포트폴리오 프롬프트 추가 (v0.7.21)
 
 - `src/components/admin/panels/PromptLibraryPanel.tsx`: `GET_PORTFOLIO_PROMPT` 함수 추가. 포트폴리오 아이템 생성용 시스템 프롬프트 섹션(상태·핸들러·UI) 추가

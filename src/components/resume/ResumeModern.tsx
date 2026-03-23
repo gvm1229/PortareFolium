@@ -1,4 +1,4 @@
-import type { Resume } from "@/types/resume";
+import type { Resume, ResumeSkillKeyword } from "@/types/resume";
 import { renderMarkdown } from "@/lib/markdown";
 import { SkillBadge, getSimpleIcon } from "@/components/resume/SkillBadge";
 
@@ -239,12 +239,18 @@ export default async function ResumeModern({ resume }: Props) {
                                                 <div className="mt-1 flex flex-wrap gap-1.5">
                                                     {skill.keywords.map(
                                                         (
-                                                            keyword: string,
+                                                            kw: ResumeSkillKeyword,
                                                             kIdx: number
                                                         ) => (
                                                             <SkillBadge
                                                                 key={kIdx}
-                                                                name={keyword}
+                                                                name={kw.name}
+                                                                overrideSlug={
+                                                                    kw.iconSlug
+                                                                }
+                                                                overrideColor={
+                                                                    kw.iconColor
+                                                                }
                                                             />
                                                         )
                                                     )}

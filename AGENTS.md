@@ -150,7 +150,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Structure
 
-**Project:** `portare-folium` — Next.js 16 App Router 기반 개인 포트폴리오 사이트 (v0.7.15)
+**Project:** `portare-folium` — Next.js 16 App Router 기반 개인 포트폴리오 사이트 (v0.7.25)
 
 **Stack:**
 
@@ -210,6 +210,8 @@ src/
 │   │   ├── ResumeClassic.tsx
 │   │   ├── ResumeModern.tsx
 │   │   ├── ResumeMinimal.tsx
+│   │   ├── ResumePhases.tsx            # 웹→게임 전환 내러티브 테마
+│   │   ├── SkillsSection.tsx           # Phases 전용 스킬 렌더러 (직무별/카테고리별 토글)
 │   │   └── SkillBadge.tsx
 │   └── admin/                          # 관리자 UI — "use client" React 컴포넌트
 │       ├── AdminDashboard.tsx
@@ -227,6 +229,9 @@ src/
 │       ├── CategorySelect.tsx
 │       ├── JobFieldSelector.tsx
 │       ├── SaveIndicator.tsx           # 자동저장 상태 표시
+│       ├── skills/                     # 스킬 편집 컴포넌트
+│       │   ├── SkillEditorModal.tsx    # 스킬 편집 모달 (draft 자동저장, exit safeguard)
+│       │   └── SkillsAdminSection.tsx  # 스킬 관리 섹션 (flat list, 배치 액션, sort/filter)
 │       └── panels/                     # Admin 기능별 패널
 │           ├── PostsPanel.tsx
 │           ├── BooksSubPanel.tsx

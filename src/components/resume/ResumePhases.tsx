@@ -1,9 +1,10 @@
 import type { Resume } from "@/types/resume";
 import { renderMarkdown } from "@/lib/markdown";
-import { SkillBadge, getSimpleIcon } from "@/components/resume/SkillBadge";
+import SkillsSection from "@/components/resume/SkillsSection";
 
 interface Props {
     resume: Resume;
+    activeJobField?: string;
 }
 
 // 날짜 포맷
@@ -26,7 +27,7 @@ function matchesPhase(
     return fields.includes(phase);
 }
 
-export default async function ResumePhases({ resume }: Props) {
+export default async function ResumePhases({ resume, activeJobField }: Props) {
     const basics = resume.basics ?? {};
 
     // Phase 1: web 경력
@@ -34,25 +35,13 @@ export default async function ResumePhases({ resume }: Props) {
         matchesPhase(w.jobField, "web")
     );
 
-    // Phase 2: game 프로젝트 (kartrushplusinfo 제외, console-game-project-1 최상단)
-    const gameProjectsRaw = (resume.projects?.entries ?? [])
-        .filter((p) => matchesPhase(p.jobField, "game"))
-        .filter((p) => !p.name?.toLowerCase().includes("kartrushplusinfo"));
-    const gameProjects = [
-        ...gameProjectsRaw.filter((p) =>
-            p.name?.toLowerCase().includes("console-game-project-1")
-        ),
-        ...gameProjectsRaw.filter(
-            (p) => !p.name?.toLowerCase().includes("console-game-project-1")
-        ),
-    ];
-
-    // 기술 스택 분리 (level 필드로 구분)
-    const gameSkills = (resume.skills?.entries ?? []).filter(
-        (s) => !s.level || s.level === "game"
+    // Phase 2: game 프로젝트
+    const gameProjects = (resume.projects?.entries ?? []).filter((p) =>
+        matchesPhase(p.jobField, "game")
     );
-    const webSkills = (resume.skills?.entries ?? []).filter(
-        (s) => s.level === "web"
+
+    const hasSkills = (resume.skills?.entries ?? []).some(
+        (s) => (s.keywords?.length ?? 0) > 0
     );
 
     const education = resume.education?.entries ?? [];
@@ -87,9 +76,14 @@ export default async function ResumePhases({ resume }: Props) {
         })
     );
 
+    // 커리어 단계 (phase 번호 오름차순 — Phase 1 좌측)
+    const careerPhases = [...(resume.careerPhases?.entries ?? [])].sort(
+        (a, b) => (a.phase ?? 0) - (b.phase ?? 0)
+    );
+    const hasCareerPhases = careerPhases.length > 0;
+
     const hasWebWork = webWork.length > 0;
     const hasGameProjects = gameProjects.length > 0;
-    const hasSkills = gameSkills.length > 0 || webSkills.length > 0;
     const hasEducation = education.length > 0;
     const hasLanguages = languages.length > 0;
     const hasAwards = awards.length > 0;
@@ -171,6 +165,85 @@ export default async function ResumePhases({ resume }: Props) {
                     </p>
                 ) : null}
             </header>
+
+            {/* 커리어 로드맵 — Phase 컬럼 타임라인 */}
+            {hasCareerPhases ? (
+                <section className="mb-10">
+                    <h2 className="mb-4 border-b border-(--color-border) pb-1.5 text-xl font-bold tracking-widest text-(--color-accent) uppercase">
+                        커리어 로드맵
+                    </h2>
+                    {/* 수평 진행 바 */}
+                    <div className="mb-5 flex gap-1">
+                        {careerPhases.map((_, idx) => (
+                            <div
+                                key={idx}
+                                className="h-1.5 flex-1 rounded-full bg-(--color-accent)"
+                                style={{
+                                    opacity:
+                                        0.35 +
+                                        idx *
+                                            (0.65 /
+                                                Math.max(
+                                                    careerPhases.length - 1,
+                                                    1
+                                                )),
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <div
+                        className="grid divide-x divide-(--color-border)"
+                        style={{
+                            gridTemplateColumns: `repeat(${careerPhases.length}, 1fr)`,
+                        }}
+                    >
+                        {careerPhases.map((phase, idx) => (
+                            <div
+                                key={idx}
+                                className={`${idx === 0 ? "pr-6" : idx === careerPhases.length - 1 ? "pl-6" : "px-6"}`}
+                            >
+                                <p className="mb-0.5 text-xs font-bold tracking-widest text-(--color-muted) uppercase">
+                                    PHASE {phase.phase}
+                                </p>
+                                {phase.startDate || phase.endDate ? (
+                                    <p
+                                        className="mb-2 text-xs text-(--color-muted)"
+                                        style={{
+                                            fontVariantNumeric: "tabular-nums",
+                                        }}
+                                    >
+                                        {phase.startDate?.slice(0, 7)} ~{" "}
+                                        {phase.endDate?.slice(0, 7) ||
+                                            "Present"}
+                                    </p>
+                                ) : null}
+                                {phase.name ? (
+                                    <h3 className="mb-1 text-base font-bold text-(--color-foreground)">
+                                        {phase.name}
+                                    </h3>
+                                ) : null}
+                                {phase.description ? (
+                                    <p className="mb-3 text-sm leading-relaxed whitespace-pre-line text-(--color-muted)">
+                                        {phase.description}
+                                    </p>
+                                ) : null}
+                                {phase.keywords && phase.keywords.length > 0 ? (
+                                    <div className="flex flex-wrap gap-1">
+                                        {phase.keywords.map((kw, kIdx) => (
+                                            <span
+                                                key={kIdx}
+                                                className="inline-block rounded bg-(--color-surface-subtle) px-2 py-0.5 text-xs text-(--color-muted)"
+                                            >
+                                                {kw}
+                                            </span>
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            ) : null}
 
             {/* Career Phase — 수평 2컬럼 (좌: 웹 경력, 우: 게임 프로젝트) */}
             {hasWebWork || hasGameProjects ? (
@@ -407,118 +480,14 @@ export default async function ResumePhases({ resume }: Props) {
                 </section>
             ) : null}
 
-            {/* 기술 스택 — ResumeModern 그리드 카드 스타일 */}
+            {/* 기술 스택 */}
             {hasSkills ? (
-                <section className="mb-10">
-                    <h2 className="mb-5 border-b border-(--color-border) pb-1.5 text-xl font-bold tracking-widest text-(--color-accent) uppercase">
-                        기술
-                    </h2>
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
-                        {gameSkills.map((skill, idx) => {
-                            const icon = skill.iconSlug
-                                ? getSimpleIcon(skill.iconSlug)
-                                : null;
-                            return (
-                                <div
-                                    key={idx}
-                                    className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-4 py-3"
-                                >
-                                    {skill.name ? (
-                                        <div className="mb-1.5 flex items-center gap-2 text-base font-bold text-(--color-foreground)">
-                                            {icon ? (
-                                                <svg
-                                                    role="img"
-                                                    viewBox="0 0 24 24"
-                                                    className="h-4 w-4"
-                                                    style={{
-                                                        fill:
-                                                            skill.iconColor ||
-                                                            `#${icon.hex}`,
-                                                    }}
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                    <title>{icon.title}</title>
-                                                    <path d={icon.path} />
-                                                </svg>
-                                            ) : null}
-                                            {skill.name}
-                                        </div>
-                                    ) : null}
-                                    {skill.keywords &&
-                                    skill.keywords.length > 0 ? (
-                                        <div className="mt-1 flex flex-wrap gap-1.5">
-                                            {skill.keywords.map((kw, kIdx) => (
-                                                <SkillBadge
-                                                    key={kIdx}
-                                                    name={kw}
-                                                />
-                                            ))}
-                                        </div>
-                                    ) : null}
-                                </div>
-                            );
-                        })}
-                    </div>
-                    {webSkills.length > 0 ? (
-                        <div className="mt-4">
-                            <p className="mb-3 text-sm font-medium text-(--color-muted)">
-                                배경 기술
-                            </p>
-                            <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3 opacity-60">
-                                {webSkills.map((skill, idx) => {
-                                    const icon = skill.iconSlug
-                                        ? getSimpleIcon(skill.iconSlug)
-                                        : null;
-                                    return (
-                                        <div
-                                            key={idx}
-                                            className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-4 py-3"
-                                        >
-                                            {skill.name ? (
-                                                <div className="mb-1.5 flex items-center gap-2 text-base font-bold text-(--color-foreground)">
-                                                    {icon ? (
-                                                        <svg
-                                                            role="img"
-                                                            viewBox="0 0 24 24"
-                                                            className="h-4 w-4"
-                                                            style={{
-                                                                fill:
-                                                                    skill.iconColor ||
-                                                                    `#${icon.hex}`,
-                                                            }}
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                        >
-                                                            <title>
-                                                                {icon.title}
-                                                            </title>
-                                                            <path
-                                                                d={icon.path}
-                                                            />
-                                                        </svg>
-                                                    ) : null}
-                                                    {skill.name}
-                                                </div>
-                                            ) : null}
-                                            {skill.keywords &&
-                                            skill.keywords.length > 0 ? (
-                                                <div className="mt-1 flex flex-wrap gap-1.5">
-                                                    {skill.keywords.map(
-                                                        (kw, kIdx) => (
-                                                            <SkillBadge
-                                                                key={kIdx}
-                                                                name={kw}
-                                                            />
-                                                        )
-                                                    )}
-                                                </div>
-                                            ) : null}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    ) : null}
-                </section>
+                <SkillsSection
+                    skills={resume.skills?.entries ?? []}
+                    activeJobField={activeJobField}
+                    works={resume.work?.entries ?? []}
+                    projects={resume.projects?.entries ?? []}
+                />
             ) : null}
 
             {/* 학력 — ResumeModern 카드 스타일 */}

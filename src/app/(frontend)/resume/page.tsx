@@ -92,7 +92,9 @@ export default async function ResumePage() {
 
     // phases 레이아웃은 jobField 필터 없이 raw 데이터 전달
     if (resumeLayout === "phases") {
-        return <ResumePhases resume={resumeDataRaw} />;
+        return (
+            <ResumePhases resume={resumeDataRaw} activeJobField={jobField} />
+        );
     }
 
     return (

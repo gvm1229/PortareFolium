@@ -10,6 +10,7 @@ import {
     JobFieldBadges,
     type JobFieldItem,
 } from "@/components/admin/JobFieldSelector";
+import SkillsAdminSection from "@/components/admin/skills/SkillsAdminSection";
 import type {
     Resume,
     ResumeWork,
@@ -17,10 +18,46 @@ import type {
     ResumeProjectSection,
     ResumeEducation,
     ResumeAward,
-    ResumeSkill,
+    ResumeSkillKeyword,
     ResumeLanguage,
     ResumeBasics,
+    ResumeCareerPhase,
 } from "@/types/resume";
+
+// string[] 하위 호환: 로드된 keyword가 string이면 객체로 정규화
+function normalizeKeywords(keywords: unknown[]): ResumeSkillKeyword[] {
+    return keywords.map((kw) =>
+        typeof kw === "string" ? { name: kw } : (kw as ResumeSkillKeyword)
+    );
+}
+
+function normalizeSkills(resume: Resume): Resume {
+    if (!resume.skills) return resume;
+    return {
+        ...resume,
+        skills: {
+            ...resume.skills,
+            entries: resume.skills.entries.map((s) => {
+                const legacy = s as unknown as Record<string, unknown>;
+                const catJobField = legacy["jobField"] as
+                    | string
+                    | string[]
+                    | undefined;
+                const catLevel = legacy["level"] as string | undefined;
+                const normalized = normalizeKeywords(
+                    s.keywords ? (s.keywords as unknown[]) : []
+                );
+                const migrated = normalized.map((kw) => ({
+                    ...kw,
+                    jobField: kw.jobField ?? catJobField,
+                    level: (kw as { level?: string }).level ?? catLevel,
+                }));
+                const { jobField: _jf, level: _lv, ...rest } = legacy as any;
+                return { ...rest, keywords: migrated };
+            }),
+        },
+    };
+}
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import { Switch } from "@/components/ui/switch";
@@ -174,10 +211,12 @@ export default function ResumePanel() {
         null
     );
     const [editingAward, setEditingAward] = useState<number | null>(null);
-    const [editingSkill, setEditingSkill] = useState<number | null>(null);
-    const [editingSkillKeywords, setEditingSkillKeywords] =
-        useState<string>("");
     const [editingLanguage, setEditingLanguage] = useState<number | null>(null);
+    const [editingCareerPhase, setEditingCareerPhase] = useState<number | null>(
+        null
+    );
+    const [editingCareerPhaseKeywords, setEditingCareerPhaseKeywords] =
+        useState<string>("");
     const [backupData, setBackupData] = useState<any>(null);
     // 드래그 소스 추적 (type: 'work' | 'project', idx: 원래 인덱스)
     const dragSrcRef = useRef<{ type: string; idx: number } | null>(null);
@@ -226,10 +265,10 @@ export default function ResumePanel() {
                 };
                 if (!error && row) {
                     setRowId(row.id);
-                    const loaded = {
+                    const loaded = normalizeSkills({
                         ...defaultResume,
                         ...(row.data as Resume),
-                    };
+                    });
                     savedDataRef.current = JSON.stringify(loaded);
                     setResumeData(loaded);
                 } else {
@@ -503,6 +542,312 @@ export default function ResumePanel() {
                     rows={4}
                 />
             </section>
+
+            {/* 커리어 타임라인 — phases 디자인 전용 */}
+            {resumeLayout === "phases" ? (
+                <section className="space-y-4 rounded-xl border border-(--color-accent) bg-(--color-surface) p-6">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-bold text-(--color-foreground)">
+                            커리어 타임라인
+                            <span className="ml-2 rounded-full bg-(--color-accent) px-2 py-0.5 text-xs font-medium text-(--color-on-accent)">
+                                Phases 전용
+                            </span>
+                        </h3>
+                        <button
+                            className="rounded-lg bg-(--color-accent) px-3 py-1.5 text-sm font-bold whitespace-nowrap text-(--color-on-accent)"
+                            onClick={() => {
+                                const newEntry: ResumeCareerPhase = {
+                                    phase:
+                                        (resumeData.careerPhases?.entries
+                                            ?.length ?? 0) + 1,
+                                    startDate: "",
+                                    endDate: "",
+                                    name: "",
+                                    description: "",
+                                    keywords: [],
+                                };
+                                const updated = {
+                                    ...resumeData,
+                                    careerPhases: {
+                                        emoji:
+                                            resumeData.careerPhases?.emoji ??
+                                            "",
+                                        showEmoji:
+                                            resumeData.careerPhases
+                                                ?.showEmoji ?? false,
+                                        entries: [
+                                            ...(resumeData.careerPhases
+                                                ?.entries ?? []),
+                                            newEntry,
+                                        ],
+                                    },
+                                };
+                                setResumeData(updated);
+                                const newIdx =
+                                    resumeData.careerPhases?.entries?.length ??
+                                    0;
+                                setEditingCareerPhase(newIdx);
+                                setEditingCareerPhaseKeywords("");
+                            }}
+                        >
+                            + Phase 추가
+                        </button>
+                    </div>
+                    {(resumeData.careerPhases?.entries ?? []).length === 0 ? (
+                        <p className="text-sm text-(--color-muted)">
+                            아직 추가된 Phase가 없습니다.
+                        </p>
+                    ) : null}
+                    {(resumeData.careerPhases?.entries ?? []).map((cp, idx) => (
+                        <div
+                            key={idx}
+                            className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) p-4"
+                        >
+                            {editingCareerPhase === idx ? (
+                                <div className="space-y-3">
+                                    <div className="flex gap-3">
+                                        <div className="w-24 flex-shrink-0">
+                                            <InputField
+                                                label="Phase 번호"
+                                                value={String(cp.phase ?? "")}
+                                                onChange={(v) => {
+                                                    const entries = [
+                                                        ...(resumeData
+                                                            .careerPhases
+                                                            ?.entries ?? []),
+                                                    ];
+                                                    entries[idx] = {
+                                                        ...entries[idx],
+                                                        phase:
+                                                            Number(v) ||
+                                                            undefined,
+                                                    };
+                                                    setResumeData({
+                                                        ...resumeData,
+                                                        careerPhases: {
+                                                            ...resumeData.careerPhases!,
+                                                            entries,
+                                                        },
+                                                    });
+                                                }}
+                                                placeholder="1"
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <InputField
+                                                label="이름"
+                                                value={cp.name ?? ""}
+                                                onChange={(v) => {
+                                                    const entries = [
+                                                        ...(resumeData
+                                                            .careerPhases
+                                                            ?.entries ?? []),
+                                                    ];
+                                                    entries[idx] = {
+                                                        ...entries[idx],
+                                                        name: v,
+                                                    };
+                                                    setResumeData({
+                                                        ...resumeData,
+                                                        careerPhases: {
+                                                            ...resumeData.careerPhases!,
+                                                            entries,
+                                                        },
+                                                    });
+                                                }}
+                                                placeholder="웹 개발 경력"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <InputField
+                                            label="시작일 (YYYY-MM)"
+                                            value={cp.startDate ?? ""}
+                                            onChange={(v) => {
+                                                const entries = [
+                                                    ...(resumeData.careerPhases
+                                                        ?.entries ?? []),
+                                                ];
+                                                entries[idx] = {
+                                                    ...entries[idx],
+                                                    startDate: v,
+                                                };
+                                                setResumeData({
+                                                    ...resumeData,
+                                                    careerPhases: {
+                                                        ...resumeData.careerPhases!,
+                                                        entries,
+                                                    },
+                                                });
+                                            }}
+                                            placeholder="2022-06"
+                                        />
+                                        <InputField
+                                            label="종료일 (YYYY-MM)"
+                                            value={cp.endDate ?? ""}
+                                            onChange={(v) => {
+                                                const entries = [
+                                                    ...(resumeData.careerPhases
+                                                        ?.entries ?? []),
+                                                ];
+                                                entries[idx] = {
+                                                    ...entries[idx],
+                                                    endDate: v,
+                                                };
+                                                setResumeData({
+                                                    ...resumeData,
+                                                    careerPhases: {
+                                                        ...resumeData.careerPhases!,
+                                                        entries,
+                                                    },
+                                                });
+                                            }}
+                                            placeholder="2025-05"
+                                        />
+                                    </div>
+                                    <TextAreaField
+                                        label="설명"
+                                        value={cp.description ?? ""}
+                                        onChange={(v) => {
+                                            const entries = [
+                                                ...(resumeData.careerPhases
+                                                    ?.entries ?? []),
+                                            ];
+                                            entries[idx] = {
+                                                ...entries[idx],
+                                                description: v,
+                                            };
+                                            setResumeData({
+                                                ...resumeData,
+                                                careerPhases: {
+                                                    ...resumeData.careerPhases!,
+                                                    entries,
+                                                },
+                                            });
+                                        }}
+                                        placeholder="줄바꿈으로 구분된 주요 내용"
+                                        rows={3}
+                                    />
+                                    <InputField
+                                        label="키워드 (쉼표로 구분)"
+                                        value={editingCareerPhaseKeywords}
+                                        onChange={(v) =>
+                                            setEditingCareerPhaseKeywords(v)
+                                        }
+                                        placeholder="React, TypeScript, FastAPI"
+                                    />
+                                    <div className="flex gap-2 pt-1">
+                                        <button
+                                            className="rounded-lg bg-(--color-accent) px-4 py-1.5 text-sm font-bold text-(--color-on-accent)"
+                                            onClick={() => {
+                                                const keywords =
+                                                    editingCareerPhaseKeywords
+                                                        .split(",")
+                                                        .map((k) => k.trim())
+                                                        .filter(Boolean);
+                                                const entries = [
+                                                    ...(resumeData.careerPhases
+                                                        ?.entries ?? []),
+                                                ];
+                                                entries[idx] = {
+                                                    ...entries[idx],
+                                                    keywords,
+                                                };
+                                                setResumeData({
+                                                    ...resumeData,
+                                                    careerPhases: {
+                                                        ...resumeData.careerPhases!,
+                                                        entries,
+                                                    },
+                                                });
+                                                setEditingCareerPhase(null);
+                                            }}
+                                        >
+                                            저장
+                                        </button>
+                                        <button
+                                            className="rounded-lg border border-(--color-border) bg-(--color-surface) px-4 py-1.5 text-sm font-bold text-(--color-muted)"
+                                            onClick={() =>
+                                                setEditingCareerPhase(null)
+                                            }
+                                        >
+                                            취소
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold tracking-widest text-(--color-muted) uppercase">
+                                            PHASE {cp.phase}
+                                        </p>
+                                        <p className="font-semibold text-(--color-foreground)">
+                                            {cp.name || "(이름 없음)"}
+                                        </p>
+                                        {cp.startDate || cp.endDate ? (
+                                            <p className="text-xs text-(--color-muted)">
+                                                {cp.startDate} ~{" "}
+                                                {cp.endDate || "Present"}
+                                            </p>
+                                        ) : null}
+                                        {cp.description ? (
+                                            <p className="mt-1 text-sm whitespace-pre-line text-(--color-foreground)">
+                                                {cp.description}
+                                            </p>
+                                        ) : null}
+                                        {cp.keywords &&
+                                        cp.keywords.length > 0 ? (
+                                            <div className="mt-1 flex flex-wrap gap-1">
+                                                {cp.keywords.map((kw, kIdx) => (
+                                                    <span
+                                                        key={kIdx}
+                                                        className="rounded bg-(--color-border) px-1.5 py-0.5 text-xs text-(--color-muted)"
+                                                    >
+                                                        {kw}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                    <div className="flex shrink-0 gap-2">
+                                        <button
+                                            className="rounded-lg bg-(--color-accent) px-3 py-1 text-sm font-bold whitespace-nowrap text-(--color-on-accent)"
+                                            onClick={() => {
+                                                setEditingCareerPhase(idx);
+                                                setEditingCareerPhaseKeywords(
+                                                    (cp.keywords ?? []).join(
+                                                        ", "
+                                                    )
+                                                );
+                                            }}
+                                        >
+                                            편집
+                                        </button>
+                                        <button
+                                            className="rounded-lg bg-red-500 px-3 py-1 text-sm font-bold whitespace-nowrap text-white"
+                                            onClick={() => {
+                                                const entries = (
+                                                    resumeData.careerPhases
+                                                        ?.entries ?? []
+                                                ).filter((_, i) => i !== idx);
+                                                setResumeData({
+                                                    ...resumeData,
+                                                    careerPhases: {
+                                                        ...resumeData.careerPhases!,
+                                                        entries,
+                                                    },
+                                                });
+                                            }}
+                                        >
+                                            삭제
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </section>
+            ) : null}
 
             {/* 경력 (Work Experience) */}
             <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
@@ -2517,311 +2862,12 @@ export default function ResumePanel() {
             </section>
 
             {/* 스킬 (Skills) */}
-            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-bold text-(--color-foreground)">
-                            <SectionEmojiSelector
-                                value={resumeData.skills?.emoji || ""}
-                                onChange={(v) => {
-                                    setResumeData({
-                                        ...resumeData,
-                                        skills: {
-                                            ...(resumeData.skills || {
-                                                showEmoji: false,
-                                                emoji: "✔️",
-                                                entries: [],
-                                            }),
-                                            emoji: v,
-                                        },
-                                    });
-                                }}
-                            />
-                            스킬 (Skills)
-                        </h3>
-                        <div className="ml-4 flex items-center gap-2">
-                            <Switch
-                                id="show-emojis-skills"
-                                checked={resumeData.skills?.showEmoji === true}
-                                onCheckedChange={(checked) =>
-                                    setResumeData({
-                                        ...resumeData,
-                                        skills: {
-                                            ...(resumeData.skills || {
-                                                showEmoji: false,
-                                                emoji: "✔️",
-                                                entries: [],
-                                            }),
-                                            showEmoji: checked,
-                                        },
-                                    })
-                                }
-                            />
-                            <label
-                                htmlFor="show-emojis-skills"
-                                className="cursor-pointer text-sm font-medium text-(--color-muted) select-none"
-                            >
-                                이모지 표시
-                            </label>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => {
-                            setBackupData(resumeData);
-                            const newSkill: ResumeSkill = {
-                                name: "",
-                                level: "",
-                                keywords: [],
-                            };
-                            setResumeData({
-                                ...resumeData,
-                                skills: {
-                                    ...(resumeData.skills || {
-                                        showEmoji: false,
-                                        emoji: "✔️",
-                                        entries: [],
-                                    }),
-                                    entries: [
-                                        newSkill,
-                                        ...(resumeData.skills?.entries || []),
-                                    ],
-                                },
-                            });
-                            setEditingSkillKeywords("");
-                            setEditingSkill(0);
-                        }}
-                        className="rounded-lg bg-(--color-accent) px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90"
-                    >
-                        + 스킬 추가
-                    </button>
-                </div>
-                <div className="space-y-4">
-                    {resumeData.skills?.entries.map((skill, idx) => (
-                        <div
-                            key={idx}
-                            className="rounded-lg border border-(--color-border) bg-transparent p-4"
-                        >
-                            {editingSkill === idx ? (
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                        <InputField
-                                            label="카테고리명"
-                                            value={skill.name || ""}
-                                            onChange={(v) => {
-                                                const s = [
-                                                    ...resumeData.skills!
-                                                        .entries,
-                                                ];
-                                                s[idx].name = v;
-                                                setResumeData({
-                                                    ...resumeData,
-                                                    skills: {
-                                                        ...(resumeData.skills || {
-                                                            showEmoji: false,
-                                                            emoji: "✔️",
-                                                            entries: [],
-                                                        }),
-                                                        entries: s,
-                                                    },
-                                                });
-                                            }}
-                                        />
-                                        <InputField
-                                            label="숙련도 (Level)"
-                                            value={skill.level || ""}
-                                            onChange={(v) => {
-                                                const s = [
-                                                    ...resumeData.skills!
-                                                        .entries,
-                                                ];
-                                                s[idx].level = v;
-                                                setResumeData({
-                                                    ...resumeData,
-                                                    skills: {
-                                                        ...(resumeData.skills || {
-                                                            showEmoji: false,
-                                                            emoji: "✔️",
-                                                            entries: [],
-                                                        }),
-                                                        entries: s,
-                                                    },
-                                                });
-                                            }}
-                                            placeholder="예: Master, Advanced"
-                                        />
-                                        <InputField
-                                            label="아이콘 오버라이드 (Slug)"
-                                            value={skill.iconSlug || ""}
-                                            onChange={(v) => {
-                                                const s = [
-                                                    ...resumeData.skills!
-                                                        .entries,
-                                                ];
-                                                s[idx].iconSlug = v;
-                                                setResumeData({
-                                                    ...resumeData,
-                                                    skills: {
-                                                        ...(resumeData.skills || {
-                                                            showEmoji: false,
-                                                            emoji: "✔️",
-                                                            entries: [],
-                                                        }),
-                                                        entries: s,
-                                                    },
-                                                });
-                                            }}
-                                            placeholder="예: react, typescript (simple-icons)"
-                                        />
-                                        <InputField
-                                            label="아이콘 색상 (Hex)"
-                                            value={skill.iconColor || ""}
-                                            onChange={(v) => {
-                                                const s = [
-                                                    ...resumeData.skills!
-                                                        .entries,
-                                                ];
-                                                s[idx].iconColor = v;
-                                                setResumeData({
-                                                    ...resumeData,
-                                                    skills: {
-                                                        ...(resumeData.skills || {
-                                                            showEmoji: false,
-                                                            emoji: "✔️",
-                                                            entries: [],
-                                                        }),
-                                                        entries: s,
-                                                    },
-                                                });
-                                            }}
-                                            placeholder="예: #61DAFB"
-                                        />
-                                    </div>
-                                    <TextAreaField
-                                        label="키워드 (쉼표로 구분)"
-                                        value={editingSkillKeywords}
-                                        onChange={setEditingSkillKeywords}
-                                        rows={2}
-                                        placeholder="예: React, TypeScript, Node.js"
-                                    />
-                                    <div className="flex justify-end gap-2 pt-2">
-                                        <button
-                                            onClick={() => {
-                                                if (backupData)
-                                                    setResumeData(backupData);
-                                                setEditingSkill(null);
-                                            }}
-                                            className="rounded-lg border border-(--color-border) px-4 py-1.5 text-sm font-medium text-(--color-muted) hover:text-(--color-foreground)"
-                                        >
-                                            취소
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                // editingSkillKeywords 파싱 후 저장
-                                                const s = [
-                                                    ...resumeData.skills!
-                                                        .entries,
-                                                ];
-                                                s[idx] = {
-                                                    ...s[idx],
-                                                    keywords:
-                                                        editingSkillKeywords
-                                                            .split(",")
-                                                            .map((k) =>
-                                                                k.trim()
-                                                            )
-                                                            .filter(Boolean),
-                                                };
-                                                setResumeData({
-                                                    ...resumeData,
-                                                    skills: {
-                                                        ...(resumeData.skills || {
-                                                            showEmoji: false,
-                                                            emoji: "✔️",
-                                                            entries: [],
-                                                        }),
-                                                        entries: s,
-                                                    },
-                                                });
-                                                setBackupData(null);
-                                                setEditingSkill(null);
-                                            }}
-                                            className="rounded-lg bg-(--color-accent) px-4 py-1.5 text-sm font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90"
-                                        >
-                                            완료
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="flex items-start justify-between">
-                                    <div className="mr-12">
-                                        <h4 className="font-semibold text-(--color-foreground)">
-                                            {skill.name}
-                                            {skill.level && (
-                                                <span className="ml-2 text-sm font-normal text-(--color-muted)">
-                                                    {skill.level}
-                                                </span>
-                                            )}
-                                        </h4>
-                                        <div className="mt-1 flex flex-wrap gap-2">
-                                            {skill.keywords?.map((kw) => (
-                                                <span
-                                                    key={kw}
-                                                    className="text-semibold rounded bg-(--color-accent) px-2 py-1 text-base text-(--color-on-accent)"
-                                                >
-                                                    {kw}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => {
-                                                setBackupData(resumeData);
-                                                setEditingSkillKeywords(
-                                                    skill.keywords?.join(
-                                                        ", "
-                                                    ) || ""
-                                                );
-                                                setEditingSkill(idx);
-                                            }}
-                                            className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
-                                        >
-                                            수정
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                if (
-                                                    confirm("삭제하시겠습니까?")
-                                                ) {
-                                                    const s = [
-                                                        ...resumeData.skills!
-                                                            .entries,
-                                                    ];
-                                                    s.splice(idx, 1);
-                                                    setResumeData({
-                                                        ...resumeData,
-                                                        skills: {
-                                                            ...(resumeData.skills || {
-                                                                showEmoji: false,
-                                                                emoji: "✔️",
-                                                                entries: [],
-                                                            }),
-                                                            entries: s,
-                                                        },
-                                                    });
-                                                }
-                                            }}
-                                            className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
-                                        >
-                                            삭제
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </section>
+            <SkillsAdminSection
+                resumeData={resumeData}
+                setResumeData={setResumeData}
+                jobFields={jobFields}
+                onBackup={() => setBackupData(resumeData)}
+            />
 
             {/* 언어 (Languages) */}
             <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">

@@ -96,10 +96,21 @@ export interface ResumePublication {
     summary?: string;
 }
 
+// 스킬 카테고리 내 개별 키워드 (뱃지) 타입
+export interface ResumeSkillKeyword {
+    name: string;
+    iconSlug?: string;
+    iconColor?: string;
+    // 키워드 단위 직무 분야
+    jobField?: string | string[];
+    level?: string;
+    workRef?: string;
+    projectRef?: string;
+}
+
 export interface ResumeSkill {
     name?: string;
-    level?: string;
-    keywords?: string[];
+    keywords?: ResumeSkillKeyword[];
     // 오버라이드용 커스텀 뱃지 정보
     iconSlug?: string;
     iconColor?: string;
@@ -149,6 +160,16 @@ export interface ResumeProject {
     sections?: ResumeProjectSection[];
 }
 
+// 커리어 단계 (커리어 로드맵 섹션용)
+export interface ResumeCareerPhase {
+    phase?: number;
+    startDate?: string;
+    endDate?: string;
+    name?: string;
+    description?: string;
+    keywords?: string[];
+}
+
 // 섹션별 이모지 및 entries 래퍼
 export interface ResumeSection<T> {
     emoji: string;
@@ -169,4 +190,5 @@ export interface Resume {
     interests?: ResumeSection<ResumeInterest>;
     references?: ResumeSection<ResumeReference>;
     projects?: ResumeSection<ResumeProject>;
+    careerPhases?: ResumeSection<ResumeCareerPhase>;
 }
