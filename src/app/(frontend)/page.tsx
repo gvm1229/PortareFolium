@@ -7,7 +7,7 @@ import {
 } from "@/lib/blog";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = false;
 
 const PORTFOLIO_PROJ_MAX_NUM = 4;
 const BLOG_POST_MAX_NUM = 5;

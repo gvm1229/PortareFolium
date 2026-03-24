@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+    revalidateHome,
+    revalidateResume,
+} from "@/app/admin/actions/revalidate";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import { browserClient } from "@/lib/supabase";
@@ -306,6 +310,8 @@ export default function SiteConfigPanel() {
             return;
         }
         setJobFields(next);
+        await revalidateHome();
+        await revalidateResume();
         if (inheritFrom) await applyInheritance(inheritFrom, id);
         setNewName("");
         setNewEmoji("✨");
@@ -450,6 +456,8 @@ export default function SiteConfigPanel() {
             setJobFields(next);
             setActiveJobField(nextActive);
             setStatus({ type: "success", msg: "직무 분야가 삭제됐습니다" });
+            await revalidateHome();
+            await revalidateResume();
         } else {
             setStatus({ type: "error", msg: "삭제 실패" });
         }
@@ -464,6 +472,8 @@ export default function SiteConfigPanel() {
             .upsert([{ key: "job_field", value: JSON.stringify(id) }], {
                 onConflict: "key",
             });
+        await revalidateHome();
+        await revalidateResume();
     };
 
     // site_config upsert (색상 + SEO)
@@ -491,6 +501,8 @@ export default function SiteConfigPanel() {
 
         if (!error) {
             localStorage.setItem("folium_color_scheme", colorScheme);
+            await revalidateHome();
+            await revalidateResume();
         }
 
         setSaving(false);

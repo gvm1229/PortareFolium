@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { browserClient } from "@/lib/supabase";
+import {
+    revalidateHome,
+    revalidateResume,
+} from "@/app/admin/actions/revalidate";
 import { uploadImageToSupabase } from "@/lib/image-upload";
 import { useAutoSave } from "@/lib/hooks/useAutoSave";
 import { matchesJobField } from "@/lib/job-field";
@@ -308,6 +312,8 @@ export default function ResumePanel() {
                 savedDataRef.current = JSON.stringify(resumeData);
                 setIsDirty(false);
                 setSavedAt(new Date());
+                await revalidateResume();
+                await revalidateHome();
             }
         } catch {}
     };
@@ -348,6 +354,8 @@ export default function ResumePanel() {
             savedDataRef.current = JSON.stringify(resumeData);
             setIsDirty(false);
             setSavedAt(new Date());
+            await revalidateResume();
+            await revalidateHome();
             setStatus({
                 type: "success",
                 msg: "저장됐습니다. 이력서 페이지에 즉시 반영됩니다.",
@@ -371,6 +379,7 @@ export default function ResumePanel() {
             });
         } else {
             setSavedAt(new Date());
+            await revalidateResume();
         }
     };
 

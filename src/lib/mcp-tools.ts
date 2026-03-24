@@ -463,6 +463,11 @@ export async function handleUpdateResume(args: {
 
     if (error)
         throw new Error(`[mcp-tools::handleUpdateResume] ${error.message}`);
+
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/resume");
+    revalidatePath("/");
+
     return updated;
 }
 

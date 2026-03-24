@@ -7,7 +7,7 @@ import ResumeMinimal from "@/components/resume/ResumeMinimal";
 import ResumePhases from "@/components/resume/ResumePhases";
 import { filterByJobField } from "@/lib/job-field";
 
-export const dynamic = "force-dynamic";
+export const revalidate = false;
 
 export const metadata: Metadata = {
     title: "Resume",

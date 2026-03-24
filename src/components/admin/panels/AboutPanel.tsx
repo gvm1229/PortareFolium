@@ -3,6 +3,10 @@
 // about_data 테이블 편집 + 프로필 이미지 업로드 + Job Field별 소개 관리
 import { useEffect, useRef, useState } from "react";
 import { browserClient } from "@/lib/supabase";
+import {
+    revalidateHome,
+    revalidateResume,
+} from "@/app/admin/actions/revalidate";
 import { uploadImageToSupabase } from "@/lib/image-upload";
 import type {
     AboutData,
@@ -244,6 +248,10 @@ export default function AboutPanel() {
             if (res.data) setRowId(res.data.id);
         }
 
+        if (!err) {
+            await revalidateHome();
+            await revalidateResume();
+        }
         setSaving(false);
         setStatus(
             err
