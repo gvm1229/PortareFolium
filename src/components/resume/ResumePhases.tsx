@@ -1,6 +1,7 @@
 import type { Resume } from "@/types/resume";
 import { renderMarkdown } from "@/lib/markdown";
 import SkillsSection from "@/components/resume/SkillsSection";
+import { getPortfolioItem } from "@/lib/queries";
 
 interface Props {
     resume: Resume;
@@ -74,6 +75,20 @@ export default async function ResumePhases({ resume, activeJobField }: Props) {
                 )
             );
         })
+    );
+
+    // Fetch portfolio data for game projects that have a portfolioSlug
+    const gameSlugs = gameProjects
+        .map((p) => p.portfolioSlug)
+        .filter((s): s is string => Boolean(s));
+    const gamePortfolioItemsArr = await Promise.all(
+        gameSlugs.map((slug) => getPortfolioItem(slug))
+    );
+    const portfolioItemMap: Record<
+        string,
+        (typeof gamePortfolioItemsArr)[number]
+    > = Object.fromEntries(
+        gameSlugs.map((slug, i) => [slug, gamePortfolioItemsArr[i]])
     );
 
     // 커리어 단계 (phase 번호 오름차순 — Phase 1 좌측)
@@ -245,240 +260,304 @@ export default async function ResumePhases({ resume, activeJobField }: Props) {
                 </section>
             ) : null}
 
-            {/* Career Phase — 수평 2컬럼 (좌: 웹 경력, 우: 게임 프로젝트) */}
-            {hasWebWork || hasGameProjects ? (
-                <section className="mb-10">
-                    <div className="tablet:grid-cols-2 tablet:divide-x tablet:divide-y-0 grid grid-cols-1 divide-y divide-(--color-border)">
-                        {/* 좌측: 웹 경력 */}
-                        <div className="tablet:pb-0 tablet:pr-8 pb-8">
-                            <h2 className="mb-5 border-b border-(--color-border) pb-1.5 text-xl font-bold tracking-widest text-(--color-accent) uppercase">
-                                경력
-                            </h2>
-                            {hasWebWork ? (
-                                <div className="relative ml-2 flex flex-col gap-7 border-l-2 border-(--color-border) pl-6">
-                                    {webWork.map((w, wIdx) => (
-                                        <div key={wIdx} className="relative">
-                                            <div
-                                                className="absolute h-2.5 w-2.5 rounded-full border-2 border-(--color-surface) bg-(--color-accent)"
-                                                style={{
-                                                    left: "-1.825rem",
-                                                    top: "0.4rem",
-                                                    boxShadow:
-                                                        "0 0 0 2px var(--color-accent)",
-                                                }}
+            {/* 게임 프로젝트 */}
+            {hasGameProjects && (
+                <div className="pt-8">
+                    <h2 className="mb-5 flex items-center gap-3 border-b border-(--color-border) pb-1.5 text-xl font-bold tracking-widest text-(--color-accent) uppercase">
+                        프로젝트
+                        <span className="rounded-full bg-(--color-accent) px-3 py-0.5 text-xs font-bold tracking-widest text-(--color-on-accent) normal-case">
+                            게임 개발 전환
+                        </span>
+                    </h2>
+                    <div className="grid grid-cols-2 gap-4">
+                        {gameProjects.map((proj, pIdx) => {
+                            const pf = proj.portfolioSlug
+                                ? portfolioItemMap[proj.portfolioSlug]
+                                : null;
+                            const pfData = pf?.data as
+                                | {
+                                      role?: string;
+                                      teamSize?: string | number;
+                                      github?: string;
+                                  }
+                                | undefined;
+                            const pfTags = pf?.tags as string[] | undefined;
+                            return (
+                                <div
+                                    key={pIdx}
+                                    className="group relative overflow-hidden rounded-lg border border-(--color-border) bg-(--color-surface-subtle) transition-colors hover:border-(--color-accent)"
+                                >
+                                    {proj.portfolioSlug ? (
+                                        <a
+                                            href={`/portfolio/${proj.portfolioSlug}`}
+                                            className="absolute inset-0 z-0"
+                                            aria-label={proj.name ?? ""}
+                                        />
+                                    ) : null}
+                                    {/* Thumbnail */}
+                                    {pf?.thumbnail ? (
+                                        <div className="relative aspect-video w-full overflow-hidden bg-(--color-border)">
+                                            <img
+                                                src={pf.thumbnail as string}
+                                                alt={proj.name ?? ""}
+                                                className="h-full w-full object-cover"
+                                                loading="lazy"
                                             />
-                                            <div>
-                                                {w.startDate || w.endDate ? (
-                                                    <p
-                                                        className="m-0 mb-0.5 text-sm text-(--color-muted)"
-                                                        style={{
-                                                            fontVariantNumeric:
-                                                                "tabular-nums",
-                                                        }}
+                                        </div>
+                                    ) : null}
+                                    <div className="p-4">
+                                        {/* Name */}
+                                        {proj.name ? (
+                                            <h3 className="relative z-10 m-0 mb-1.5 text-base leading-snug font-bold text-(--color-foreground) transition-colors group-hover:text-(--color-accent)">
+                                                {proj.name}
+                                            </h3>
+                                        ) : null}
+                                        {/* Tags from portfolio */}
+                                        {pfTags && pfTags.length > 0 ? (
+                                            <div className="relative z-10 mb-2 flex flex-wrap gap-1">
+                                                {pfTags
+                                                    .slice(0, 5)
+                                                    .map((tag, tIdx) => (
+                                                        <span
+                                                            key={tIdx}
+                                                            className="inline-block rounded bg-(--color-tag-bg) px-[0.45em] py-[0.1em] text-xs leading-normal font-medium text-(--color-tag-fg)"
+                                                        >
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                            </div>
+                                        ) : null}
+                                        {/* GitHub */}
+                                        {pfData?.github ? (
+                                            <div className="relative z-10 mb-2">
+                                                <a
+                                                    href={pfData.github}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 rounded-full border border-(--color-border) px-2.5 py-0.5 text-xs font-medium text-(--color-foreground) transition-colors hover:border-(--color-accent) hover:text-(--color-accent)"
+                                                >
+                                                    GitHub
+                                                    <svg
+                                                        className="h-3 w-3"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
                                                     >
-                                                        {formatDateRange(
-                                                            w.startDate,
-                                                            w.endDate,
-                                                            w.hideDays
-                                                        )}
-                                                    </p>
-                                                ) : null}
-                                                {w.name ? (
-                                                    <h3 className="m-0 mb-0.5 text-lg font-bold text-(--color-foreground)">
-                                                        {w.url ? (
-                                                            <a
-                                                                href={w.url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-inherit no-underline hover:text-(--color-link)"
-                                                            >
-                                                                {w.name}
-                                                            </a>
-                                                        ) : (
-                                                            w.name
-                                                        )}
-                                                    </h3>
-                                                ) : null}
-                                                {w.position ? (
-                                                    <p className="m-0 mb-2 text-base text-(--color-muted)">
-                                                        {w.position}
-                                                    </p>
-                                                ) : null}
-                                                {w.summary ? (
-                                                    workMarkdown[wIdx]
-                                                        ?.summary ? (
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                                        />
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        ) : null}
+                                        {/* Role · Team size */}
+                                        {pfData?.role || pfData?.teamSize ? (
+                                            <p className="relative z-10 m-0 mb-1.5 text-xs text-(--color-muted)">
+                                                {[
+                                                    pfData.role,
+                                                    pfData.teamSize
+                                                        ? `${pfData.teamSize}인`
+                                                        : null,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(" · ")}
+                                            </p>
+                                        ) : null}
+                                        {/* Date range */}
+                                        {(proj.startDate || proj.endDate) && (
+                                            <div
+                                                className="relative z-10 mb-2 text-sm text-(--color-muted)"
+                                                style={{
+                                                    fontVariantNumeric:
+                                                        "tabular-nums",
+                                                }}
+                                            >
+                                                {formatDateRange(
+                                                    proj.startDate,
+                                                    proj.endDate
+                                                )}
+                                            </div>
+                                        )}
+                                        {/* Content */}
+                                        {proj.sections &&
+                                        proj.sections.length > 0 ? (
+                                            proj.sections.map((sec, sIdx) => (
+                                                <div
+                                                    key={sIdx}
+                                                    className="mt-2"
+                                                >
+                                                    {sec.title ? (
+                                                        <p className="m-0 mb-0.5 text-base font-semibold tracking-wider text-(--color-muted) uppercase">
+                                                            {sec.title}
+                                                        </p>
+                                                    ) : null}
+                                                    {projectSectionsMarkdown[
+                                                        pIdx
+                                                    ]?.[sIdx] ? (
                                                         <div
-                                                            className="resume-markdown m-0 mb-2 text-base text-(--color-foreground)"
+                                                            className="resume-markdown m-0 text-base leading-[1.6] text-(--color-foreground)"
                                                             dangerouslySetInnerHTML={{
-                                                                __html: workMarkdown[
-                                                                    wIdx
-                                                                ].summary!,
+                                                                __html: projectSectionsMarkdown[
+                                                                    pIdx
+                                                                ][sIdx]!,
                                                             }}
                                                         />
                                                     ) : (
-                                                        <p className="m-0 mb-2 text-base text-(--color-foreground)">
-                                                            {w.summary}
+                                                        <p className="m-0 text-base leading-[1.6] whitespace-pre-wrap text-(--color-foreground)">
+                                                            {sec.content}
                                                         </p>
-                                                    )
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <>
+                                                {proj.description ? (
+                                                    <p className="m-0 text-base leading-[1.6] whitespace-pre-wrap text-(--color-foreground)">
+                                                        {proj.description}
+                                                    </p>
                                                 ) : null}
-                                                {w.highlights &&
-                                                w.highlights.length > 0 ? (
-                                                    <ul className="m-0 mt-1 flex list-none flex-col gap-1 p-0">
-                                                        {w.highlights.map(
+                                                {proj.highlights &&
+                                                proj.highlights.length > 0 ? (
+                                                    <ul className="mt-1 mb-0 pl-2 text-base text-(--color-foreground)">
+                                                        {proj.highlights.map(
                                                             (h, hIdx) => (
                                                                 <li
                                                                     key={hIdx}
-                                                                    className="mb-1 text-base text-(--color-foreground)"
+                                                                    className="mb-[0.2em]"
                                                                 >
-                                                                    {workMarkdown[
-                                                                        wIdx
-                                                                    ]
-                                                                        ?.highlights?.[
-                                                                        hIdx
-                                                                    ] ? (
-                                                                        <span
-                                                                            className="resume-markdown"
-                                                                            dangerouslySetInnerHTML={{
-                                                                                __html: workMarkdown[
-                                                                                    wIdx
-                                                                                ]
-                                                                                    .highlights![
-                                                                                    hIdx
-                                                                                ],
-                                                                            }}
-                                                                        />
-                                                                    ) : (
-                                                                        `• ${h}`
-                                                                    )}
+                                                                    {`• ${h}`}
                                                                 </li>
                                                             )
                                                         )}
                                                     </ul>
                                                 ) : null}
-                                            </div>
-                                        </div>
-                                    ))}
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
-                            ) : null}
-                        </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
-                        {/* 우측: 게임 프로젝트 */}
-                        <div className="tablet:pt-0 tablet:pl-8 pt-8">
-                            <h2 className="mb-5 flex items-center gap-3 border-b border-(--color-border) pb-1.5 text-xl font-bold tracking-widest text-(--color-accent) uppercase">
-                                프로젝트
-                                <span className="rounded-full bg-(--color-accent) px-3 py-0.5 text-xs font-bold tracking-widest text-(--color-on-accent) normal-case">
-                                    게임 개발 전환
-                                </span>
+            {/* 웹 경력 */}
+            {hasWebWork && (
+                <section className="mb-10">
+                    <div className="grid grid-cols-1 divide-y divide-(--color-border)">
+                        <div className="pt-8">
+                            <h2 className="mb-5 border-b border-(--color-border) pb-1.5 text-xl font-bold tracking-widest text-(--color-accent) uppercase">
+                                경력
                             </h2>
-                            {hasGameProjects ? (
-                                <div className="flex flex-col gap-4">
-                                    {gameProjects.map((proj, pIdx) => (
+                            <div className="relative ml-2 flex flex-col gap-7 border-l-2 border-(--color-border) pl-6">
+                                {webWork.map((w, wIdx) => (
+                                    <div key={wIdx} className="relative">
                                         <div
-                                            key={pIdx}
-                                            className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) p-4"
-                                        >
-                                            {proj.name ? (
-                                                <h3 className="m-0 mb-1 text-lg font-bold text-(--color-foreground)">
-                                                    {proj.url ? (
-                                                        <a
-                                                            href={proj.url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="text-(--color-link) no-underline hover:opacity-80"
-                                                        >
-                                                            {proj.name}
-                                                        </a>
-                                                    ) : (
-                                                        proj.name
-                                                    )}
-                                                </h3>
-                                            ) : null}
-                                            {proj.startDate || proj.endDate ? (
-                                                <div
-                                                    className="mb-2 text-sm text-(--color-muted)"
+                                            className="absolute h-2.5 w-2.5 rounded-full border-2 border-(--color-surface) bg-(--color-accent)"
+                                            style={{
+                                                left: "-1.825rem",
+                                                top: "0.4rem",
+                                                boxShadow:
+                                                    "0 0 0 2px var(--color-accent)",
+                                            }}
+                                        />
+                                        <div>
+                                            {w.startDate || w.endDate ? (
+                                                <p
+                                                    className="m-0 mb-0.5 text-sm text-(--color-muted)"
                                                     style={{
                                                         fontVariantNumeric:
                                                             "tabular-nums",
                                                     }}
                                                 >
                                                     {formatDateRange(
-                                                        proj.startDate,
-                                                        proj.endDate,
-                                                        proj.hideDays
+                                                        w.startDate,
+                                                        w.endDate,
+                                                        w.hideDays
                                                     )}
-                                                </div>
+                                                </p>
                                             ) : null}
-                                            {proj.sections &&
-                                            proj.sections.length > 0 ? (
-                                                proj.sections.map(
-                                                    (sec, sIdx) => (
-                                                        <div
-                                                            key={sIdx}
-                                                            className="mt-2"
+                                            {w.name ? (
+                                                <h3 className="m-0 mb-0.5 text-lg font-bold text-(--color-foreground)">
+                                                    {w.url ? (
+                                                        <a
+                                                            href={w.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-inherit no-underline hover:text-(--color-link)"
                                                         >
-                                                            {sec.title ? (
-                                                                <p className="m-0 mb-0.5 text-base font-semibold tracking-wider text-(--color-muted) uppercase">
-                                                                    {sec.title}
-                                                                </p>
-                                                            ) : null}
-                                                            {projectSectionsMarkdown[
-                                                                pIdx
-                                                            ]?.[sIdx] ? (
-                                                                <div
-                                                                    className="resume-markdown m-0 text-base leading-[1.6] text-(--color-foreground)"
-                                                                    dangerouslySetInnerHTML={{
-                                                                        __html: projectSectionsMarkdown[
-                                                                            pIdx
-                                                                        ][
-                                                                            sIdx
-                                                                        ]!,
-                                                                    }}
-                                                                />
-                                                            ) : (
-                                                                <p className="m-0 text-base leading-[1.6] whitespace-pre-wrap text-(--color-foreground)">
-                                                                    {
-                                                                        sec.content
-                                                                    }
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    )
+                                                            {w.name}
+                                                        </a>
+                                                    ) : (
+                                                        w.name
+                                                    )}
+                                                </h3>
+                                            ) : null}
+                                            {w.position ? (
+                                                <p className="m-0 mb-2 text-base text-(--color-muted)">
+                                                    {w.position}
+                                                </p>
+                                            ) : null}
+                                            {w.summary ? (
+                                                workMarkdown[wIdx]?.summary ? (
+                                                    <div
+                                                        className="resume-markdown m-0 mb-2 text-base text-(--color-foreground)"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: workMarkdown[
+                                                                wIdx
+                                                            ].summary!,
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <p className="m-0 mb-2 text-base text-(--color-foreground)">
+                                                        {w.summary}
+                                                    </p>
                                                 )
-                                            ) : (
-                                                <>
-                                                    {proj.description ? (
-                                                        <p className="m-0 text-base leading-[1.6] whitespace-pre-wrap text-(--color-foreground)">
-                                                            {proj.description}
-                                                        </p>
-                                                    ) : null}
-                                                    {proj.highlights &&
-                                                    proj.highlights.length >
-                                                        0 ? (
-                                                        <ul className="mt-1 mb-0 pl-2 text-base text-(--color-foreground)">
-                                                            {proj.highlights.map(
-                                                                (h, hIdx) => (
-                                                                    <li
-                                                                        key={
-                                                                            hIdx
-                                                                        }
-                                                                        className="mb-[0.2em]"
-                                                                    >
-                                                                        {`• ${h}`}
-                                                                    </li>
-                                                                )
-                                                            )}
-                                                        </ul>
-                                                    ) : null}
-                                                </>
-                                            )}
+                                            ) : null}
+                                            {w.highlights &&
+                                            w.highlights.length > 0 ? (
+                                                <ul className="m-0 mt-1 flex list-none flex-col gap-1 p-0">
+                                                    {w.highlights.map(
+                                                        (h, hIdx) => (
+                                                            <li
+                                                                key={hIdx}
+                                                                className="mb-1 text-base text-(--color-foreground)"
+                                                            >
+                                                                {workMarkdown[
+                                                                    wIdx
+                                                                ]?.highlights?.[
+                                                                    hIdx
+                                                                ] ? (
+                                                                    <span
+                                                                        className="resume-markdown"
+                                                                        dangerouslySetInnerHTML={{
+                                                                            __html: workMarkdown[
+                                                                                wIdx
+                                                                            ]
+                                                                                .highlights![
+                                                                                hIdx
+                                                                            ],
+                                                                        }}
+                                                                    />
+                                                                ) : (
+                                                                    `• ${h}`
+                                                                )}
+                                                            </li>
+                                                        )
+                                                    )}
+                                                </ul>
+                                            ) : null}
                                         </div>
-                                    ))}
-                                </div>
-                            ) : null}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </section>
-            ) : null}
+            )}
 
             {/* 기술 스택 */}
             {hasSkills ? (
