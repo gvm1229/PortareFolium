@@ -31,12 +31,32 @@ const formatDateRange = (
 
 export default async function ResumeModern({ resume }: Props) {
     const basics = resume.basics ?? {};
+    const sectionOrder = [
+        "work",
+        "projects",
+        "skills",
+        "education",
+        "volunteer",
+        "awards",
+        "certificates",
+        "publications",
+        "languages",
+        "interests",
+        "references",
+    ];
     const sections = Object.entries(resume)
         .filter(([key]) => key !== "basics")
         .map(
             ([key, val]) =>
                 [key, (val as any)?.entries ?? []] as [string, any[]]
-        );
+        )
+        .sort(([a], [b]) => {
+            const ai = sectionOrder.indexOf(a);
+            const bi = sectionOrder.indexOf(b);
+            const aPos = ai === -1 ? sectionOrder.length : ai;
+            const bPos = bi === -1 ? sectionOrder.length : bi;
+            return aPos - bPos;
+        });
     const getLabel = (key: string) => {
         const sec = (resume as any)[key];
         const emoji = sec?.emoji || "➕";
@@ -178,91 +198,6 @@ export default async function ResumeModern({ resume }: Props) {
                     )
                         return null;
 
-                    if (
-                        sectionKey === "skills" &&
-                        Array.isArray(sectionValue)
-                    ) {
-                        return (
-                            <section key={sectionKey} className="mb-10">
-                                <h2 className="mb-5 border-b border-(--color-border) pb-1.5 text-xl font-bold tracking-widest text-(--color-accent) uppercase">
-                                    {getLabel("skills")}
-                                </h2>
-                                <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
-                                    {sectionValue.map((skill, idx) => (
-                                        <div
-                                            key={idx}
-                                            className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-4 py-3"
-                                        >
-                                            {skill.name ? (
-                                                <div className="mb-1.5 flex items-center gap-2 text-base font-bold text-(--color-foreground)">
-                                                    {skill.iconSlug &&
-                                                    getSimpleIcon(
-                                                        skill.iconSlug
-                                                    ) ? (
-                                                        <svg
-                                                            role="img"
-                                                            viewBox="0 0 24 24"
-                                                            className="h-4 w-4"
-                                                            style={{
-                                                                fill:
-                                                                    skill.iconColor ||
-                                                                    `#${getSimpleIcon(skill.iconSlug)!.hex}`,
-                                                            }}
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                        >
-                                                            <title>
-                                                                {
-                                                                    getSimpleIcon(
-                                                                        skill.iconSlug
-                                                                    )!.title
-                                                                }
-                                                            </title>
-                                                            <path
-                                                                d={
-                                                                    getSimpleIcon(
-                                                                        skill.iconSlug
-                                                                    )!.path
-                                                                }
-                                                            />
-                                                        </svg>
-                                                    ) : null}
-                                                    {skill.name}
-                                                </div>
-                                            ) : null}
-                                            {skill.level ? (
-                                                <div className="mb-1.5 text-sm text-(--color-muted)">
-                                                    {skill.level}
-                                                </div>
-                                            ) : null}
-                                            {skill.keywords &&
-                                            skill.keywords.length > 0 ? (
-                                                <div className="mt-1 flex flex-wrap gap-1.5">
-                                                    {skill.keywords.map(
-                                                        (
-                                                            kw: ResumeSkillKeyword,
-                                                            kIdx: number
-                                                        ) => (
-                                                            <SkillBadge
-                                                                key={kIdx}
-                                                                name={kw.name}
-                                                                overrideSlug={
-                                                                    kw.iconSlug
-                                                                }
-                                                                overrideColor={
-                                                                    kw.iconColor
-                                                                }
-                                                            />
-                                                        )
-                                                    )}
-                                                </div>
-                                            ) : null}
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
-                        );
-                    }
-
                     if (sectionKey === "work" && Array.isArray(sectionValue)) {
                         return (
                             <section key={sectionKey} className="mb-10">
@@ -390,98 +325,6 @@ export default async function ResumeModern({ resume }: Props) {
                                             </div>
                                         )
                                     )}
-                                </div>
-                            </section>
-                        );
-                    }
-
-                    if (
-                        sectionKey === "education" &&
-                        Array.isArray(sectionValue)
-                    ) {
-                        return (
-                            <section key={sectionKey} className="mb-10">
-                                <h2 className="mb-5 border-b border-(--color-border) pb-1.5 text-xl font-bold tracking-widest text-(--color-accent) uppercase">
-                                    {getLabel("education")}
-                                </h2>
-                                <div>
-                                    {sectionValue.map((education, idx) => (
-                                        <div
-                                            key={idx}
-                                            className="mb-3 rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-4.5 py-3.5 last:mb-0"
-                                        >
-                                            {education.institution ? (
-                                                <h3 className="m-0 mb-0.5 text-lg font-bold text-(--color-foreground)">
-                                                    {education.url ? (
-                                                        <a
-                                                            href={education.url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="text-inherit no-underline hover:text-(--color-link)"
-                                                        >
-                                                            {
-                                                                education.institution
-                                                            }
-                                                        </a>
-                                                    ) : (
-                                                        education.institution
-                                                    )}
-                                                </h3>
-                                            ) : null}
-                                            {(education.studyType ||
-                                                education.area) && (
-                                                <div className="mb-0.5 text-base text-(--color-foreground)">
-                                                    {`${education.studyType || ""} ${education.area ? " " + education.area : ""}`}
-                                                </div>
-                                            )}
-                                            {(education.startDate ||
-                                                education.endDate) && (
-                                                <div
-                                                    className="mb-1 text-sm text-(--color-muted)"
-                                                    style={{
-                                                        fontVariantNumeric:
-                                                            "tabular-nums",
-                                                    }}
-                                                >
-                                                    {formatDateRange(
-                                                        education.startDate,
-                                                        education.endDate
-                                                    )}
-                                                </div>
-                                            )}
-                                            {education.gpa != null ? (
-                                                <div className="mb-1 text-sm text-(--color-muted)">
-                                                    GPA:{" "}
-                                                    {education.gpa.toFixed(2)} /{" "}
-                                                    {(
-                                                        education.gpaMax ?? 4.5
-                                                    ).toFixed(2)}
-                                                </div>
-                                            ) : education.score ? (
-                                                <div className="mb-1 text-sm text-(--color-muted)">
-                                                    GPA: {education.score}
-                                                </div>
-                                            ) : null}
-                                            {education.courses &&
-                                            education.courses.length > 0 ? (
-                                                <div className="mt-2 flex flex-wrap gap-1">
-                                                    {education.courses.map(
-                                                        (
-                                                            course: string,
-                                                            cIdx: number
-                                                        ) => (
-                                                            <span
-                                                                key={cIdx}
-                                                                className="inline-block rounded bg-(--color-tag-bg) px-[0.55em] py-[0.15em] text-sm leading-normal font-medium text-(--color-tag-fg)"
-                                                            >
-                                                                {course}
-                                                            </span>
-                                                        )
-                                                    )}
-                                                </div>
-                                            ) : null}
-                                        </div>
-                                    ))}
                                 </div>
                             </section>
                         );
@@ -617,6 +460,183 @@ export default async function ResumeModern({ resume }: Props) {
                                             </div>
                                         )
                                     )}
+                                </div>
+                            </section>
+                        );
+                    }
+
+                    if (
+                        sectionKey === "skills" &&
+                        Array.isArray(sectionValue)
+                    ) {
+                        return (
+                            <section key={sectionKey} className="mb-10">
+                                <h2 className="mb-5 border-b border-(--color-border) pb-1.5 text-xl font-bold tracking-widest text-(--color-accent) uppercase">
+                                    {getLabel("skills")}
+                                </h2>
+                                <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+                                    {sectionValue.map((skill, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-4 py-3"
+                                        >
+                                            {skill.name ? (
+                                                <div className="mb-1.5 flex items-center gap-2 text-base font-bold text-(--color-foreground)">
+                                                    {skill.iconSlug &&
+                                                    getSimpleIcon(
+                                                        skill.iconSlug
+                                                    ) ? (
+                                                        <svg
+                                                            role="img"
+                                                            viewBox="0 0 24 24"
+                                                            className="h-4 w-4"
+                                                            style={{
+                                                                fill:
+                                                                    skill.iconColor ||
+                                                                    `#${getSimpleIcon(skill.iconSlug)!.hex}`,
+                                                            }}
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                            <title>
+                                                                {
+                                                                    getSimpleIcon(
+                                                                        skill.iconSlug
+                                                                    )!.title
+                                                                }
+                                                            </title>
+                                                            <path
+                                                                d={
+                                                                    getSimpleIcon(
+                                                                        skill.iconSlug
+                                                                    )!.path
+                                                                }
+                                                            />
+                                                        </svg>
+                                                    ) : null}
+                                                    {skill.name}
+                                                </div>
+                                            ) : null}
+                                            {skill.level ? (
+                                                <div className="mb-1.5 text-sm text-(--color-muted)">
+                                                    {skill.level}
+                                                </div>
+                                            ) : null}
+                                            {skill.keywords &&
+                                            skill.keywords.length > 0 ? (
+                                                <div className="mt-1 flex flex-wrap gap-1.5">
+                                                    {skill.keywords.map(
+                                                        (
+                                                            kw: ResumeSkillKeyword,
+                                                            kIdx: number
+                                                        ) => (
+                                                            <SkillBadge
+                                                                key={kIdx}
+                                                                name={kw.name}
+                                                                overrideSlug={
+                                                                    kw.iconSlug
+                                                                }
+                                                                overrideColor={
+                                                                    kw.iconColor
+                                                                }
+                                                            />
+                                                        )
+                                                    )}
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        );
+                    }
+
+                    if (
+                        sectionKey === "education" &&
+                        Array.isArray(sectionValue)
+                    ) {
+                        return (
+                            <section key={sectionKey} className="mb-10">
+                                <h2 className="mb-5 border-b border-(--color-border) pb-1.5 text-xl font-bold tracking-widest text-(--color-accent) uppercase">
+                                    {getLabel("education")}
+                                </h2>
+                                <div>
+                                    {sectionValue.map((education, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="mb-3 rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-4.5 py-3.5 last:mb-0"
+                                        >
+                                            {education.institution ? (
+                                                <h3 className="m-0 mb-0.5 text-lg font-bold text-(--color-foreground)">
+                                                    {education.url ? (
+                                                        <a
+                                                            href={education.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-inherit no-underline hover:text-(--color-link)"
+                                                        >
+                                                            {
+                                                                education.institution
+                                                            }
+                                                        </a>
+                                                    ) : (
+                                                        education.institution
+                                                    )}
+                                                </h3>
+                                            ) : null}
+                                            {(education.studyType ||
+                                                education.area) && (
+                                                <div className="mb-0.5 text-base text-(--color-foreground)">
+                                                    {`${education.studyType || ""} ${education.area ? " " + education.area : ""}`}
+                                                </div>
+                                            )}
+                                            {(education.startDate ||
+                                                education.endDate) && (
+                                                <div
+                                                    className="mb-1 text-sm text-(--color-muted)"
+                                                    style={{
+                                                        fontVariantNumeric:
+                                                            "tabular-nums",
+                                                    }}
+                                                >
+                                                    {formatDateRange(
+                                                        education.startDate,
+                                                        education.endDate
+                                                    )}
+                                                </div>
+                                            )}
+                                            {education.gpa != null ? (
+                                                <div className="mb-1 text-sm text-(--color-muted)">
+                                                    GPA:{" "}
+                                                    {education.gpa.toFixed(2)} /{" "}
+                                                    {(
+                                                        education.gpaMax ?? 4.5
+                                                    ).toFixed(2)}
+                                                </div>
+                                            ) : education.score ? (
+                                                <div className="mb-1 text-sm text-(--color-muted)">
+                                                    GPA: {education.score}
+                                                </div>
+                                            ) : null}
+                                            {education.courses &&
+                                            education.courses.length > 0 ? (
+                                                <div className="mt-2 flex flex-wrap gap-1">
+                                                    {education.courses.map(
+                                                        (
+                                                            course: string,
+                                                            cIdx: number
+                                                        ) => (
+                                                            <span
+                                                                key={cIdx}
+                                                                className="inline-block rounded bg-(--color-tag-bg) px-[0.55em] py-[0.15em] text-sm leading-normal font-medium text-(--color-tag-fg)"
+                                                            >
+                                                                {course}
+                                                            </span>
+                                                        )
+                                                    )}
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    ))}
                                 </div>
                             </section>
                         );
