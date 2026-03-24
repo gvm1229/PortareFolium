@@ -150,7 +150,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Structure
 
-**Project:** `portare-folium` — Next.js 16 App Router 기반 개인 포트폴리오 사이트 (v0.7.36)
+**Project:** `portare-folium` — Next.js 16 App Router 기반 개인 포트폴리오 사이트 (v0.7.40)
 
 **Stack:**
 
@@ -188,7 +188,7 @@ src/
 │   │   ├── login/page.tsx
 │   │   └── actions/                    # Server Actions
 │   │       ├── agent-tokens.ts         # Agent token CRUD
-│   │       ├── revalidate.ts           # On-Demand revalidation (revalidatePost, revalidatePortfolioItem)
+│   │       ├── revalidate.ts           # On-Demand revalidation (revalidatePost, revalidatePortfolioItem, revalidateBook, revalidateHome, revalidateResume)
 │   │       └── snapshots.ts            # DB 스냅샷 관리
 │   └── api/
 │       ├── mcp/route.ts                # MCP 서버 엔드포인트
@@ -248,7 +248,7 @@ src/
 │           └── SnapshotsPanel.tsx      # DB 스냅샷 관리
 ├── lib/                                # 유틸리티 모듈
 │   ├── supabase.ts                     # serverClient (service_role) + browserClient (anon)
-│   ├── queries.ts                      # React cache() 기반 Supabase 쿼리 (getPost, getPortfolioItem, getTags, getSiteConfig)
+│   ├── queries.ts                      # React cache() 기반 Supabase 쿼리 (getPost, getPostMeta, getAllPostSlugs, getPortfolioItem, getPortfolioItemMeta, getAllPortfolioSlugs, getBook, getBookMeta, getAllBookSlugs, getTags, getSiteConfig)
 │   ├── blog.ts                         # 블로그 유틸 (날짜 포맷, 요약 추출)
 │   ├── markdown.tsx                    # Markdown/MDX 렌더링 (getCachedMarkdown — unstable_cache 기반)
 │   ├── mdx-directive-converter.ts      # MDX directive 변환
@@ -296,8 +296,9 @@ docs/CHANGES.md                         # 변경 이력 (기능/디자인 변경
 - 에디터 자동저장: `useAutoSave` + `useKeyboardSave` + `useUnsavedWarning` 훅 조합
 - 디자인 컨셉: "Editorial Minimal" — 대담한 타이포그래피, 여백, 서브틀 애니메이션
 - 전역 애니메이션 유틸리티: `.animate-fade-in-up`, `.animate-fade-in`, `.stagger-1~5`, `.card-lift` (`global.css`)
-- 페이지 레벨 ISR: `export const revalidate = 60` (blog/portfolio slug 페이지), `revalidate = 3600` (레이아웃)
+- 페이지 레벨 ISR: 모든 콘텐츠 페이지 `export const revalidate = false` (blog·portfolio·books slug, blog·portfolio 목록, home, resume) — 빌드 타임 정적 생성 후 admin 저장 시 On-Demand `revalidatePath`로만 갱신. 레이아웃은 `revalidate = 3600`.
 - 쿼리 중복 제거: 동일 request 내 `generateMetadata` + page 컴포넌트가 같은 데이터를 fetch할 때 `lib/queries.ts`의 React `cache()` 함수를 사용
+- On-Demand revalidation: admin 패널 저장·발행 시 `src/app/admin/actions/revalidate.ts` Server Action 호출 → 해당 slug 페이지 + 목록 + 홈 페이지 즉시 재생성. MCP 에이전트(`mcp-tools.ts`)도 동일 경로 커버.
 
 **Known Pitfalls:**
 

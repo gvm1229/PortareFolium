@@ -2,6 +2,27 @@
 
 ## 2026-03-24
 
+### Perf: 홈·이력서 정적 생성 및 전 패널 On-Demand 재검증 확장 (v0.7.40)
+
+- `src/app/(frontend)/page.tsx`, `resume/page.tsx`: `force-dynamic` → `revalidate = false`. 빌드 타임 정적 HTML 생성 — 첫 방문자도 CDN 즉시 서빙.
+- `src/app/admin/actions/revalidate.ts`: `revalidateHome()`, `revalidateResume()` 추가. `revalidatePost`·`revalidatePortfolioItem`에 `revalidatePath("/")` 추가 — 포스트·포트폴리오 변경이 홈 피드에 즉시 반영.
+- `src/components/admin/panels/AboutPanel.tsx`: `handleSave` 성공 시 `revalidateHome` + `revalidateResume` 호출 (프로필 이미지가 이력서에도 반영).
+- `src/components/admin/panels/ResumePanel.tsx`: `autoSave`·`handleSave`·`saveLayout` 성공 시 `revalidateResume` + `revalidateHome` 호출.
+- `src/components/admin/panels/SiteConfigPanel.tsx`: `handleSave`(site_name)·`handleSelectJobField`·`saveJobFields` 호출부에 `revalidateHome` + `revalidateResume` 추가.
+- `src/lib/mcp-tools.ts`: `handleUpdateResume` 완료 후 `revalidatePath("/resume")` + `revalidatePath("/")` 추가 — AI 에이전트 경로 커버.
+
+### Perf: 도서(Books) 정적 생성 및 On-Demand 재검증 적용 (v0.7.39)
+
+- `src/app/(frontend)/books/[slug]/page.tsx`: `force-dynamic` 제거 → `revalidate = false`, `dynamicParams = true`, `generateStaticParams`. `getCachedMarkdown` 사용.
+- `src/lib/queries.ts`: `getBookMeta`, `getBook`, `getAllBookSlugs` 추가 — blog/portfolio와 동일 패턴.
+- `src/app/admin/actions/revalidate.ts`: `revalidateBook(slug)` 추가.
+- `src/components/admin/panels/BooksSubPanel.tsx`: `autoSave`·`handleSave`·`togglePublish`·`handlePublishToggle` 모든 저장 지점에서 `revalidateBook` 호출. 미리보기 버튼 하단 및 저장 바 좌측에 캐시 갱신 안내 문구 추가.
+
+### Feat: 관리자 패널 캐시 워밍 안내 문구 추가 (v0.7.38)
+
+- `src/components/admin/panels/PostsPanel.tsx`, `PortfolioPanel.tsx`: 편집 화면 상단 버튼 행 하단에 `"저장 후 미리보기를 한 번 방문하면 캐시가 갱신되어 방문자에게 즉시 제공됩니다."` 안내 문구 추가.
+- 하단 sticky 저장 바: `justify-end` → `justify-between`, 좌측에 `"저장 후 미리보기를 방문하면 캐시가 갱신됩니다."` 문구 추가.
+
 ### Perf: generateStaticParams + On-Demand revalidation — 첫 방문 속도 개선 (v0.7.34~v0.7.36)
 
 - `src/lib/queries.ts`: `getPostMeta`, `getPortfolioItemMeta` 추가 (content 제외 경량 메타데이터 쿼리). `getAllPostSlugs`, `getAllPortfolioSlugs` 추가 (빌드 타임 전용).
