@@ -39,15 +39,10 @@
         background: var(--tt-toolbar-bg-color);
         border-bottom: 1px solid var(--tt-toolbar-border-color);
         padding: 0 0.5rem;
-        overflow-x: auto;
-        overscroll-behavior-x: contain;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-
-        &::-webkit-scrollbar {
-            display: none;
-        }
+        // 버튼 줄바꿈 (overflow 대신 wrap)
+        flex-wrap: wrap;
+        // 팝업 클리핑 방지 (overflow: auto는 스크롤 컨테이너로 작동해 absolute 팝업을 숨김)
+        overflow: visible;
 
         @media (max-width: 480px) {
             position: absolute;
@@ -56,8 +51,18 @@
             border-top: 1px solid var(--tt-toolbar-border-color);
             border-bottom: none;
             padding: 0 0.5rem var(--tt-safe-area-bottom);
+            // 모바일은 가로 스크롤 유지
             flex-wrap: nowrap;
             justify-content: flex-start;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
 
             .tiptap-toolbar-group {
                 flex: 0 0 auto;

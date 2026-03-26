@@ -1,5 +1,11 @@
 # CHANGES
 
+## v0.8.6 (2026-03-26)
+
+### Fix: EditorToolbar 버튼 overflow + 셀 배경색 팝업 클리핑 (v0.8.6)
+
+- `src/components/tiptap-ui-primitive/toolbar/toolbar.scss`: `[data-variant="fixed"]`에 `flex-wrap: wrap` 추가, `overflow-x: auto` → `overflow: visible` 변경. 테이블 편집 시 버튼이 잘리지 않고 다음 줄로 wrap됨. `overflow: auto` 계산으로 인한 `CellColorPicker` 팝업 클리핑도 함께 해결. 모바일 breakpoint로 스크롤 관련 CSS 이동.
+
 ## v0.8.5 (2026-03-26)
 
 ### Feat: FoliumTable → ColoredTable 전면 리네이밍 (v0.8.5)
