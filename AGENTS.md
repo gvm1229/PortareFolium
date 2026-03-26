@@ -160,7 +160,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Deployment: Vercel
 - Package Manager: pnpm 10
 - Testing: Vitest + Testing Library
-- Editor: MDX Editor (Rich Markdown Editor)
+- Editor: Tiptap (Rich Markdown Editor)
 - Diagrams: Mermaid 11
 - Code Highlighting: Shiki
 - Math: KaTeX

@@ -36,6 +36,14 @@ body {
     --breakpoint-tablet: 48rem; /* 768px */
     --breakpoint-laptop: 77.5625rem; /* 1241px */
     --breakpoint-desktop: 100rem; /* 1600px */
+
+    /* prose 시맨틱 변수 */
+    --color-prose-heading: var(--color-accent);
+    --color-prose-body: oklch(0.2 0 0);
+    --color-prose-link: var(--color-accent);
+    --color-prose-code-bg: oklch(0.97 0 0);
+    --color-prose-blockquote-border: var(--color-accent);
+    --color-accent-soft: color-mix(in oklch, var(--color-accent) 8%, white);
 }
 
 /* shadcn/ui CSS 변수 → 프로젝트 토큰 매핑 */
@@ -499,12 +507,152 @@ body {
     --color-link: #fcd34d;
 }
 
-/* prose: Color Scheme 변수 적용 (코드블록, 인라인코드, 링크) */
+/* ── Prose Overhaul ─────────────────────────────────────────────── */
+.prose {
+    --tw-prose-body: var(--color-prose-body);
+    --tw-prose-headings: var(--color-prose-heading);
+    --tw-prose-links: var(--color-prose-link);
+    --tw-prose-bold: oklch(0.1 0 0);
+    --tw-prose-counters: oklch(0.5 0 0);
+    --tw-prose-bullets: oklch(0.5 0 0);
+    --tw-prose-hr: oklch(0.9 0 0);
+    --tw-prose-quotes: oklch(0.3 0 0);
+    --tw-prose-quote-borders: var(--color-prose-blockquote-border);
+    --tw-prose-captions: oklch(0.5 0 0);
+    --tw-prose-code: oklch(0.2 0 0);
+    --tw-prose-pre-code: oklch(0.95 0 0);
+    --tw-prose-pre-bg: oklch(0.15 0.01 265);
+    --tw-prose-th-borders: oklch(0.8 0 0);
+    --tw-prose-td-borders: oklch(0.9 0 0);
+}
+
+.prose :where(h1, h2, h3, h4) {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-prose-heading);
+}
+
+.prose :where(h1) {
+    font-size: 2.25rem;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+}
+
+.prose :where(h2) {
+    font-size: 1.75rem;
+    line-height: 1.25;
+    margin-top: 2rem;
+    padding-bottom: 0.375rem;
+    border-bottom: 2px solid var(--color-prose-blockquote-border);
+}
+
+.prose :where(h3) {
+    font-size: 1.375rem;
+    line-height: 1.3;
+    margin-top: 1.5rem;
+}
+
+.prose :where(blockquote) {
+    border-left: 4px solid var(--color-prose-blockquote-border);
+    background: var(--color-accent-soft);
+    padding: 0.75rem 1.25rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-style: normal;
+    color: oklch(0.35 0 0);
+}
+
+.prose :where(code):not(pre code) {
+    background: var(--color-prose-code-bg);
+    color: oklch(0.25 0.08 15);
+    padding: 0.15em 0.4em;
+    border-radius: 0.3em;
+    font-size: 0.875em;
+    font-weight: 500;
+    border: 1px solid oklch(0.88 0 0);
+}
+
+.prose :where(pre) {
+    background: oklch(0.15 0.01 265);
+    border-radius: 0.625rem;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+}
+
+.prose :where(a) {
+    color: var(--color-prose-link);
+    text-decoration: underline;
+    text-decoration-color: color-mix(
+        in oklch,
+        var(--color-prose-link) 40%,
+        transparent
+    );
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s;
+}
+
+.prose :where(a:hover) {
+    text-decoration-color: var(--color-prose-link);
+}
+
+.prose :where(table) {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.prose :where(th) {
+    background: var(--color-accent-soft);
+    font-weight: 600;
+    text-align: left;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid oklch(0.85 0 0);
+}
+
+.prose :where(td) {
+    padding: 0.5rem 0.875rem;
+    border: 1px solid oklch(0.9 0 0);
+}
+
+/* 다크 모드 prose */
+html.dark .prose {
+    --tw-prose-body: oklch(0.88 0 0);
+    --tw-prose-headings: oklch(0.95 0 0);
+    --tw-prose-links: var(--color-folium-primary);
+    --tw-prose-bold: oklch(0.98 0 0);
+    --tw-prose-counters: oklch(0.65 0 0);
+    --tw-prose-bullets: oklch(0.65 0 0);
+    --tw-prose-hr: oklch(0.3 0 0);
+    --tw-prose-quotes: oklch(0.85 0 0);
+    --tw-prose-quote-borders: var(--color-folium-primary);
+    --tw-prose-captions: oklch(0.65 0 0);
+    --tw-prose-code: oklch(0.95 0 0);
+    --tw-prose-pre-code: oklch(0.92 0 0);
+    --tw-prose-pre-bg: oklch(0.1 0.01 265);
+    --tw-prose-th-borders: oklch(0.35 0 0);
+    --tw-prose-td-borders: oklch(0.25 0 0);
+}
+
+html.dark .prose :where(blockquote) {
+    background: oklch(0.18 0.01 var(--color-folium-hue, 145) / 0.3);
+    color: oklch(0.8 0 0);
+}
+
+html.dark .prose :where(code):not(pre code) {
+    background: oklch(0.2 0.01 265);
+    color: oklch(0.9 0.05 15);
+    border-color: oklch(0.3 0 0);
+}
+
+html.dark .prose :where(th) {
+    background: oklch(0.2 0.01 var(--color-folium-hue, 145) / 0.2);
+    border-color: oklch(0.35 0 0);
+}
+
+html.dark .prose :where(td) {
+    border-color: oklch(0.25 0 0);
+}
 
 /* Shiki 구문 강조: defaultColor:false 모드 (라이트/다크 듀얼 테마) */
 /* pre 배경은 Color Scheme 변수 사용 (항상 어두운 배경) */
-/* --shiki-light: 밝은 배경용(어두운 텍스트), --shiki-dark: 어두운 배경용(밝은 텍스트) */
-/* 현재 스킴이 라이트/다크 모드 모두 어두운 코드블록 배경을 쓰므로 --shiki-dark만 사용 */
 .prose pre.shiki {
     background-color: var(--color-code-block-bg) !important;
     overflow-x: auto;
@@ -525,55 +673,9 @@ body {
 .prose pre:not(.shiki) code {
     color: var(--color-code-block-fg) !important;
 }
-.prose :where(:not(pre) > code):not(:where([class~="not-prose"] *)) {
-    /* 인라인 코드 배경/텍스트 컬러 */
-    background-color: var(--color-code-bg);
-    color: var(--color-code-fg);
-}
 /* Typography 플러그인 기본: 인라인 code에 ::before/::after로 백틱 추가 → 제거 */
 .prose :where(:not(pre) > code)::before,
 .prose :where(:not(pre) > code)::after {
-    content: none;
-}
-.prose a,
-.prose :where(a):not(:where([class~="not-prose"] *)) {
-    /* 링크 컬러 */
-    color: var(--color-link);
-}
-.prose a:hover {
-    /* 링크 hover시 투명도 변화 */
-    opacity: 0.85;
-}
-
-/* prose 헤딩: 강한 타이포그래피 계층 */
-.prose h1,
-.prose h2,
-.prose h3,
-.prose h4 {
-    letter-spacing: -0.02em;
-    font-weight: 700;
-}
-.prose h2 {
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--color-border);
-    margin-top: 2.5rem;
-}
-
-/* prose blockquote: accent border + 서브틀 배경 */
-.prose blockquote {
-    border-left: 3px solid var(--color-accent);
-    background: var(--color-surface-subtle);
-    border-radius: 0 0.5rem 0.5rem 0;
-    padding: 1rem 1.25rem;
-    font-style: normal;
-    color: var(--color-foreground);
-}
-.prose blockquote p {
-    margin: 0;
-    color: var(--color-foreground);
-}
-.prose blockquote p::before,
-.prose blockquote p::after {
     content: none;
 }
 
@@ -582,21 +684,6 @@ body {
     border-color: var(--color-border);
     margin-top: 3rem;
     margin-bottom: 3rem;
-}
-
-/* prose table: border 정돈 */
-.prose table {
-    font-size: 0.9rem;
-    border-collapse: collapse;
-}
-.prose thead {
-    background: var(--color-surface-subtle);
-}
-.prose th,
-.prose td {
-    border: 1px solid var(--color-border);
-    padding: 0.6rem 0.875rem;
-    color: var(--color-foreground);
 }
 
 /* TOC 앵커 스크롤: 스티키 헤더 높이만큼 여백 (클릭 시 제목이 헤더에 가려지지 않도록) */
@@ -792,198 +879,6 @@ body {
     font-size: 0.875em;
 }
 
-/* Admin RichMarkdownEditor: 다크모드 (Tailwind @apply) */
-.dark .mdxeditor button,
-.dark .mdxeditor [role="button"],
-.dark .mdxeditor svg,
-.dark .mdxeditor .mdxeditor-toolbar,
-.dark .mdxeditor [class*="toolbar"],
-.dark .mdxeditor select,
-.dark .mdxeditor input,
-.dark .mdxeditor [contenteditable="true"],
-.dark .mdxeditor [contenteditable="true"] p,
-.dark .mdxeditor [contenteditable="true"] li,
-.dark .mdxeditor [contenteditable="true"] blockquote,
-.dark .mdxeditor [contenteditable="true"] span:not([class*="code"]),
-.dark .mdxeditor [class*="selectTrigger"],
-.dark .mdxeditor [class*="SelectTrigger"] {
-    @apply text-(--color-foreground);
-}
-
-/* CodeMirror 다크 모드: basicDark 구문 강조 복원 (상위 text 규칙 상속 차단) */
-.dark .mdxeditor [class*="codeMirrorWrapper"] .cm-content,
-.dark .mdxeditor [class*="codeMirrorWrapper"] .cm-content *,
-.dark .mdxeditor [class*="sp-wrapper"] .cm-content,
-.dark .mdxeditor [class*="sp-wrapper"] .cm-content * {
-    color: revert;
-}
-.dark .mdxeditor .cm-gutters {
-    @apply border-(--color-border) text-(--color-muted);
-}
-/* .mdxeditor 내부 + Radix Portal로 body에 렌더된 이미지/링크 모달 */
-.dark .mdxeditor [class*="DialogContent"],
-.dark .mdxeditor [class*="PopoverContent"],
-html.dark [class*="DialogContent"],
-html.dark [class*="PopoverContent"] {
-    @apply border-(--color-border) bg-(--color-surface) text-(--color-foreground);
-}
-.dark .mdxeditor [class*="DialogContent"] input,
-.dark .mdxeditor [class*="PopoverContent"] input,
-html.dark [class*="DialogContent"] input,
-html.dark [class*="PopoverContent"] input {
-    @apply border-(--color-border) bg-(--color-surface-subtle) text-(--color-foreground);
-}
-
-/* Rich text / Diff / Source 토글: 다크 배경 + 호버 */
-.dark .mdxeditor [class*="diffSourceToggle"],
-.dark .mdxeditor [class*="diffSourceToggleWrapper"] {
-    @apply bg-(--color-surface-subtle);
-}
-.dark .mdxeditor [class*="diffSourceToggle"] [class*="toolbarToggleItem"] {
-    @apply text-(--color-foreground);
-}
-.dark
-    .mdxeditor
-    [class*="diffSourceToggle"]
-    [class*="toolbarToggleItem"]:hover {
-    @apply bg-(--color-border);
-}
-.dark
-    .mdxeditor
-    [class*="diffSourceToggle"]
-    [class*="toolbarToggleItem"][data-state="on"] {
-    @apply bg-(--color-border);
-}
-
-/* 툴바 버튼(Bold, Image 등) 호버/active: diff 토글과 동일한 스타일 */
-.dark .mdxeditor [class*="toolbarToggleItem"]:hover,
-.dark .mdxeditor [class*="toolbarButton"]:hover {
-    background-color: var(--color-border) !important;
-}
-.dark .mdxeditor [class*="toolbarToggleItem"][data-state="on"],
-.dark .mdxeditor [class*="toolbarToggleItem"]:active,
-.dark .mdxeditor [class*="toolbarButton"][data-state="on"],
-.dark .mdxeditor [class*="toolbarButton"]:active {
-    background-color: var(--color-border) !important;
-}
-
-/* Code block (CodeMirror): Consolas 폰트 (Pretendard 상속 차단) + 배경 */
-.rich-markdown-editor .cm-editor,
-.rich-markdown-editor .cm-editor *,
-.rich-markdown-editor .cm-scroller,
-.rich-markdown-editor .cm-content,
-.rich-markdown-editor [class*="codeMirrorWrapper"],
-.rich-markdown-editor [class*="codeMirrorWrapper"] *,
-.rich-markdown-editor [class*="sp-wrapper"] .cm-editor,
-.rich-markdown-editor [class*="sp-wrapper"] .cm-editor * {
-    font-family: Consolas, "Courier New", monospace !important;
-}
-/* 라이트 모드: 밝은 배경 + basicLight 다색 구문 강조 */
-html:not(.dark) .mdxeditor .cm-editor,
-html:not(.dark) .mdxeditor .cm-scroller,
-html:not(.dark) .mdxeditor [class*="codeMirrorWrapper"],
-html:not(.dark) .mdxeditor [class*="sp-wrapper"] .cm-editor {
-    @apply bg-(--color-code-bg);
-}
-/* 다크 모드: 어두운 배경 + basicDark 다색 구문 강조 */
-.dark .mdxeditor .cm-editor,
-.dark .mdxeditor .cm-scroller,
-.dark .mdxeditor [class*="codeMirrorWrapper"],
-.dark .mdxeditor [class*="sp-wrapper"] .cm-editor {
-    @apply bg-(--color-code-block-bg);
-}
-
-/* 코드블록 언어 선택기: 다크 배경 */
-.dark .mdxeditor [class*="codeMirrorToolbar"],
-.dark .mdxeditor [class*="codeMirrorToolbar"] *,
-.dark .mdxeditor [class*="CodeBlockLanguage"] select,
-.dark .mdxeditor [class*="codeBlock"] select,
-.dark .mdxeditor [class*="codeMirrorWrapper"] select,
-.dark .mdxeditor [class*="toolbarCodeBlockLanguageSelectTrigger"],
-.dark .mdxeditor [class*="toolbarCodeBlockLanguageSelectContent"],
-.dark .mdxeditor [class*="codeMirrorWrapper"] [class*="selectTrigger"],
-.dark .mdxeditor [class*="codeMirrorWrapper"] [class*="SelectContent"] {
-    @apply border-(--color-border) bg-(--color-surface-subtle) text-(--color-foreground);
-}
-
-/* 인라인 코드 (``): 다크모드에서 텍스트를 검정으로 (밝은 배경 대비 가독) */
-html.dark .rich-markdown-editor :not(pre) > code,
-.dark .rich-markdown-editor :not(pre) > code,
-html.dark .rich-markdown-editor .rich-editor-prose :not(pre) > code,
-.dark .rich-markdown-editor .rich-editor-prose :not(pre) > code {
-    color: #000 !important;
-    padding: 0.125rem 0.25rem !important;
-    border-radius: 0.25rem !important;
-}
-
-/* Admin RichMarkdownEditor: Pretendard 폰트 적용 */
-.rich-markdown-editor,
-.rich-markdown-editor .mdxeditor,
-.rich-markdown-editor [contenteditable="true"] {
-    font-family: var(--font-sans);
-}
-
-/* Rich editor: KaTeX display mode — 기본 margin 제거 */
-.rich-markdown-editor .katex-display {
-    margin: 0 !important;
-}
-
-/* Rich editor: block directive 전후 단락 간격 축소
- * prose-lg p { margin: 1.333em } → 0.5rem 으로 단축
- * 원인: 본문 중간에 directive가 위치할 때 인접 단락 margin이 거대 여백을 만들어냄 */
-.rich-markdown-editor p:has(+ [data-lexical-decorator="true"]) {
-    margin-bottom: 0.5rem !important;
-}
-.rich-markdown-editor [data-lexical-decorator="true"] + p {
-    margin-top: 0.5rem !important;
-}
-
-/* Rich editor: Lexical 빈 커서 단락 축소
- * - 텍스트 없는 빈 단락 (br 요소만 있는 경우 또는 완전 빈 경우)
- * - MDXEditor가 마지막에 자동 삽입하는 커서용 단락 포함 
- * 주의: dir="auto" 속성만으로 타겟팅하면 텍스트가 있는 단락이 뭉개지는 버그가 발생함 */
-.rich-markdown-editor [data-lexical-decorator="true"] + p:has(br:only-child),
-.rich-markdown-editor [data-lexical-decorator="true"] + p:empty,
-.rich-markdown-editor
-    [contenteditable="true"]
-    > p:last-child:has(br:only-child),
-.rich-markdown-editor [contenteditable="true"] > p:last-child:empty {
-    line-height: 0 !important;
-    margin: 0 !important;
-    min-height: 0 !important;
-}
-
-/* Admin RichMarkdownEditor: prose heading 스타일 보강 (MDXEditor contentEditable) */
-[contenteditable="true"][data-lexical-editor="true"].prose h1,
-[contenteditable="true"][data-lexical-editor="true"].prose h2,
-[contenteditable="true"][data-lexical-editor="true"].prose h3,
-[contenteditable="true"][data-lexical-editor="true"].prose h4,
-[contenteditable="true"][data-lexical-editor="true"].prose h5,
-[contenteditable="true"][data-lexical-editor="true"].prose h6 {
-    font-weight: 600;
-    line-height: 1.25;
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-}
-[contenteditable="true"][data-lexical-editor="true"].prose h1 {
-    font-size: 2.25rem;
-}
-[contenteditable="true"][data-lexical-editor="true"].prose h2 {
-    font-size: 1.875rem;
-}
-[contenteditable="true"][data-lexical-editor="true"].prose h3 {
-    font-size: 1.5rem;
-}
-[contenteditable="true"][data-lexical-editor="true"].prose h4 {
-    font-size: 1.25rem;
-}
-[contenteditable="true"][data-lexical-editor="true"].prose h5 {
-    font-size: 1.125rem;
-}
-[contenteditable="true"][data-lexical-editor="true"].prose h6 {
-    font-size: 1rem;
-}
-
 /* ── 디자인 시스템: 애니메이션 & 전역 유틸리티 ────────────────────── */
 
 /* 스크롤 reveal 키프레임 */
@@ -1175,4 +1070,406 @@ html.dark .rich-markdown-editor .rich-editor-prose :not(pre) > code,
 .admin-card-hover:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px oklch(0 0 0 / 0.08);
+}
+
+/* ── Tiptap Editor ──────────────────────────────────────────────── */
+
+/* Tiptap CSS custom properties (extracted from _variables.scss) */
+:root {
+    /* Toolbar */
+    --tt-toolbar-height: 2.75rem;
+    --tt-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --tt-toolbar-bg-color: var(--white);
+    --tt-toolbar-border-color: var(--tt-gray-light-a-100);
+
+    /* Radius */
+    --tt-radius-xxs: 0.125rem;
+    --tt-radius-xs: 0.25rem;
+    --tt-radius-sm: 0.375rem;
+    --tt-radius-md: 0.5rem;
+    --tt-radius-lg: 0.75rem;
+    --tt-radius-xl: 1rem;
+
+    /* Transitions */
+    --tt-transition-duration-short: 0.1s;
+    --tt-transition-duration-default: 0.2s;
+    --tt-transition-duration-long: 0.64s;
+    --tt-transition-easing-default: cubic-bezier(0.46, 0.03, 0.52, 0.96);
+    --tt-transition-easing-cubic: cubic-bezier(0.65, 0.05, 0.36, 1);
+    --tt-transition-easing-quart: cubic-bezier(0.77, 0, 0.18, 1);
+    --tt-transition-easing-circ: cubic-bezier(0.79, 0.14, 0.15, 0.86);
+    --tt-transition-easing-back: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+    /* Contrast */
+    --tt-accent-contrast: 8%;
+    --tt-destructive-contrast: 8%;
+    --tt-foreground-contrast: 8%;
+
+    /* Gray alpha (light mode) */
+    --tt-gray-light-a-50: rgba(56, 56, 56, 0.04);
+    --tt-gray-light-a-100: rgba(15, 22, 36, 0.05);
+    --tt-gray-light-a-200: rgba(37, 39, 45, 0.1);
+    --tt-gray-light-a-300: rgba(47, 50, 55, 0.2);
+    --tt-gray-light-a-400: rgba(40, 44, 51, 0.42);
+    --tt-gray-light-a-500: rgba(52, 55, 60, 0.64);
+    --tt-gray-light-a-600: rgba(36, 39, 46, 0.78);
+    --tt-gray-light-a-700: rgba(35, 37, 42, 0.87);
+    --tt-gray-light-a-800: rgba(30, 32, 36, 0.95);
+    --tt-gray-light-a-900: rgba(29, 30, 32, 0.98);
+
+    /* Gray (light mode) */
+    --tt-gray-light-50: rgba(250, 250, 250, 1);
+    --tt-gray-light-100: rgba(244, 244, 245, 1);
+    --tt-gray-light-200: rgba(234, 234, 235, 1);
+    --tt-gray-light-300: rgba(213, 214, 215, 1);
+    --tt-gray-light-400: rgba(166, 167, 171, 1);
+    --tt-gray-light-500: rgba(125, 127, 130, 1);
+    --tt-gray-light-600: rgba(83, 86, 90, 1);
+    --tt-gray-light-700: rgba(64, 65, 69, 1);
+    --tt-gray-light-800: rgba(44, 45, 48, 1);
+    --tt-gray-light-900: rgba(34, 35, 37, 1);
+
+    /* Gray alpha (dark mode) */
+    --tt-gray-dark-a-50: rgba(232, 232, 253, 0.05);
+    --tt-gray-dark-a-100: rgba(231, 231, 243, 0.07);
+    --tt-gray-dark-a-200: rgba(238, 238, 246, 0.11);
+    --tt-gray-dark-a-300: rgba(239, 239, 245, 0.22);
+    --tt-gray-dark-a-400: rgba(244, 244, 255, 0.37);
+    --tt-gray-dark-a-500: rgba(236, 238, 253, 0.5);
+    --tt-gray-dark-a-600: rgba(247, 247, 253, 0.64);
+    --tt-gray-dark-a-700: rgba(251, 251, 254, 0.75);
+    --tt-gray-dark-a-800: rgba(253, 253, 253, 0.88);
+    --tt-gray-dark-a-900: rgba(255, 255, 255, 0.96);
+
+    /* Gray (dark mode) */
+    --tt-gray-dark-50: rgba(25, 25, 26, 1);
+    --tt-gray-dark-100: rgba(32, 32, 34, 1);
+    --tt-gray-dark-200: rgba(45, 45, 47, 1);
+    --tt-gray-dark-300: rgba(70, 70, 73, 1);
+    --tt-gray-dark-400: rgba(99, 99, 105, 1);
+    --tt-gray-dark-500: rgba(124, 124, 131, 1);
+    --tt-gray-dark-600: rgba(163, 163, 168, 1);
+    --tt-gray-dark-700: rgba(192, 192, 195, 1);
+    --tt-gray-dark-800: rgba(224, 224, 225, 1);
+    --tt-gray-dark-900: rgba(245, 245, 245, 1);
+
+    /* Brand colors */
+    --tt-brand-color-50: rgba(239, 238, 255, 1);
+    --tt-brand-color-100: rgba(222, 219, 255, 1);
+    --tt-brand-color-200: rgba(195, 189, 255, 1);
+    --tt-brand-color-300: rgba(157, 138, 255, 1);
+    --tt-brand-color-400: rgba(122, 82, 255, 1);
+    --tt-brand-color-500: rgba(98, 41, 255, 1);
+    --tt-brand-color-600: rgba(84, 0, 229, 1);
+    --tt-brand-color-700: rgba(75, 0, 204, 1);
+    --tt-brand-color-800: rgba(56, 0, 153, 1);
+    --tt-brand-color-900: rgba(43, 25, 102, 1);
+    --tt-brand-color-950: hsla(257, 100%, 9%, 1);
+
+    /* Basic colors */
+    --white: rgba(255, 255, 255, 1);
+    --black: rgba(14, 14, 17, 1);
+    --transparent: rgba(255, 255, 255, 0);
+
+    /* Shadows */
+    --tt-shadow-elevated-md:
+        0px 16px 48px 0px rgba(17, 24, 39, 0.04),
+        0px 12px 24px 0px rgba(17, 24, 39, 0.04),
+        0px 6px 8px 0px rgba(17, 24, 39, 0.02),
+        0px 2px 3px 0px rgba(17, 24, 39, 0.02);
+
+    /* Global colors - Light mode */
+    --tt-bg-color: var(--white);
+    --tt-border-color: var(--tt-gray-light-a-200);
+    --tt-border-color-tint: var(--tt-gray-light-a-100);
+    --tt-sidebar-bg-color: var(--tt-gray-light-100);
+    --tt-scrollbar-color: var(--tt-gray-light-a-200);
+    --tt-cursor-color: var(--tt-brand-color-500);
+    --tt-selection-color: rgba(157, 138, 255, 0.2);
+    --tt-card-bg-color: var(--white);
+    --tt-card-border-color: var(--tt-gray-light-a-100);
+
+    /* Text colors */
+    --tt-color-text-gray: hsl(45, 2%, 46%);
+    --tt-color-text-brown: hsl(19, 31%, 47%);
+    --tt-color-text-orange: hsl(30, 89%, 45%);
+    --tt-color-text-yellow: hsl(38, 62%, 49%);
+    --tt-color-text-green: hsl(148, 32%, 39%);
+    --tt-color-text-blue: hsl(202, 54%, 43%);
+    --tt-color-text-purple: hsl(274, 32%, 54%);
+    --tt-color-text-pink: hsl(328, 49%, 53%);
+    --tt-color-text-red: hsl(2, 62%, 55%);
+
+    --tt-color-text-gray-contrast: hsla(39, 26%, 26%, 0.15);
+    --tt-color-text-brown-contrast: hsla(18, 43%, 69%, 0.35);
+    --tt-color-text-orange-contrast: hsla(24, 73%, 55%, 0.27);
+    --tt-color-text-yellow-contrast: hsla(44, 82%, 59%, 0.39);
+    --tt-color-text-green-contrast: hsla(126, 29%, 60%, 0.27);
+    --tt-color-text-blue-contrast: hsla(202, 54%, 59%, 0.27);
+    --tt-color-text-purple-contrast: hsla(274, 37%, 64%, 0.27);
+    --tt-color-text-pink-contrast: hsla(331, 60%, 71%, 0.27);
+    --tt-color-text-red-contrast: hsla(8, 79%, 79%, 0.4);
+
+    /* Highlight colors */
+    --tt-color-highlight-yellow: #fef9c3;
+    --tt-color-highlight-green: #dcfce7;
+    --tt-color-highlight-blue: #e0f2fe;
+    --tt-color-highlight-purple: #f3e8ff;
+    --tt-color-highlight-red: #ffe4e6;
+    --tt-color-highlight-gray: rgb(248, 248, 247);
+    --tt-color-highlight-brown: rgb(244, 238, 238);
+    --tt-color-highlight-orange: rgb(251, 236, 221);
+    --tt-color-highlight-pink: rgb(252, 241, 246);
+
+    --tt-color-highlight-yellow-contrast: #fbe604;
+    --tt-color-highlight-green-contrast: #c7fad8;
+    --tt-color-highlight-blue-contrast: #ceeafd;
+    --tt-color-highlight-purple-contrast: #e4ccff;
+    --tt-color-highlight-red-contrast: #ffccd0;
+    --tt-color-highlight-gray-contrast: rgba(84, 72, 49, 0.15);
+    --tt-color-highlight-brown-contrast: rgba(210, 162, 141, 0.35);
+    --tt-color-highlight-orange-contrast: rgba(224, 124, 57, 0.27);
+    --tt-color-highlight-pink-contrast: rgba(225, 136, 179, 0.27);
+
+    /* Green */
+    --tt-color-green-inc-5: hsla(129, 100%, 97%, 1);
+    --tt-color-green-inc-4: hsla(129, 100%, 92%, 1);
+    --tt-color-green-inc-3: hsla(131, 100%, 86%, 1);
+    --tt-color-green-inc-2: hsla(133, 98%, 78%, 1);
+    --tt-color-green-inc-1: hsla(137, 99%, 70%, 1);
+    --tt-color-green-base: hsla(147, 99%, 50%, 1);
+    --tt-color-green-dec-1: hsla(147, 97%, 41%, 1);
+    --tt-color-green-dec-2: hsla(146, 98%, 32%, 1);
+    --tt-color-green-dec-3: hsla(146, 100%, 24%, 1);
+    --tt-color-green-dec-4: hsla(144, 100%, 16%, 1);
+    --tt-color-green-dec-5: hsla(140, 100%, 9%, 1);
+
+    /* Yellow */
+    --tt-color-yellow-inc-5: hsla(50, 100%, 97%, 1);
+    --tt-color-yellow-inc-4: hsla(50, 100%, 91%, 1);
+    --tt-color-yellow-inc-3: hsla(50, 100%, 84%, 1);
+    --tt-color-yellow-inc-2: hsla(50, 100%, 77%, 1);
+    --tt-color-yellow-inc-1: hsla(50, 100%, 68%, 1);
+    --tt-color-yellow-base: hsla(52, 100%, 50%, 1);
+    --tt-color-yellow-dec-1: hsla(52, 100%, 41%, 1);
+    --tt-color-yellow-dec-2: hsla(52, 100%, 32%, 1);
+    --tt-color-yellow-dec-3: hsla(52, 100%, 24%, 1);
+    --tt-color-yellow-dec-4: hsla(51, 100%, 16%, 1);
+    --tt-color-yellow-dec-5: hsla(50, 100%, 9%, 1);
+
+    /* Red */
+    --tt-color-red-inc-5: hsla(11, 100%, 96%, 1);
+    --tt-color-red-inc-4: hsla(11, 100%, 88%, 1);
+    --tt-color-red-inc-3: hsla(10, 100%, 80%, 1);
+    --tt-color-red-inc-2: hsla(9, 100%, 73%, 1);
+    --tt-color-red-inc-1: hsla(7, 100%, 64%, 1);
+    --tt-color-red-base: hsla(7, 100%, 54%, 1);
+    --tt-color-red-dec-1: hsla(7, 100%, 41%, 1);
+    --tt-color-red-dec-2: hsla(5, 100%, 32%, 1);
+    --tt-color-red-dec-3: hsla(4, 100%, 24%, 1);
+    --tt-color-red-dec-4: hsla(3, 100%, 16%, 1);
+    --tt-color-red-dec-5: hsla(1, 100%, 9%, 1);
+}
+
+.dark {
+    --tt-toolbar-bg-color: var(--black);
+    --tt-toolbar-border-color: var(--tt-gray-dark-a-50);
+
+    /* Global colors - Dark mode */
+    --tt-bg-color: var(--black);
+    --tt-border-color: var(--tt-gray-dark-a-200);
+    --tt-border-color-tint: var(--tt-gray-dark-a-100);
+    --tt-sidebar-bg-color: var(--tt-gray-dark-100);
+    --tt-scrollbar-color: var(--tt-gray-dark-a-200);
+    --tt-cursor-color: var(--tt-brand-color-400);
+    --tt-selection-color: rgba(122, 82, 255, 0.2);
+    --tt-card-bg-color: var(--tt-gray-dark-50);
+    --tt-card-border-color: var(--tt-gray-dark-a-50);
+
+    --tt-shadow-elevated-md:
+        0px 16px 48px 0px rgba(0, 0, 0, 0.5),
+        0px 12px 24px 0px rgba(0, 0, 0, 0.24),
+        0px 6px 8px 0px rgba(0, 0, 0, 0.22), 0px 2px 3px 0px rgba(0, 0, 0, 0.12);
+
+    /* Text colors dark */
+    --tt-color-text-gray: hsl(0, 0%, 61%);
+    --tt-color-text-brown: hsl(18, 35%, 58%);
+    --tt-color-text-orange: hsl(25, 53%, 53%);
+    --tt-color-text-yellow: hsl(36, 54%, 55%);
+    --tt-color-text-green: hsl(145, 32%, 47%);
+    --tt-color-text-blue: hsl(202, 64%, 52%);
+    --tt-color-text-purple: hsl(270, 55%, 62%);
+    --tt-color-text-pink: hsl(329, 57%, 58%);
+    --tt-color-text-red: hsl(1, 69%, 60%);
+
+    --tt-color-text-gray-contrast: hsla(0, 0%, 100%, 0.09);
+    --tt-color-text-brown-contrast: hsla(17, 45%, 50%, 0.25);
+    --tt-color-text-orange-contrast: hsla(27, 82%, 53%, 0.2);
+    --tt-color-text-yellow-contrast: hsla(35, 49%, 47%, 0.2);
+    --tt-color-text-green-contrast: hsla(151, 55%, 39%, 0.2);
+    --tt-color-text-blue-contrast: hsla(202, 54%, 43%, 0.2);
+    --tt-color-text-purple-contrast: hsla(271, 56%, 60%, 0.18);
+    --tt-color-text-pink-contrast: hsla(331, 67%, 58%, 0.22);
+    --tt-color-text-red-contrast: hsla(0, 67%, 60%, 0.25);
+
+    /* Highlight colors dark */
+    --tt-color-highlight-yellow: #6b6524;
+    --tt-color-highlight-green: #509568;
+    --tt-color-highlight-blue: #6e92aa;
+    --tt-color-highlight-purple: #583e74;
+    --tt-color-highlight-red: #743e42;
+    --tt-color-highlight-gray: rgb(47, 47, 47);
+    --tt-color-highlight-brown: rgb(74, 50, 40);
+    --tt-color-highlight-orange: rgb(92, 59, 35);
+    --tt-color-highlight-pink: rgb(78, 44, 60);
+
+    --tt-color-highlight-yellow-contrast: #58531e;
+    --tt-color-highlight-green-contrast: #47855d;
+    --tt-color-highlight-blue-contrast: #5e86a1;
+    --tt-color-highlight-purple-contrast: #4c3564;
+    --tt-color-highlight-red-contrast: #643539;
+    --tt-color-highlight-gray-contrast: rgba(255, 255, 255, 0.094);
+    --tt-color-highlight-brown-contrast: rgba(184, 101, 69, 0.25);
+    --tt-color-highlight-orange-contrast: rgba(233, 126, 37, 0.2);
+    --tt-color-highlight-pink-contrast: rgba(220, 76, 145, 0.22);
+}
+
+/* Tiptap keyframe animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+@keyframes zoomIn {
+    from {
+        transform: scale(0.95);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+@keyframes zoomOut {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(0.95);
+    }
+}
+@keyframes zoom {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+@keyframes slideFromTop {
+    from {
+        transform: translateY(-0.5rem);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+@keyframes slideFromRight {
+    from {
+        transform: translateX(0.5rem);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+@keyframes slideFromLeft {
+    from {
+        transform: translateX(-0.5rem);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+@keyframes slideFromBottom {
+    from {
+        transform: translateY(0.5rem);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Tiptap simple-editor layout */
+.tiptap.simple-editor {
+    min-height: 600px;
+    padding: 3rem;
+    outline: none;
+}
+
+@media (max-width: 768px) {
+    .tiptap.simple-editor {
+        padding: 1.5rem;
+    }
+}
+
+.tiptap {
+    outline: none;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: oklch(0.65 0 0);
+    pointer-events: none;
+    float: left;
+    height: 0;
+}
+
+html.dark .tiptap p.is-editor-empty:first-child::before {
+    color: oklch(0.45 0 0);
+}
+
+/* Tiptap YouTube embed 16:9 */
+div[data-youtube-video] {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+div[data-youtube-video] iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* 기존 iframe 기반 YouTube 호환 */
+.tiptap iframe[src*="youtube"],
+.tiptap iframe[src*="youtu.be"],
+.tiptap iframe[src*="youtube-nocookie"] {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border: none;
+    border-radius: 0.5rem;
 }
