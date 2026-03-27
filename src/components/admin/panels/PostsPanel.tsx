@@ -99,7 +99,15 @@ function toSlug(title: string): string {
         .slice(0, 80);
 }
 
-export default function PostsPanel() {
+interface PostsPanelProps {
+    editPath?: string;
+    onEditPathChange?: (path: string) => void;
+}
+
+export default function PostsPanel({
+    editPath = "",
+    onEditPathChange,
+}: PostsPanelProps) {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [editTarget, setEditTarget] = useState<Post | null | "new">(null);
@@ -225,6 +233,28 @@ export default function PostsPanel() {
         }
     }, []);
 
+    // editPath로 편집 상태 복원 (새로고침 시)
+    const editPathRestoredRef = useRef(false);
+    useEffect(() => {
+        if (
+            editPathRestoredRef.current ||
+            !editPath ||
+            loading ||
+            !posts.length
+        )
+            return;
+        editPathRestoredRef.current = true;
+        if (editPath === "new") {
+            openNew();
+        } else if (editPath.startsWith("edit/")) {
+            const slug = editPath.slice(5);
+            const post = posts.find((p) => p.slug === slug);
+            if (post) openEdit(post);
+            else onEditPathChange?.("");
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editPath, loading, posts]);
+
     // 포스트 목차 스타일 저장 (site_config upsert)
     const saveTocStyle = async (slug: string, style: string) => {
         if (!browserClient) return;
@@ -283,6 +313,7 @@ export default function PostsPanel() {
         initialFormRef.current = f;
         setForm(f);
         setEditTarget(post);
+        onEditPathChange?.(`edit/${post.slug}`);
         setError(null);
         setSuccess(null);
     };
@@ -296,6 +327,7 @@ export default function PostsPanel() {
         initialFormRef.current = base;
         setForm(base);
         setEditTarget("new");
+        onEditPathChange?.("new");
         setError(null);
         setSuccess(null);
     };
@@ -374,6 +406,7 @@ export default function PostsPanel() {
     const handleBack = () => {
         if (confirmLeave()) {
             setEditTarget(null);
+            onEditPathChange?.("");
             setMetadataOpen(false);
             loadStateCounts();
         }
@@ -394,6 +427,7 @@ export default function PostsPanel() {
                 editTarget.id === id
             ) {
                 setEditTarget(null);
+                onEditPathChange?.("");
             }
             loadPosts();
         }
@@ -428,6 +462,15 @@ export default function PostsPanel() {
         );
         await revalidatePost(editTarget.slug);
     };
+
+    // editPath 복원 대기 중 (list 깜빡임 방지)
+    if (editPath && !editTarget && !editPathRestoredRef.current) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <span className="text-zinc-400">불러오는 중...</span>
+            </div>
+        );
+    }
 
     // ── 편집 화면 ────────────────────────────────────────────
     if (editTarget !== null) {

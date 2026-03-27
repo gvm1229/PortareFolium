@@ -142,7 +142,15 @@ function itemToForm(item: PortfolioItem): ItemForm {
     };
 }
 
-export default function PortfolioPanel() {
+interface PortfolioPanelProps {
+    editPath?: string;
+    onEditPathChange?: (path: string) => void;
+}
+
+export default function PortfolioPanel({
+    editPath = "",
+    onEditPathChange,
+}: PortfolioPanelProps) {
     const [tab, setTab] = useState<"portfolio" | "books">("portfolio");
     const [items, setItems] = useState<PortfolioItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -257,6 +265,28 @@ export default function PortfolioPanel() {
         }
     }, []);
 
+    // editPath로 편집 상태 복원 (새로고침 시)
+    const editPathRestoredRef = useRef(false);
+    useEffect(() => {
+        if (
+            editPathRestoredRef.current ||
+            !editPath ||
+            loading ||
+            !items.length
+        )
+            return;
+        editPathRestoredRef.current = true;
+        if (editPath === "new") {
+            openNew();
+        } else if (editPath.startsWith("edit/")) {
+            const slug = editPath.slice(5);
+            const item = items.find((i) => i.slug === slug);
+            if (item) openEdit(item);
+            else onEditPathChange?.("");
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editPath, loading, items]);
+
     // form → DB payload 변환
     const buildPayload = () => ({
         slug: form.slug,
@@ -298,6 +328,7 @@ export default function PortfolioPanel() {
         initialFormRef.current = f;
         setForm(f);
         setEditTarget(item);
+        onEditPathChange?.(`edit/${item.slug}`);
         setError(null);
         setSuccess(null);
     };
@@ -311,6 +342,7 @@ export default function PortfolioPanel() {
         initialFormRef.current = base;
         setForm(base);
         setEditTarget("new");
+        onEditPathChange?.("new");
         setError(null);
         setSuccess(null);
     };
@@ -390,6 +422,7 @@ export default function PortfolioPanel() {
     const handleBack = () => {
         if (confirmLeave()) {
             setEditTarget(null);
+            onEditPathChange?.("");
             setMetadataOpen(false);
             loadStateCounts();
         }
@@ -404,6 +437,7 @@ export default function PortfolioPanel() {
             editTarget.id === id
         ) {
             setEditTarget(null);
+            onEditPathChange?.("");
         }
         loadItems();
     };
@@ -452,6 +486,15 @@ export default function PortfolioPanel() {
         );
         await revalidatePortfolioItem((editTarget as PortfolioItem).slug);
     };
+
+    // editPath 복원 대기 중 (list 깜빡임 방지)
+    if (editPath && !editTarget && !editPathRestoredRef.current) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <span className="text-zinc-400">불러오는 중...</span>
+            </div>
+        );
+    }
 
     // ── 편집 화면 (Ghost 에디터 레이아웃) ──
     if (editTarget !== null) {

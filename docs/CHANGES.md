@@ -1,5 +1,16 @@
 # CHANGES
 
+## v0.8.17 (2026-03-27)
+
+### Feat: 편집 상태 새로고침 영속화 + LaTeX 에디터 기능 (v0.8.17)
+
+- `src/components/admin/AdminDashboard.tsx`: URL hash 확장 — `#posts/edit/{slug}`, `#posts/new` 형식으로 편집 상태 영속화. `parseHash` 함수 추가. `editPath` state + `handleEditPathChange` 콜백을 PostsPanel/PortfolioPanel에 전달. 탭 전환 시 editPath 초기화.
+- `src/components/admin/panels/PostsPanel.tsx`: `editPath`/`onEditPathChange` props 추가. `openEdit`/`openNew`/`handleBack`/`handleDelete`에서 hash 동기화. 데이터 로드 완료 후 `editPath`에서 편집 상태 자동 복원 (1회).
+- `src/components/admin/panels/PortfolioPanel.tsx`: PostsPanel과 동일한 hash 영속화 적용.
+- `src/extensions/LatexNode.tsx`: 신규 Tiptap Node extension. KaTeX 기반 에디터 내 LaTeX 프리뷰 렌더링. `::latex{src="..."}` directive serialize/parse. `latexDirectiveToHtml` 전처리 함수.
+- `src/components/admin/RichMarkdownEditor.tsx`: `LatexNode` extension 등록. `latexDirectiveToHtml` 전처리 체인 추가 (initialContent + exitSourceMode).
+- `src/components/admin/EditorToolbar.tsx`: `LatexInput` 서브 컴포넌트 추가 — textarea 입력 + 실시간 KaTeX 프리뷰 + Ctrl+Enter 삽입. Media ToolbarGroup에 배치.
+
 ## v0.8.16 (2026-03-27)
 
 ### Fix: Source 모드 textarea 스크롤 리셋 + 모드 전환 시 스크롤 위치 보존 (v0.8.16)

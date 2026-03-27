@@ -20,6 +20,7 @@ import {
     ColoredTableNode,
     coloredTableDirectiveToHtml,
 } from "@/extensions/ColoredTableNode";
+import { LatexNode, latexDirectiveToHtml } from "@/extensions/LatexNode";
 import { jsxToDirective, directiveToJsx } from "@/lib/mdx-directive-converter";
 import EditorToolbar from "@/components/admin/EditorToolbar";
 import TiptapImageUpload from "@/components/admin/TiptapImageUpload";
@@ -105,8 +106,8 @@ export default function RichMarkdownEditor({
         const jsxContent = directiveToJsx(sourceText);
         // directive → HTML 전처리 (YoutubeEmbed, ColoredTableNode parseHTML 호환)
         const directives = jsxToDirective(jsxContent);
-        const preprocessed = coloredTableDirectiveToHtml(
-            youtubeDirectiveToHtml(directives)
+        const preprocessed = latexDirectiveToHtml(
+            coloredTableDirectiveToHtml(youtubeDirectiveToHtml(directives))
         );
         onChange(jsxContent);
         // setContent를 useEffect로 defer — React 렌더 완료 후 실행 (flushSync 충돌 방지)
@@ -133,7 +134,9 @@ export default function RichMarkdownEditor({
         // JSX → directive 변환 후 Tiptap에 로드 (JSX를 그대로 넘기면 FoliumTable 등이 소실됨)
         // directive → HTML 변환 (YoutubeEmbed, ColoredTableNode parseHTML 호환)
         const directives = jsxToDirective(value);
-        return coloredTableDirectiveToHtml(youtubeDirectiveToHtml(directives));
+        return latexDirectiveToHtml(
+            coloredTableDirectiveToHtml(youtubeDirectiveToHtml(directives))
+        );
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -151,6 +154,7 @@ export default function RichMarkdownEditor({
             Highlight.configure({ multicolor: true }),
             YoutubeEmbed,
             ColoredTableNode,
+            LatexNode,
             Placeholder.configure({
                 placeholder: placeholder ?? "Start writing...",
             }),

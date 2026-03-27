@@ -37,15 +37,32 @@ const VALID_TABS: TabId[] = [
     "config",
 ];
 
+// hash에서 tab + editPath 추출 (예: "posts/edit/my-slug" → { tab: "posts", editPath: "edit/my-slug" })
+function parseHash(raw: string): { tab: TabId; editPath: string } {
+    const hash = raw.replace("#", "");
+    const slashIdx = hash.indexOf("/");
+    const tabPart = slashIdx === -1 ? hash : hash.slice(0, slashIdx);
+    const editPath = slashIdx === -1 ? "" : hash.slice(slashIdx + 1);
+    const tab = VALID_TABS.includes(tabPart as TabId)
+        ? (tabPart as TabId)
+        : "posts";
+    return { tab, editPath };
+}
+
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<TabId>(() => {
         if (typeof window !== "undefined") {
-            const hash = window.location.hash.replace("#", "");
-            if (hash && VALID_TABS.includes(hash as TabId)) {
-                return hash as TabId;
-            }
+            return parseHash(window.location.hash).tab;
         }
         return "posts";
+    });
+
+    // 초기 editPath (새로고침 시 편집 상태 복원용)
+    const [editPath, setEditPath] = useState(() => {
+        if (typeof window !== "undefined") {
+            return parseHash(window.location.hash).editPath;
+        }
+        return "";
     });
 
     const [tabKey, setTabKey] = useState(0);
@@ -54,17 +71,17 @@ export default function AdminDashboard() {
     const lastActivityRef = useRef(Date.now());
 
     useEffect(() => {
-        window.history.replaceState(null, "", `#${activeTab}`);
+        const suffix = editPath ? `/${editPath}` : "";
+        window.history.replaceState(null, "", `#${activeTab}${suffix}`);
 
         const handleHashChange = () => {
-            const hash = window.location.hash.replace("#", "");
-            if (hash && VALID_TABS.includes(hash as TabId)) {
-                setActiveTab(hash as TabId);
-            }
+            const parsed = parseHash(window.location.hash);
+            setActiveTab(parsed.tab);
+            setEditPath(parsed.editPath);
         };
         window.addEventListener("hashchange", handleHashChange);
         return () => window.removeEventListener("hashchange", handleHashChange);
-    }, [activeTab]);
+    }, [activeTab, editPath]);
 
     // 비활동 타이머: 1초마다 남은 시간 갱신, 만료 시 자동 로그아웃
     useEffect(() => {
@@ -96,12 +113,18 @@ export default function AdminDashboard() {
         };
     }, []);
 
+    // 패널에서 편집 상태 변경 시 hash 업데이트
+    const handleEditPathChange = (path: string) => {
+        setEditPath(path);
+    };
+
     // 탭 클릭 핸들러
     const handleTabClick = (tabId: TabId) => {
         if (activeTab === tabId) {
             setTabKey((prev) => prev + 1);
         } else {
             setActiveTab(tabId);
+            setEditPath("");
             setTabKey(0);
         }
     };
@@ -126,10 +149,18 @@ export default function AdminDashboard() {
 
                 <main className="flex-1 overflow-y-auto p-8">
                     {activeTab === "posts" && (
-                        <PostsPanel key={`posts-${tabKey}`} />
+                        <PostsPanel
+                            key={`posts-${tabKey}`}
+                            editPath={editPath}
+                            onEditPathChange={handleEditPathChange}
+                        />
                     )}
                     {activeTab === "portfolio" && (
-                        <PortfolioPanel key={`portfolio-${tabKey}`} />
+                        <PortfolioPanel
+                            key={`portfolio-${tabKey}`}
+                            editPath={editPath}
+                            onEditPathChange={handleEditPathChange}
+                        />
                     )}
                     {activeTab === "tags" && (
                         <TagsPanel key={`tags-${tabKey}`} />

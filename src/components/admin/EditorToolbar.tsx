@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Editor } from "@tiptap/react";
+import katex from "katex";
 
 // --- Tiptap UI Primitives ---
 import {
@@ -176,6 +177,112 @@ function YoutubeInput({ editor }: { editor: Editor }) {
                     >
                         삽입
                     </button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// LaTeX 수식 삽입 서브 컴포넌트
+function LatexInput({ editor }: { editor: Editor }) {
+    const [open, setOpen] = useState(false);
+    const [src, setSrc] = useState("");
+    const ref = useRef<HTMLDivElement>(null);
+
+    // 외부 클릭 시 닫기
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        };
+        if (open) document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, [open]);
+
+    const handleInsert = () => {
+        if (!src.trim()) return;
+        editor
+            .chain()
+            .focus()
+            .insertContent({ type: "latexEmbed", attrs: { src: src.trim() } })
+            .run();
+        setSrc("");
+        setOpen(false);
+    };
+
+    // KaTeX 프리뷰 HTML
+    let previewHtml = "";
+    if (src.trim()) {
+        try {
+            previewHtml = katex.renderToString(src.trim(), {
+                throwOnError: false,
+                displayMode: true,
+            });
+        } catch {
+            previewHtml = "";
+        }
+    }
+
+    return (
+        <div ref={ref} className="relative">
+            <button
+                className="rounded p-1.5 text-sm transition-colors hover:bg-zinc-100 disabled:opacity-40 dark:hover:bg-zinc-700"
+                onClick={() => setOpen((v) => !v)}
+                title="LaTeX 수식 삽입"
+            >
+                <svg
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <text
+                        x="12"
+                        y="18"
+                        fontSize="18"
+                        fontWeight="normal"
+                        fill="currentColor"
+                        textAnchor="middle"
+                        fontFamily="serif"
+                    >
+                        ∑
+                    </text>
+                </svg>
+            </button>
+            {open && (
+                <div className="absolute top-full right-0 z-50 mt-1 w-80 rounded-lg border border-zinc-200 bg-white p-3 shadow-lg dark:border-zinc-700 dark:bg-zinc-800">
+                    <textarea
+                        value={src}
+                        onChange={(e) => setSrc(e.target.value)}
+                        onKeyDown={(e) => {
+                            e.stopPropagation();
+                            if (e.key === "Enter" && (e.ctrlKey || e.metaKey))
+                                handleInsert();
+                        }}
+                        placeholder={"\\alpha + \\beta = \\gamma"}
+                        rows={3}
+                        className="w-full resize-none rounded border border-zinc-300 bg-white px-2 py-1 font-mono text-sm text-zinc-900 outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+                        autoFocus
+                    />
+                    {previewHtml && (
+                        <div
+                            className="mt-2 overflow-x-auto rounded border border-zinc-100 bg-zinc-50 p-2 text-center dark:border-zinc-700 dark:bg-zinc-900"
+                            dangerouslySetInnerHTML={{ __html: previewHtml }}
+                        />
+                    )}
+                    <div className="mt-2 flex items-center justify-between">
+                        <span className="text-xs text-zinc-400">
+                            Ctrl+Enter 삽입 · \alpha → α
+                        </span>
+                        <button
+                            onClick={handleInsert}
+                            className="rounded bg-zinc-800 px-2 py-1 text-sm whitespace-nowrap text-white transition-opacity hover:opacity-80 dark:bg-zinc-200 dark:text-zinc-900"
+                        >
+                            삽입
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
@@ -817,6 +924,7 @@ export default function EditorToolbar({
             <ToolbarGroup>
                 <YoutubeInput editor={editor} />
                 <ColoredTableInsert editor={editor} />
+                <LatexInput editor={editor} />
             </ToolbarGroup>
 
             <Spacer />
