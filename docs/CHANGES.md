@@ -1,8 +1,6 @@
 # CHANGES
 
-## v0.9.11 (2026-03-29)
-
-### Feat: /ship 커스텀 커맨드 스킬 추가
+## Feat: /ship 커스텀 커맨드 스킬 추가
 
 - `.claude/commands/ship.md`: `/ship` 슬래시 커맨드 추가. 커밋 메시지 한국어 포맷, 버전 범프, PR.md/CHANGES.md 업데이트, 테스트 실행 등 커밋 워크플로우 자동화 규칙 정의.
 
