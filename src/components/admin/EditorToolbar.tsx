@@ -564,7 +564,7 @@ function ColoredTableInsert({ editor }: { editor: Editor }) {
                 </svg>
             </button>
             {open && (
-                <div className="absolute top-full right-0 z-50 mt-1 flex max-h-[60vh] w-[480px] flex-col gap-3 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-4 shadow-xl dark:border-zinc-700 dark:bg-zinc-800">
+                <div className="tablet:w-[480px] absolute top-full right-0 z-50 mt-1 flex max-h-[60vh] w-[calc(100vw-2rem)] flex-col gap-3 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-4 shadow-xl dark:border-zinc-700 dark:bg-zinc-800">
                     {/* 탭 */}
                     <div className="flex gap-1 rounded-lg bg-zinc-100 p-0.5 dark:bg-zinc-700">
                         <button

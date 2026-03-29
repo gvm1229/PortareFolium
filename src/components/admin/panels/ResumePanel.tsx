@@ -494,15 +494,15 @@ export default function ResumePanel() {
                 <h3 className="text-xl font-bold text-(--color-foreground)">
                     기본 정보
                 </h3>
-                <div className="mb-4 flex items-start gap-6">
+                <div className="tablet:flex-row tablet:gap-6 mb-4 flex flex-col items-start gap-4">
                     {resumeData.basics?.image && (
                         <img
                             src={resumeData.basics.image}
                             alt="Profile"
-                            className="h-48 w-48 shrink-0 rounded-full border border-(--color-border) object-cover"
+                            className="tablet:h-48 tablet:w-48 h-32 w-32 shrink-0 rounded-full border border-(--color-border) object-cover"
                         />
                     )}
-                    <div className="flex-1">
+                    <div className="max-w-full min-w-0 flex-1">
                         <label className="text-sm font-medium text-(--color-muted)">
                             프로필 사진 (자동 업로드)
                         </label>
@@ -511,12 +511,12 @@ export default function ResumePanel() {
                             accept="image/*"
                             onChange={handleImageUpload}
                             disabled={uploadingImage}
-                            className={`mt-4 block w-fit cursor-pointer rounded-lg border-2 border-(--color-border) px-4 py-2 text-sm font-semibold text-(--color-foreground) file:mr-4 file:rounded-lg file:border-0 file:bg-(--color-surface-subtle) file:px-4 file:py-2 file:text-sm file:font-semibold file:text-(--color-foreground) hover:file:bg-(--color-border) hover:file:text-(--color-foreground) disabled:opacity-50`}
+                            className={`mt-4 block max-w-full cursor-pointer rounded-lg border-2 border-(--color-border) px-4 py-2 text-sm font-semibold text-(--color-foreground) file:mr-4 file:rounded-lg file:border-0 file:bg-(--color-surface-subtle) file:px-4 file:py-2 file:text-sm file:font-semibold file:text-(--color-foreground) hover:file:bg-(--color-border) hover:file:text-(--color-foreground) disabled:opacity-50`}
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="tablet:grid-cols-2 grid grid-cols-1 gap-4">
                     <InputField
                         label="이름 (Name)"
                         value={resumeData.basics?.name || ""}
@@ -1048,7 +1048,7 @@ export default function ResumePanel() {
                             >
                                 {editingWork === idx ? (
                                     <div className="space-y-4">
-                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        <div className="tablet:grid-cols-2 grid grid-cols-1 gap-4">
                                             <InputField
                                                 label="회사명"
                                                 value={work.name || ""}
@@ -1568,7 +1568,7 @@ export default function ResumePanel() {
                             >
                                 {editingProject === idx ? (
                                     <div className="space-y-4">
-                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        <div className="tablet:grid-cols-2 grid grid-cols-1 gap-4">
                                             <InputField
                                                 label="프로젝트명"
                                                 value={proj.name || ""}
@@ -2304,7 +2304,7 @@ export default function ResumePanel() {
                         >
                             {editingEducation === idx ? (
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div className="tablet:grid-cols-2 grid grid-cols-1 gap-4">
                                         <InputField
                                             label="학교/기관명"
                                             value={ed.institution || ""}
@@ -2692,7 +2692,7 @@ export default function ResumePanel() {
                         >
                             {editingAward === idx ? (
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div className="tablet:grid-cols-2 grid grid-cols-1 gap-4">
                                         <InputField
                                             label="수상명"
                                             value={award.title || ""}
@@ -3012,7 +3012,7 @@ export default function ResumePanel() {
                         >
                             {editingLanguage === idx ? (
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div className="tablet:grid-cols-2 grid grid-cols-1 gap-4">
                                         <InputField
                                             label="언어"
                                             value={lang.language || ""}

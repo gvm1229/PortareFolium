@@ -267,7 +267,7 @@ export default function RichMarkdownEditor({
                     <div
                         className={
                             isFullscreen
-                                ? "relative sticky top-0 z-50 flex items-center"
+                                ? "relative sticky top-0 z-30 flex items-center"
                                 : ""
                         }
                     >
@@ -302,7 +302,7 @@ export default function RichMarkdownEditor({
                             <div
                                 className={`min-h-[300px] w-full bg-zinc-50 p-6 dark:bg-zinc-800 ${
                                     isFullscreen
-                                        ? "mx-auto my-8 max-w-4xl rounded-xl bg-white p-16 shadow-2xl dark:bg-zinc-900"
+                                        ? "tablet:p-8 laptop:p-16 mx-auto my-8 max-w-4xl rounded-xl bg-white p-4 shadow-2xl dark:bg-zinc-900"
                                         : ""
                                 }`}
                                 onClick={(e) => {
@@ -341,7 +341,7 @@ export default function RichMarkdownEditor({
                         <div
                             className={`prose ${
                                 isFullscreen
-                                    ? "prose-lg mx-auto my-8 min-h-[1100px] max-w-4xl rounded-xl bg-white p-16 shadow-2xl dark:bg-zinc-900"
+                                    ? "prose-lg tablet:p-8 laptop:p-16 mx-auto my-8 min-h-[1100px] max-w-4xl rounded-xl bg-white p-4 shadow-2xl dark:bg-zinc-900"
                                     : "prose-base min-h-[300px] max-w-none p-6"
                             } ${sourceMode ? "hidden" : ""}`}
                         >

@@ -209,7 +209,7 @@ export default function TiptapImageUpload({
             onClick={handleClose}
         >
             <div
-                className="mx-4 w-full max-w-md rounded-xl border border-(--color-border) bg-(--color-surface) p-6 shadow-xl"
+                className="tablet:mx-4 tablet:max-w-md mx-2 w-full rounded-xl border border-(--color-border) bg-(--color-surface) p-6 shadow-xl"
                 onClick={(e) => e.stopPropagation()}
             >
                 <h3 className="mb-4 text-xl font-semibold text-(--color-foreground)">

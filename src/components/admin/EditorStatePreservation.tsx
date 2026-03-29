@@ -401,7 +401,7 @@ export default function EditorStatePreservation({
                 onClick={onClose}
             >
                 <div
-                    className="mx-4 flex max-h-[80vh] w-full max-w-md flex-col rounded-xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+                    className="tablet:mx-4 tablet:max-w-md mx-2 flex max-h-[80vh] w-full flex-col rounded-xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* 헤더 */}

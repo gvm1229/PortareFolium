@@ -531,7 +531,7 @@ export default function SiteConfigPanel() {
                     새로운 테마를 선택하면 대시보드 화면에 즉시 반영되며, '설정
                     저장' 버튼을 누르면 다른 사용자들에게도 배포됩니다.
                 </p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="tablet:grid-cols-3 grid grid-cols-2 gap-2">
                     {COLOR_OPTIONS.map((opt) => (
                         <button
                             key={opt.value}
@@ -602,7 +602,7 @@ export default function SiteConfigPanel() {
                                 variant="default"
                                 size="sm"
                                 onClick={() => handleDeleteJobField(field.id)}
-                                className="h-full bg-red-600 p-3 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                                className="tablet:opacity-0 tablet:group-hover:opacity-100 h-full bg-red-600 p-3 text-white transition-opacity"
                             >
                                 <Trash2 size={13} />
                                 삭제

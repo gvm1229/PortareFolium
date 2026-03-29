@@ -33,7 +33,7 @@
     &[data-variant="fixed"] {
         position: sticky;
         top: 0;
-        z-index: 50;
+        z-index: 30;
         width: 100%;
         min-height: var(--tt-toolbar-height);
         background: var(--tt-toolbar-bg-color);
@@ -44,14 +44,9 @@
         // 팝업 클리핑 방지 (overflow: auto는 스크롤 컨테이너로 작동해 absolute 팝업을 숨김)
         overflow: visible;
 
-        @media (max-width: 480px) {
-            position: absolute;
-            top: auto;
-            height: calc(var(--tt-toolbar-height) + var(--tt-safe-area-bottom));
-            border-top: 1px solid var(--tt-toolbar-border-color);
-            border-bottom: none;
-            padding: 0 0.5rem var(--tt-safe-area-bottom);
-            // 모바일은 가로 스크롤 유지
+        // 모바일: 플로우 유지 + 가로 스크롤
+        @media (max-width: 768px) {
+            position: sticky;
             flex-wrap: nowrap;
             justify-content: flex-start;
             overflow-x: auto;

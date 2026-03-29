@@ -67,6 +67,7 @@ export default function AdminDashboard() {
 
     const [tabKey, setTabKey] = useState(0);
     const [commandOpen, setCommandOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [remainingMs, setRemainingMs] = useState(INACTIVITY_LIMIT_MS);
     const lastActivityRef = useRef(Date.now());
 
@@ -138,16 +139,25 @@ export default function AdminDashboard() {
 
     return (
         <div className="flex h-screen overflow-hidden bg-(--color-surface)">
-            <AdminSidebar activeTab={activeTab} onTabClick={handleTabClick} />
+            <AdminSidebar
+                activeTab={activeTab}
+                onTabClick={(id) => {
+                    handleTabClick(id);
+                    setSidebarOpen(false);
+                }}
+                open={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+            />
 
             <div className="flex flex-1 flex-col overflow-hidden">
                 <AdminHeader
                     timeLeft={remainingMs}
                     onLogout={handleLogout}
                     onCommandOpen={() => setCommandOpen(true)}
+                    onMenuOpen={() => setSidebarOpen(true)}
                 />
 
-                <main className="flex-1 overflow-y-auto p-8">
+                <main className="tablet:p-6 laptop:p-8 flex-1 overflow-y-auto p-4">
                     {activeTab === "posts" && (
                         <PostsPanel
                             key={`posts-${tabKey}`}

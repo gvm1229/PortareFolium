@@ -42,7 +42,7 @@ export default function LoginForm({ siteName = "" }: { siteName?: string }) {
             {/* 배경 글로우 */}
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute top-1/3 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-(--color-accent) opacity-[0.08] blur-3xl"
+                className="tablet:h-96 tablet:w-96 pointer-events-none absolute top-1/3 left-1/2 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-(--color-accent) opacity-[0.08] blur-3xl"
             />
 
             <div className="relative w-full max-w-sm">

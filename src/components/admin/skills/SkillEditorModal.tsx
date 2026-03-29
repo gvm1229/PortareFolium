@@ -297,7 +297,7 @@ export default function SkillEditorModal({
                 if (e.target === e.currentTarget) attemptClose();
             }}
         >
-            <div className="relative mx-4 w-full max-w-xl rounded-xl border border-(--color-border) bg-(--color-surface) p-6 shadow-2xl">
+            <div className="tablet:mx-4 tablet:max-w-xl relative mx-2 w-full rounded-xl border border-(--color-border) bg-(--color-surface) p-6 shadow-2xl">
                 {/* 닫기 버튼 */}
                 <button
                     onClick={attemptClose}

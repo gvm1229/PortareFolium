@@ -75,7 +75,7 @@ export default function CategorySelect({
                 />
                 <ComboboxOptions
                     anchor="bottom"
-                    className="tablet:min-w-96 z-50 mt-1 max-h-48 min-w-48 overflow-y-auto rounded-lg border border-(--color-border) bg-(--color-surface) py-1 shadow-lg empty:invisible"
+                    className="tablet:min-w-96 z-50 mt-1 max-h-48 w-full min-w-0 overflow-y-auto rounded-lg border border-(--color-border) bg-(--color-surface) py-1 shadow-lg empty:invisible"
                 >
                     {displayOptions.length === 0 && !showCreateOption ? (
                         <div className="px-3 py-2 text-base text-(--color-muted)">

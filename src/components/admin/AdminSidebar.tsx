@@ -11,6 +11,7 @@ import {
     KeyRound,
     Archive,
     MessageSquare,
+    ExternalLink,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -62,45 +63,76 @@ export type TabId =
 interface AdminSidebarProps {
     activeTab: TabId;
     onTabClick: (tabId: TabId) => void;
+    open: boolean;
+    onClose: () => void;
 }
 
 // 어드민 사이드바 네비게이션
 export default function AdminSidebar({
     activeTab,
     onTabClick,
+    open,
+    onClose,
 }: AdminSidebarProps) {
     return (
-        <nav className="flex w-48 shrink-0 flex-col border-r border-(--color-border) bg-(--color-surface) py-4">
-            {SECTIONS.map((section, sectionIdx) => (
-                <div key={section.label}>
-                    {sectionIdx > 0 && (
-                        <div className="mx-4 my-2 h-px bg-(--color-border)" />
-                    )}
-                    <p className="mb-1 px-4 text-[10px] font-bold tracking-[0.15em] text-(--color-muted) uppercase">
-                        {section.label}
-                    </p>
-                    {section.items.map((item) => {
-                        const Icon: ComponentType<{ className?: string }> =
-                            item.icon;
-                        const isActive = activeTab === item.id;
-                        return (
-                            <button
-                                key={item.id}
-                                onClick={() => onTabClick(item.id as TabId)}
-                                className={[
-                                    "admin-sidebar-item flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium",
-                                    isActive
-                                        ? "border-l-2 border-(--color-accent) bg-(--color-surface-subtle) text-(--color-foreground)"
-                                        : "border-l-2 border-transparent text-(--color-muted) hover:bg-(--color-surface-subtle) hover:text-(--color-foreground)",
-                                ].join(" ")}
-                            >
-                                <Icon className="h-4 w-4 shrink-0" />
-                                <span>{item.label}</span>
-                            </button>
-                        );
-                    })}
+        <>
+            {/* 모바일 오버레이 배경 */}
+            {open && (
+                <div
+                    className="tablet:hidden fixed inset-0 z-30 bg-black/40"
+                    onClick={onClose}
+                />
+            )}
+            {/* 사이드바 본체 */}
+            <nav
+                className={[
+                    "flex w-48 shrink-0 flex-col border-r border-(--color-border) bg-(--color-surface) py-4",
+                    "fixed inset-y-0 left-0 z-40 transition-transform duration-200",
+                    "tablet:relative tablet:translate-x-0 tablet:z-auto tablet:transition-none",
+                    open ? "translate-x-0" : "-translate-x-full",
+                ].join(" ")}
+            >
+                {SECTIONS.map((section, sectionIdx) => (
+                    <div key={section.label}>
+                        {sectionIdx > 0 && (
+                            <div className="mx-4 my-2 h-px bg-(--color-border)" />
+                        )}
+                        <p className="mb-1 px-4 text-[10px] font-bold tracking-[0.15em] text-(--color-muted) uppercase">
+                            {section.label}
+                        </p>
+                        {section.items.map((item) => {
+                            const Icon: ComponentType<{ className?: string }> =
+                                item.icon;
+                            const isActive = activeTab === item.id;
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => onTabClick(item.id as TabId)}
+                                    className={[
+                                        "admin-sidebar-item flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium",
+                                        isActive
+                                            ? "border-l-2 border-(--color-accent) bg-(--color-surface-subtle) text-(--color-foreground)"
+                                            : "border-l-2 border-transparent text-(--color-muted) hover:bg-(--color-surface-subtle) hover:text-(--color-foreground)",
+                                    ].join(" ")}
+                                >
+                                    <Icon className="h-4 w-4 shrink-0" />
+                                    <span>{item.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                ))}
+                {/* 사이트 링크 */}
+                <div className="mt-auto border-t border-(--color-border) px-4 pt-3 pb-2">
+                    <a
+                        href="/"
+                        className="flex items-center gap-3 text-sm font-medium text-(--color-muted) transition-colors hover:text-(--color-foreground)"
+                    >
+                        <ExternalLink className="h-4 w-4 shrink-0" />
+                        <span>사이트로 이동</span>
+                    </a>
                 </div>
-            ))}
-        </nav>
+            </nav>
+        </>
     );
 }

@@ -110,7 +110,7 @@ export default function AgentTokensPanel() {
                         placeholder="Label (예: claude-agent-prod)"
                         value={label}
                         onChange={(e) => setLabel(e.target.value)}
-                        className="min-w-48 flex-1 rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-3 py-2 text-sm text-(--color-foreground) placeholder:text-(--color-muted) focus:ring-2 focus:ring-(--color-accent) focus:outline-none"
+                        className="min-w-0 flex-1 rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-3 py-2 text-sm text-(--color-foreground) placeholder:text-(--color-muted) focus:ring-2 focus:ring-(--color-accent) focus:outline-none"
                     />
                     <select
                         value={duration}

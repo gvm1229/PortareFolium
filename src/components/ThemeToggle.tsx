@@ -83,6 +83,7 @@ export default function ThemeToggle() {
         >
             <button
                 type="button"
+                onClick={() => setIsOpen((v) => !v)}
                 className="rounded-md p-2 text-(--color-muted) transition-colors hover:text-(--color-foreground) hover:opacity-80"
                 aria-label="테마 선택"
                 aria-haspopup="true"
@@ -138,7 +139,7 @@ export default function ThemeToggle() {
             {/* 드롭다운 메뉴 - hover 시 표시 */}
             {isOpen && (
                 <div
-                    className="absolute top-full right-0 min-w-[120px] pt-1"
+                    className="absolute top-full left-0 z-35 min-w-[120px] pt-1"
                     role="menu"
                     aria-orientation="vertical"
                 >
