@@ -1,5 +1,6 @@
 /* @import는 파일 최상단에 배치 (CSS 규칙) */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 /* 스무스 스크롤 */
@@ -28,8 +29,11 @@ body {
         "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
         system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo",
         "Noto Sans KR", "Malgun Gothic", sans-serif;
-    --color-folium-primary: #6366f1;
-    --color-folium-secondary: #8b5cf6;
+    --font-display:
+        "Space Grotesk", "Pretendard Variable", Pretendard, system-ui,
+        sans-serif;
+    --color-folium-primary: #2d7ff9;
+    --color-folium-secondary: #5ba0ff;
 
     /* 브레이크포인트: 기본(mobile)은 접두사 없음, tablet·laptop·desktop만 사용 */
     --breakpoint-*: initial;
@@ -69,442 +73,153 @@ body {
     --radius: 0.5rem;
 }
 
-/* Color Scheme: PUBLIC_COLOR_SCHEME env (blue | gray | beige | blackwhite | forest | sunset | lavender) */
-/* light mode: 각 스킴에 맞는 100~200 톤의 은은한 틴트 적용 */
-/* Mermaid 다이어그램 테마와 동기화: src/lib/mermaid-themes.ts */
+/* Color Scheme: slate (UE5 blue) | ember (orange) | circuit (green) | phantom (purple) */
+/* 다크모드 1차, 라이트모드 동등 지원. Mermaid 동기화: src/lib/mermaid-themes.ts */
 
-/* forest: 깊은 숲의 그린 (라이트: emerald 100~200) */
-[data-color-scheme="forest"] {
-    --color-code-block-bg: #064e3b;
-    --color-code-block-fg: #d1fae5;
-    --color-surface: #ecfdf5;
-    --color-surface-subtle: #d1fae5;
-    --color-foreground: #064e3b;
-    --color-muted: #52525b; /* zinc-600 */
-    --color-border: #6ee7b7;
-    --color-accent: #10b981;
+/* slate: UE5 Editor 다크 슬레이트 + Unreal Blue (기본값) */
+[data-color-scheme="slate"],
+:root:not([data-color-scheme]) {
+    --color-code-block-bg: #1e2028;
+    --color-code-block-fg: #e0e4ec;
+    --color-surface: #f3f5f8;
+    --color-surface-subtle: #e6eaf0;
+    --color-foreground: #141620;
+    --color-muted: #5c6370;
+    --color-border: #c5cad4;
+    --color-accent: #2563eb;
     --color-on-accent: #ffffff;
-    --color-highlight: #059669;
-    --color-tag-bg: #d1fae5;
-    --color-tag-fg: #047857;
-    --color-code-bg: #6ee7b7;
-    --color-code-fg: #064e3b;
-    --color-link: #059669;
+    --color-highlight: #1d4ed8;
+    --color-tag-bg: #dbeafe;
+    --color-tag-fg: #1e40af;
+    --color-code-bg: #e8ecf2;
+    --color-code-fg: #1a1c28;
+    --color-link: #2563eb;
 }
-[data-color-scheme="forest"].dark {
-    --color-code-block-bg: #14241d;
-    --color-code-block-fg: #d1fae5;
-    --color-surface: #101c17;
-    --color-surface-subtle: #14241d;
-    --color-foreground: #ecfdf5;
-    --color-muted: #a1a1aa; /* zinc-400 */
-    --color-border: #2d6651;
-    --color-accent: #34d399;
-    --color-on-accent: #022c22;
-    --color-highlight: #6ee7b7;
-    --color-tag-bg: #14241d;
-    --color-tag-fg: #6ee7b7;
-    --color-code-bg: #14241d;
-    --color-code-fg: #d1fae5;
-    --color-link: #6ee7b7;
-}
-
-/* forest-plain: 무채색 배경 + forest 포인트 요소 */
-[data-color-scheme="forest-plain"] {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #fafafa;
-    --color-surface-subtle: #f5f5f5;
-    --color-foreground: #064e3b; /* Replaced to match base scheme */
-    --color-muted: #525252;
-    --color-border: #c4c4c4;
-    --color-accent: #10b981;
+[data-color-scheme="slate"].dark,
+:root:not([data-color-scheme]).dark {
+    --color-code-block-bg: #14161e;
+    --color-code-block-fg: #d0d6e0;
+    --color-surface: #1a1c24;
+    --color-surface-subtle: #22252e;
+    --color-foreground: #e4e8f0;
+    --color-muted: #8890a0;
+    --color-border: #2e3340;
+    --color-accent: #2d7ff9;
     --color-on-accent: #ffffff;
-    --color-highlight: #059669;
-    --color-tag-bg: #e5e5e5;
-    --color-tag-fg: #047857;
-    --color-code-bg: #f0f0f0;
-    --color-code-fg: #171717;
-    --color-link: #059669;
-}
-[data-color-scheme="forest-plain"].dark {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #171717;
-    --color-surface-subtle: #262626;
-    --color-foreground: #ecfdf5; /* Replaced to match base scheme */
-    --color-muted: #a3a3a3;
-    --color-border: #666666;
-    --color-accent: #34d399;
-    --color-on-accent: #022c22;
-    --color-highlight: #6ee7b7;
-    --color-tag-bg: #404040;
-    --color-tag-fg: #6ee7b7;
-    --color-code-bg: #262626;
-    --color-code-fg: #e5e5e5;
-    --color-link: #6ee7b7;
+    --color-highlight: #5ba0ff;
+    --color-tag-bg: #1a2540;
+    --color-tag-fg: #7db4ff;
+    --color-code-bg: #1e2230;
+    --color-code-fg: #c8d0e0;
+    --color-link: #5ba0ff;
 }
 
-/* sunset: 따뜻한 석양의 주황/금색 (라이트: orange/amber 100~200) */
-[data-color-scheme="sunset"] {
-    --color-code-block-bg: #431407;
-    --color-code-block-fg: #ffedd5;
-    --color-surface: #fff8f1;
-    --color-surface-subtle: #ffedd5;
-    --color-foreground: #431407;
-    --color-muted: #78716c; /* stone-500 */
-    --color-border: #fdba74;
-    --color-accent: #f97316;
+/* ember: 고에너지 오렌지/파이어 */
+[data-color-scheme="ember"] {
+    --color-code-block-bg: #261a10;
+    --color-code-block-fg: #f0e6da;
+    --color-surface: #faf8f5;
+    --color-surface-subtle: #f2ede6;
+    --color-foreground: #2a2118;
+    --color-muted: #7a6f62;
+    --color-border: #ddd5ca;
+    --color-accent: #ea580c;
     --color-on-accent: #ffffff;
-    --color-highlight: #ea580c;
+    --color-highlight: #c2410c;
     --color-tag-bg: #ffedd5;
     --color-tag-fg: #c2410c;
-    --color-code-bg: #fdba74;
-    --color-code-fg: #431407;
+    --color-code-bg: #f5ece2;
+    --color-code-fg: #2a2118;
     --color-link: #ea580c;
 }
-[data-color-scheme="sunset"].dark {
-    --color-code-block-bg: #261a15;
-    --color-code-block-fg: #ffedd5;
-    --color-surface: #1b1310;
-    --color-surface-subtle: #261a15;
-    --color-foreground: #fff8f1;
-    --color-muted: #a8a29e; /* stone-400 */
-    --color-border: #6e3e30;
-    --color-accent: #fb923c;
-    --color-on-accent: #1a0802;
-    --color-highlight: #fdba74;
-    --color-tag-bg: #261a15;
-    --color-tag-fg: #fdba74;
-    --color-code-bg: #261a15;
-    --color-code-fg: #ffedd5;
-    --color-link: #fdba74;
-}
-
-/* sunset-plain: 무채색 배경 + sunset 포인트 요소 */
-[data-color-scheme="sunset-plain"] {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #fafafa;
-    --color-surface-subtle: #f5f5f5;
-    --color-foreground: #431407; /* Replaced to match base scheme */
-    --color-muted: #525252;
-    --color-border: #c4c4c4;
+[data-color-scheme="ember"].dark {
+    --color-code-block-bg: #1a1410;
+    --color-code-block-fg: #f0e6da;
+    --color-surface: #1c1814;
+    --color-surface-subtle: #28201a;
+    --color-foreground: #f0ebe4;
+    --color-muted: #9a918a;
+    --color-border: #3d3228;
     --color-accent: #f97316;
-    --color-on-accent: #ffffff;
-    --color-highlight: #ea580c;
-    --color-tag-bg: #e5e5e5;
-    --color-tag-fg: #c2410c;
-    --color-code-bg: #f0f0f0;
-    --color-code-fg: #171717;
-    --color-link: #ea580c;
-}
-[data-color-scheme="sunset-plain"].dark {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #171717;
-    --color-surface-subtle: #262626;
-    --color-foreground: #fff8f1; /* Replaced to match base scheme */
-    --color-muted: #a3a3a3;
-    --color-border: #666666;
-    --color-accent: #fb923c;
-    --color-on-accent: #1a0802;
-    --color-highlight: #fdba74;
-    --color-tag-bg: #404040;
-    --color-tag-fg: #fdba74;
-    --color-code-bg: #262626;
-    --color-code-fg: #e5e5e5;
-    --color-link: #fdba74;
+    --color-on-accent: #1c1814;
+    --color-highlight: #fb923c;
+    --color-tag-bg: #2e2010;
+    --color-tag-fg: #fbb870;
+    --color-code-bg: #261e14;
+    --color-code-fg: #e8ddd0;
+    --color-link: #fb923c;
 }
 
-/* lavender: 차분한 보라 (라이트: violet 100~200) */
-[data-color-scheme="lavender"] {
-    --color-code-block-bg: #2e1065;
-    --color-code-block-fg: #ede9fe;
-    --color-surface: #f5f3ff;
-    --color-surface-subtle: #ede9fe;
-    --color-foreground: #2e1065;
-    --color-muted: #52525b; /* zinc-600 */
-    --color-border: #c4b5fd;
-    --color-accent: #8b5cf6;
+/* circuit: 매트릭스 그린 */
+[data-color-scheme="circuit"] {
+    --color-code-block-bg: #0a1a12;
+    --color-code-block-fg: #d0f0dc;
+    --color-surface: #f2faf5;
+    --color-surface-subtle: #e0f2e8;
+    --color-foreground: #0f2618;
+    --color-muted: #4a7058;
+    --color-border: #b0d4be;
+    --color-accent: #16a34a;
     --color-on-accent: #ffffff;
-    --color-highlight: #7c3aed;
+    --color-highlight: #15803d;
+    --color-tag-bg: #dcfce7;
+    --color-tag-fg: #166534;
+    --color-code-bg: #e2f0e8;
+    --color-code-fg: #0f2618;
+    --color-link: #16a34a;
+}
+[data-color-scheme="circuit"].dark {
+    --color-code-block-bg: #0a140e;
+    --color-code-block-fg: #d0f0dc;
+    --color-surface: #0e1612;
+    --color-surface-subtle: #162018;
+    --color-foreground: #daf0e2;
+    --color-muted: #70a880;
+    --color-border: #1e3828;
+    --color-accent: #22c55e;
+    --color-on-accent: #0a1a10;
+    --color-highlight: #4ade80;
+    --color-tag-bg: #102818;
+    --color-tag-fg: #6ee7a0;
+    --color-code-bg: #12201a;
+    --color-code-fg: #c8e8d4;
+    --color-link: #4ade80;
+}
+
+/* phantom: 보라/바이올렛 */
+[data-color-scheme="phantom"] {
+    --color-code-block-bg: #1a1028;
+    --color-code-block-fg: #e4daf0;
+    --color-surface: #f8f5ff;
+    --color-surface-subtle: #ede8f8;
+    --color-foreground: #1a1030;
+    --color-muted: #665c80;
+    --color-border: #c8bce0;
+    --color-accent: #7c3aed;
+    --color-on-accent: #ffffff;
+    --color-highlight: #6d28d9;
     --color-tag-bg: #ede9fe;
-    --color-tag-fg: #6d28d9;
-    --color-code-bg: #c4b5fd;
-    --color-code-fg: #2e1065;
+    --color-tag-fg: #5b21b6;
+    --color-code-bg: #e8e0f4;
+    --color-code-fg: #1a1030;
     --color-link: #7c3aed;
 }
-[data-color-scheme="lavender"].dark {
-    --color-code-block-bg: #1f1b2e;
-    --color-code-block-fg: #ede9fe;
-    --color-surface: #15131f;
-    --color-surface-subtle: #1f1b2e;
-    --color-foreground: #f5f3ff;
-    --color-muted: #a1a1aa; /* zinc-400 */
-    --color-border: #523e7a;
-    --color-accent: #a78bfa;
-    --color-on-accent: #1e1b4b;
-    --color-highlight: #c4b5fd;
-    --color-tag-bg: #1f1b2e;
-    --color-tag-fg: #c4b5fd;
-    --color-code-bg: #1f1b2e;
-    --color-code-fg: #ede9fe;
-    --color-link: #c4b5fd;
-}
-
-/* lavender-plain: 무채색 배경 + lavender 포인트 요소 */
-[data-color-scheme="lavender-plain"] {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #fafafa;
-    --color-surface-subtle: #f5f5f5;
-    --color-foreground: #2e1065; /* Replaced to match base scheme */
-    --color-muted: #525252;
-    --color-border: #c4c4c4;
+[data-color-scheme="phantom"].dark {
+    --color-code-block-bg: #100c1a;
+    --color-code-block-fg: #e4daf0;
+    --color-surface: #13101c;
+    --color-surface-subtle: #1c1828;
+    --color-foreground: #e8e2f4;
+    --color-muted: #8a80a8;
+    --color-border: #2e2848;
     --color-accent: #8b5cf6;
     --color-on-accent: #ffffff;
-    --color-highlight: #7c3aed;
-    --color-tag-bg: #e5e5e5;
-    --color-tag-fg: #6d28d9;
-    --color-code-bg: #f0f0f0;
-    --color-code-fg: #171717;
-    --color-link: #7c3aed;
-}
-[data-color-scheme="lavender-plain"].dark {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #171717;
-    --color-surface-subtle: #262626;
-    --color-foreground: #f5f3ff; /* Replaced to match base scheme */
-    --color-muted: #a3a3a3;
-    --color-border: #666666;
-    --color-accent: #a78bfa;
-    --color-on-accent: #1e1b4b;
-    --color-highlight: #c4b5fd;
-    --color-tag-bg: #404040;
-    --color-tag-fg: #c4b5fd;
-    --color-code-bg: #262626;
-    --color-code-fg: #e5e5e5;
-    --color-link: #c4b5fd;
-}
-
-/* blackwhite: 순수 흰/검정, 다른 색 없음 */
-[data-color-scheme="blackwhite"] {
-    --color-code-block-bg: #171717;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #ffffff;
-    --color-surface-subtle: #f5f5f5;
-    --color-foreground: #000000;
-    --color-muted: #525252;
-    --color-border: #c4c4c4;
-    --color-accent: #000000;
-    --color-on-accent: #ffffff;
-    --color-highlight: #525252;
-    --color-tag-bg: #e5e5e5;
-    --color-tag-fg: #171717;
-    --color-code-bg: #f5f5f5;
-    --color-code-fg: #171717;
-    --color-link: #000000;
-}
-[data-color-scheme="blackwhite"].dark {
-    --color-code-block-bg: #171717;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #000000;
-    --color-surface-subtle: #171717;
-    --color-foreground: #ffffff;
-    --color-muted: #a3a3a3;
-    --color-border: #525252;
-    --color-accent: #ffffff;
-    --color-on-accent: #000000;
-    --color-highlight: #a3a3a3;
-    --color-tag-bg: #262626;
-    --color-tag-fg: #fafafa;
-    --color-code-bg: #171717;
-    --color-code-fg: #e5e5e5;
-    --color-link: #ffffff;
-}
-
-/* gray: 중립 회색 (라이트 배경 완화로 코드블록 대비 개선) / 스킴 미지정 시 기본값 */
-[data-color-scheme="gray"],
-:root:not([data-color-scheme]) {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #fafafa;
-    --color-surface-subtle: #f5f5f5;
-    --color-foreground: #171717;
-    --color-muted: #525252;
-    --color-border: #c4c4c4;
-    --color-accent: #525252;
-    --color-on-accent: #ffffff;
-    --color-highlight: #404040;
-    --color-tag-bg: #e5e5e5;
-    --color-tag-fg: #404040;
-    --color-code-bg: #f0f0f0;
-    --color-code-fg: #171717;
-    --color-link: #404040;
-}
-[data-color-scheme="gray"].dark,
-:root:not([data-color-scheme]).dark {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #171717;
-    --color-surface-subtle: #262626;
-    --color-foreground: #fafafa;
-    --color-muted: #a3a3a3;
-    --color-border: #666666;
-    --color-accent: #a3a3a3;
-    --color-on-accent: #171717;
-    --color-highlight: #d4d4d4;
-    --color-tag-bg: #404040;
-    --color-tag-fg: #e5e5e5;
-    --color-code-bg: #262626;
-    --color-code-fg: #e5e5e5;
-    --color-link: #d4d4d4;
-}
-
-/* blue: 파란 톤 (라이트: slate 100~200) */
-[data-color-scheme="blue"] {
-    --color-code-block-bg: #1e293b;
-    --color-code-block-fg: #e2e8f0;
-    --color-surface: #f1f5f9;
-    --color-surface-subtle: #e2e8f0;
-    --color-foreground: #1e293b;
-    --color-muted: #475569;
-    --color-border: #94a3b8;
-    --color-accent: #3b82f6;
-    --color-on-accent: #ffffff;
-    --color-highlight: #2563eb;
-    --color-tag-bg: #dbeafe;
-    --color-tag-fg: #1d4ed8;
-    --color-code-bg: #e0e7ff;
-    --color-code-fg: #1e293b;
-    --color-link: #2563eb;
-}
-[data-color-scheme="blue"].dark {
-    --color-code-block-bg: #181f29;
-    --color-code-block-fg: #e2e8f0;
-    --color-surface: #10141a;
-    --color-surface-subtle: #181f29;
-    --color-foreground: #f1f5f9;
-    --color-muted: #94a3b8;
-    --color-border: #3d5070;
-    --color-accent: #60a5fa;
-    --color-on-accent: #0f172a;
-    --color-highlight: #93c5fd;
-    --color-tag-bg: #1e2838;
-    --color-tag-fg: #93c5fd;
-    --color-code-bg: #181f29;
-    --color-code-fg: #e2e8f0;
-    --color-link: #93c5fd;
-}
-
-/* blue-plain: 무채색 배경 + blue 포인트 요소 */
-[data-color-scheme="blue-plain"] {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #fafafa;
-    --color-surface-subtle: #f5f5f5;
-    --color-foreground: #0f172a; /* Replaced to match base scheme */
-    --color-muted: #525252;
-    --color-border: #c4c4c4;
-    --color-accent: #3b82f6;
-    --color-on-accent: #ffffff;
-    --color-highlight: #2563eb;
-    --color-tag-bg: #e5e5e5;
-    --color-tag-fg: #1d4ed8;
-    --color-code-bg: #f0f0f0;
-    --color-code-fg: #171717;
-    --color-link: #2563eb;
-}
-[data-color-scheme="blue-plain"].dark {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #171717;
-    --color-surface-subtle: #262626;
-    --color-foreground: #f1f5f9; /* Replaced to match base scheme */
-    --color-muted: #a3a3a3;
-    --color-border: #666666;
-    --color-accent: #60a5fa;
-    --color-on-accent: #0f172a;
-    --color-highlight: #93c5fd;
-    --color-tag-bg: #404040;
-    --color-tag-fg: #93c5fd;
-    --color-code-bg: #262626;
-    --color-code-fg: #e5e5e5;
-    --color-link: #93c5fd;
-}
-
-/* beige: 따뜻한 베이지/스톤 톤 (라이트: stone 100~200) */
-[data-color-scheme="beige"] {
-    --color-code-block-bg: #292524;
-    --color-code-block-fg: #e7e5e4;
-    --color-surface: #fafaf9;
-    --color-surface-subtle: #f5f5f4;
-    --color-foreground: #292524;
-    --color-muted: #78716c;
-    --color-border: #d6d3d1;
-    --color-accent: #d97706;
-    --color-on-accent: #ffffff;
-    --color-highlight: #b45309;
-    --color-tag-bg: #fef3c7;
-    --color-tag-fg: #b45309;
-    --color-code-bg: #fefce8;
-    --color-code-fg: #292524;
-    --color-link: #b45309;
-}
-[data-color-scheme="beige"].dark {
-    --color-code-block-bg: #242220;
-    --color-code-block-fg: #e7e5e4;
-    --color-surface: #1a1917;
-    --color-surface-subtle: #242220;
-    --color-foreground: #fafaf9;
-    --color-muted: #a8a29e;
-    --color-border: #665c52;
-    --color-accent: #f59e0b;
-    --color-on-accent: #1c1917;
-    --color-highlight: #fcd34d;
-    --color-tag-bg: #321c10;
-    --color-tag-fg: #fcd34d;
-    --color-code-bg: #242220;
-    --color-code-fg: #e7e5e4;
-    --color-link: #fcd34d;
-}
-
-/* beige-plain: 무채색 배경 + beige 포인트 요소 */
-[data-color-scheme="beige-plain"] {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #fafafa;
-    --color-surface-subtle: #f5f5f5;
-    --color-foreground: #1c1917; /* Replaced to match base scheme */
-    --color-muted: #525252;
-    --color-border: #c4c4c4;
-    --color-accent: #d97706;
-    --color-on-accent: #ffffff;
-    --color-highlight: #b45309;
-    --color-tag-bg: #e5e5e5;
-    --color-tag-fg: #b45309;
-    --color-code-bg: #f0f0f0;
-    --color-code-fg: #171717;
-    --color-link: #b45309;
-}
-[data-color-scheme="beige-plain"].dark {
-    --color-code-block-bg: #262626;
-    --color-code-block-fg: #e5e5e5;
-    --color-surface: #171717;
-    --color-surface-subtle: #262626;
-    --color-foreground: #fafaf9; /* Replaced to match base scheme */
-    --color-muted: #a3a3a3;
-    --color-border: #666666;
-    --color-accent: #f59e0b;
-    --color-on-accent: #1c1917;
-    --color-highlight: #fcd34d;
-    --color-tag-bg: #404040;
-    --color-tag-fg: #fcd34d;
-    --color-code-bg: #262626;
-    --color-code-fg: #e5e5e5;
-    --color-link: #fcd34d;
+    --color-highlight: #a78bfa;
+    --color-tag-bg: #1e1440;
+    --color-tag-fg: #b8a0f8;
+    --color-code-bg: #1a1430;
+    --color-code-fg: #d8cee8;
+    --color-link: #a78bfa;
 }
 
 /* ── Prose Overhaul ─────────────────────────────────────────────── */
@@ -616,13 +331,13 @@ body {
 html.dark .prose {
     --tw-prose-body: oklch(0.88 0 0);
     --tw-prose-headings: oklch(0.95 0 0);
-    --tw-prose-links: var(--color-folium-primary);
+    --tw-prose-links: var(--color-accent);
     --tw-prose-bold: oklch(0.98 0 0);
     --tw-prose-counters: oklch(0.65 0 0);
     --tw-prose-bullets: oklch(0.65 0 0);
     --tw-prose-hr: oklch(0.3 0 0);
     --tw-prose-quotes: oklch(0.85 0 0);
-    --tw-prose-quote-borders: var(--color-folium-primary);
+    --tw-prose-quote-borders: var(--color-accent);
     --tw-prose-captions: oklch(0.65 0 0);
     --tw-prose-code: oklch(0.95 0 0);
     --tw-prose-pre-code: oklch(0.92 0 0);
@@ -632,7 +347,7 @@ html.dark .prose {
 }
 
 html.dark .prose :where(blockquote) {
-    background: oklch(0.18 0.01 var(--color-folium-hue, 145) / 0.3);
+    background: color-mix(in oklch, var(--color-accent) 8%, transparent);
     color: oklch(0.8 0 0);
 }
 
@@ -643,7 +358,7 @@ html.dark .prose :where(code):not(pre code) {
 }
 
 html.dark .prose :where(th) {
-    background: oklch(0.2 0.01 var(--color-folium-hue, 145) / 0.2);
+    background: color-mix(in oklch, var(--color-accent) 10%, transparent);
     border-color: oklch(0.35 0 0);
 }
 

@@ -56,22 +56,24 @@ export default function AdminHeader({
                     </button>
                 )}
                 <div className="flex items-center gap-2">
+                    {/* 액센트 도트 */}
                     <span
-                        className="h-2.5 w-2.5 rounded-full bg-(--color-accent)"
+                        className="h-2 w-2 rounded-full bg-(--color-accent) ring-2 ring-(--color-accent)/25"
                         aria-hidden="true"
                     />
-                    <span className="text-base font-black tracking-tight text-(--color-foreground)">
+                    <span className="text-base font-(--font-display) font-black tracking-tight text-(--color-foreground)">
                         Admin 대시보드
                     </span>
                 </div>
             </div>
             <div className="tablet:gap-3 flex items-center gap-2">
+                {/* 세션 타이머 pill */}
                 <span
                     className={[
-                        "font-mono text-xs tabular-nums",
+                        "rounded-md px-2 py-0.5 font-mono text-xs tabular-nums",
                         timeLeft <= 5 * 60 * 1000
-                            ? "text-red-500"
-                            : "text-(--color-muted)",
+                            ? "bg-red-500/10 text-red-500"
+                            : "bg-(--color-surface-subtle) text-(--color-muted)",
                     ].join(" ")}
                 >
                     {formatRemaining(timeLeft)}
@@ -94,9 +96,10 @@ export default function AdminHeader({
                     </TooltipProvider>
                 )}
                 <ThemeToggle />
+                {/* 로그아웃 버튼 */}
                 <button
                     onClick={onLogout}
-                    className="rounded-full border border-(--color-border) px-4 py-1.5 text-sm font-medium text-(--color-muted) transition-colors hover:border-red-400 hover:text-red-500"
+                    className="rounded-md border border-(--color-border) px-3 py-1.5 text-xs font-semibold text-(--color-muted) transition-colors hover:border-red-400/60 hover:bg-red-500/8 hover:text-red-500"
                 >
                     로그아웃
                 </button>

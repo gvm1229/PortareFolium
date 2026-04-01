@@ -237,36 +237,6 @@ export default async function HomePage() {
                 coreCompetencies={CORE_VALUES}
             />
 
-            {/* 핵심 가치 */}
-            <section className="mx-auto max-w-5xl border-t border-(--color-border) py-16">
-                <div className="mb-10">
-                    <p className="mb-1 text-sm font-semibold tracking-[0.2em] text-(--color-accent) uppercase">
-                        Core Values
-                    </p>
-                    <h2 className="text-4xl font-black tracking-tight text-(--color-foreground)">
-                        핵심 가치
-                    </h2>
-                </div>
-                <div className="tablet:grid-cols-2 grid grid-cols-1 gap-5">
-                    {CORE_VALUES.map((comp, idx) => (
-                        <div
-                            key={idx}
-                            className="rounded-2xl border border-(--color-border) bg-(--color-surface-subtle) p-7"
-                        >
-                            <span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-(--color-accent) text-base font-bold text-(--color-on-accent)">
-                                {idx + 1}
-                            </span>
-                            <h3 className="mb-2 text-xl font-bold text-(--color-foreground)">
-                                {comp.title}
-                            </h3>
-                            <p className="text-base leading-relaxed text-(--color-muted)">
-                                {comp.description}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
             {/* Portfolio Featured */}
             {featuredItems.length > 0 && (
                 <section className="mx-auto max-w-5xl border-t border-(--color-border) py-14">
@@ -275,7 +245,7 @@ export default async function HomePage() {
                             <p className="mb-1 text-xs font-semibold tracking-[0.2em] text-(--color-accent) uppercase">
                                 Featured Work
                             </p>
-                            <h2 className="text-3xl font-black tracking-tight text-(--color-foreground)">
+                            <h2 className="text-3xl font-(--font-display) font-black tracking-tight text-(--color-foreground)">
                                 Portfolio
                             </h2>
                         </div>
@@ -303,7 +273,7 @@ export default async function HomePage() {
                     {featuredItems[0] && (
                         <Link
                             href={`/portfolio/${featuredItems[0].slug}`}
-                            className="card-lift group mb-4 block overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-surface-subtle)"
+                            className="card-lift group mb-4 block overflow-hidden rounded-xl border border-(--color-border) bg-(--color-surface-subtle)"
                         >
                             <div className="tablet:flex-row flex flex-col">
                                 {featuredItems[0].thumbnail && (
@@ -319,10 +289,10 @@ export default async function HomePage() {
                                     </div>
                                 )}
                                 <div className="tablet:w-1/2 flex flex-col justify-center p-7">
-                                    <span className="mb-3 inline-flex w-fit items-center rounded-full bg-(--color-accent) px-3 py-1 text-xs font-semibold text-(--color-on-accent)">
+                                    <span className="mb-3 inline-flex w-fit items-center rounded-md bg-(--color-accent) px-3 py-1 text-xs font-semibold text-(--color-on-accent)">
                                         Featured
                                     </span>
-                                    <h3 className="mb-3 text-xl font-bold text-(--color-foreground) transition-colors group-hover:text-(--color-accent)">
+                                    <h3 className="mb-3 text-xl font-(--font-display) font-bold text-(--color-foreground) transition-colors group-hover:text-(--color-accent)">
                                         {featuredItems[0].title}
                                     </h3>
                                     {featuredItems[0].description && (
@@ -338,7 +308,7 @@ export default async function HomePage() {
                                                     .map((t) => (
                                                         <span
                                                             key={t}
-                                                            className="rounded-full bg-(--color-tag-bg) px-2.5 py-0.5 text-xs font-medium text-(--color-tag-fg)"
+                                                            className="rounded-md bg-(--color-tag-bg) px-2.5 py-0.5 text-xs font-medium text-(--color-tag-fg)"
                                                         >
                                                             {t}
                                                         </span>
@@ -356,7 +326,7 @@ export default async function HomePage() {
                                 <Link
                                     key={item.slug}
                                     href={`/portfolio/${item.slug}`}
-                                    className="card-lift group block overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-surface-subtle)"
+                                    className="card-lift group block overflow-hidden rounded-xl border border-(--color-border) bg-(--color-surface-subtle)"
                                 >
                                     {item.thumbnail && (
                                         <div className="aspect-video overflow-hidden bg-(--color-border)">
@@ -371,7 +341,7 @@ export default async function HomePage() {
                                         </div>
                                     )}
                                     <div className="p-5">
-                                        <h3 className="mb-2 font-semibold text-(--color-foreground) transition-colors group-hover:text-(--color-accent)">
+                                        <h3 className="mb-2 font-(--font-display) font-semibold text-(--color-foreground) transition-colors group-hover:text-(--color-accent)">
                                             {item.title}
                                         </h3>
                                         {item.description && (
@@ -386,7 +356,7 @@ export default async function HomePage() {
                                                     .map((t) => (
                                                         <span
                                                             key={t}
-                                                            className="rounded-full bg-(--color-tag-bg) px-2.5 py-0.5 text-xs font-medium text-(--color-tag-fg)"
+                                                            className="rounded-md bg-(--color-tag-bg) px-2.5 py-0.5 text-xs font-medium text-(--color-tag-fg)"
                                                         >
                                                             {t}
                                                         </span>
@@ -401,6 +371,38 @@ export default async function HomePage() {
                 </section>
             )}
 
+            {/* 핵심 역량 */}
+            <section className="mx-auto max-w-5xl border-t border-(--color-border) py-16">
+                <div className="mb-10">
+                    <p className="mb-1 text-sm font-semibold tracking-[0.2em] text-(--color-accent) uppercase">
+                        Technical Strengths
+                    </p>
+                    <h2 className="text-4xl font-(--font-display) font-black tracking-tight text-(--color-foreground)">
+                        핵심 역량
+                    </h2>
+                </div>
+                <div className="tablet:grid-cols-2 grid grid-cols-1 gap-5">
+                    {CORE_VALUES.map((comp, idx) => (
+                        <div
+                            key={idx}
+                            className="rounded-xl border border-(--color-border) bg-(--color-surface-subtle) p-6"
+                        >
+                            <div className="mb-3 flex items-center gap-3">
+                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-(--color-accent)/10 text-sm font-(--font-display) font-bold text-(--color-accent)">
+                                    {String(idx + 1).padStart(2, "0")}
+                                </span>
+                                <h3 className="text-lg font-(--font-display) font-bold text-(--color-foreground)">
+                                    {comp.title}
+                                </h3>
+                            </div>
+                            <p className="text-sm leading-relaxed text-(--color-muted)">
+                                {comp.description}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
             {/* Work Experience */}
             {workItems.length > 0 && (
                 <section className="mx-auto max-w-5xl border-t border-(--color-border) py-14">
@@ -409,7 +411,7 @@ export default async function HomePage() {
                             <p className="mb-1 text-xs font-semibold tracking-[0.2em] text-(--color-accent) uppercase">
                                 Experience
                             </p>
-                            <h2 className="text-3xl font-black tracking-tight text-(--color-foreground)">
+                            <h2 className="text-3xl font-(--font-display) font-black tracking-tight text-(--color-foreground)">
                                 Work
                             </h2>
                         </div>
@@ -481,7 +483,7 @@ export default async function HomePage() {
                             <p className="mb-1 text-xs font-semibold tracking-[0.2em] text-(--color-accent) uppercase">
                                 Latest Posts
                             </p>
-                            <h2 className="text-3xl font-black tracking-tight text-(--color-foreground)">
+                            <h2 className="text-3xl font-(--font-display) font-black tracking-tight text-(--color-foreground)">
                                 Blog
                             </h2>
                         </div>

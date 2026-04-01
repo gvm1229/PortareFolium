@@ -17,19 +17,31 @@ export default function Header({
 
     return (
         <header
-            className="sticky top-0 z-50 border-b border-(--color-border) bg-(--color-surface)/90 backdrop-blur-md transition-shadow"
+            className="sticky top-0 z-50 border-b-2 border-(--color-border) bg-(--color-surface)/95 backdrop-blur-md transition-shadow"
             id="site-header"
         >
-            <nav className="container mx-auto flex items-center justify-between gap-4 px-4 py-3.5">
+            <nav className="container mx-auto flex items-center justify-between gap-4 px-6 py-4">
+                {/* 사이트 로고 */}
                 <Link
                     href="/"
-                    className="flex items-center gap-2 font-black tracking-tight text-(--color-foreground) transition-opacity hover:opacity-80"
+                    className="flex items-center gap-2 text-(--color-foreground) transition-opacity hover:opacity-80"
                 >
+                    {/* 액센트 색상 각괄호 */}
                     <span
-                        className="h-2 w-2 rounded-full bg-(--color-accent)"
+                        className="text-base leading-none font-bold text-(--color-accent)"
                         aria-hidden="true"
-                    />
-                    <span className="text-lg">{siteName}</span>
+                    >
+                        {"["}
+                    </span>
+                    <span className="text-lg font-(--font-display) font-bold tracking-tight">
+                        {siteName}
+                    </span>
+                    <span
+                        className="text-base leading-none font-bold text-(--color-accent)"
+                        aria-hidden="true"
+                    >
+                        {"]"}
+                    </span>
                 </Link>
 
                 {/* 햄버거: 모바일만 */}
@@ -76,10 +88,10 @@ export default function Header({
                 {/* 네비 */}
                 <div
                     className={[
-                        "tablet:flex tablet:flex-row tablet:items-center tablet:gap-4 tablet:border-0 tablet:py-0 flex-col gap-1 border-t border-(--color-border) py-4",
+                        "tablet:flex tablet:flex-row tablet:items-center tablet:gap-1 tablet:border-0 tablet:py-0 flex-col gap-1 border-t-2 border-(--color-border) py-4",
                         open ? "flex" : "tablet:flex hidden",
                         "tablet:static tablet:w-auto tablet:bg-transparent absolute top-full left-0 w-full bg-(--color-surface)",
-                        "tablet:px-0 px-4",
+                        "tablet:px-0 px-6",
                     ].join(" ")}
                     role="navigation"
                 >
@@ -109,6 +121,11 @@ export default function Header({
                             Admin
                         </Link>
                     )}
+                    {/* 구분선 */}
+                    <span
+                        className="tablet:block tablet:h-5 tablet:w-px tablet:mx-2 hidden bg-(--color-border)"
+                        aria-hidden="true"
+                    />
                     <a
                         href={githubUrl || "https://github.com/"}
                         target="_blank"

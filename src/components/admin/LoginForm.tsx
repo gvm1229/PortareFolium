@@ -57,7 +57,7 @@ export default function LoginForm({ siteName = "" }: { siteName?: string }) {
                             {siteName}
                         </span>
                     </div>
-                    <h1 className="text-3xl font-black tracking-tight text-(--color-foreground)">
+                    <h1 className="text-3xl font-(--font-display) font-black tracking-tight text-(--color-foreground)">
                         Admin 로그인
                     </h1>
                     <p className="text-sm text-(--color-muted)">
@@ -66,7 +66,7 @@ export default function LoginForm({ siteName = "" }: { siteName?: string }) {
                 </div>
 
                 {/* 로그인 카드 */}
-                <div className="rounded-2xl border border-(--color-border) bg-(--color-surface-subtle) p-7">
+                <div className="rounded-2xl border border-(--color-border) bg-(--color-surface-subtle) p-7 shadow-sm ring-1 ring-(--color-border)/40">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
                             <label

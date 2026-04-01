@@ -157,7 +157,7 @@ export default function AdminDashboard() {
                     onMenuOpen={() => setSidebarOpen(true)}
                 />
 
-                <main className="tablet:p-6 laptop:p-8 flex-1 overflow-y-auto p-4">
+                <main className="tablet:p-6 laptop:p-8 flex-1 overflow-y-auto p-4 shadow-inner">
                     {activeTab === "posts" && (
                         <PostsPanel
                             key={`posts-${tabKey}`}

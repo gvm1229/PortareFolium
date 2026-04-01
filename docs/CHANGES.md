@@ -1,5 +1,33 @@
 # CHANGES
 
+## v0.10.0 (2026-04-01)
+
+### Feat: 프론트엔드 디자인 오버홀 — UE5 게임 개발자 미학 (v0.10.0)
+
+**Design System**
+
+- `src/styles/global.css`: 12개 기존 컬러 스킴 → 4개 UE5 inspired 스킴 (slate/ember/circuit/phantom)으로 교체. Space Grotesk 디스플레이 폰트 추가 (`--font-display`). 다크모드 prose에서 `folium-primary`/`folium-hue` → 스킴 토큰 `--color-accent` 참조로 전환
+- `src/app/layout.tsx`: `VALID_SCHEMES` 4개로 축소, 기본값 `gray` → `slate`
+- `src/lib/mermaid-themes.ts`: 4개 신규 스킴에 맞춰 전면 재작성
+
+**Landing Page**
+
+- `src/components/LandingHeroSwitcher.tsx`: 터미널/코드 에디터 미학 완전 제거 (TerminalBadge, StatsCard, 트래픽라이트 윈도우). Space Grotesk 대형 타이포, accent 하이라이트 히어로 이름, 클린 패널 스타일 value pillars로 교체
+- `src/app/(frontend)/page.tsx`: 섹션 순서 변경 (Portfolio Featured → 핵심 역량 → Work → Blog). 섹션 제목에 `font-(--font-display)` 적용. 카드 모서리 `rounded-2xl` → `rounded-xl`
+
+**Header & Theme**
+
+- `src/components/Header.tsx`: Space Grotesk 폰트 + 각괄호 accent 로고. 헤더 패딩/보더 강화
+- `src/components/ThemeToggle.tsx`: 드롭다운에 "Color" 섹션 추가 — slate/ember/circuit/phantom 4개 컬러 스킴 프론트엔드 선택 UI
+
+**Admin Polish**
+
+- `src/components/admin/AdminSidebar.tsx`: 간격 축소, active 상태 accent 배경 tint 추가
+- `src/components/admin/AdminHeader.tsx`: 타이틀에 `font-(--font-display)`, 타이머 pill 스타일
+- `src/components/admin/AdminDashboard.tsx`: main 영역 미세 조정
+- `src/components/admin/LoginForm.tsx`: 헤딩 디스플레이 폰트, 카드 보더/그림자 개선
+- `src/components/admin/panels/SiteConfigPanel.tsx`: 12개 → 4개 신규 컬러 스킴 옵션 반영
+
 ## v0.9.14 (2026-03-31)
 
 ### Feat: MCP 스키마 가이드에 MDX 컴포넌트 문서 추가 (v0.9.14)
