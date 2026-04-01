@@ -24,7 +24,6 @@ import {
 } from "@/types/about";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Trash2 } from "lucide-react";
 
 type JobFieldItem = { id: string; name: string; emoji: string };
@@ -297,21 +296,20 @@ export default function AboutPanel() {
         );
     };
 
-    const textareaCls =
-        "w-full px-3 py-2 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-foreground) text-sm resize-y focus:outline-none focus:ring-2 focus:ring-(--color-accent)/40";
+    // input 공통 클래스
+    const inputCls =
+        "w-full rounded-lg border border-(--color-border) bg-transparent px-3 py-2 text-sm text-(--color-foreground) placeholder-(--color-muted) focus:border-(--color-accent) focus:outline-none";
+    // textarea 공통 클래스
+    const textareaCls = `${inputCls} resize-y`;
 
     // override가 없는 job fields만 선택 목록에 표시
     const availableFields = jobFields.filter((f) => !introductions[f.id]);
 
     return (
-        <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-(--color-foreground)">
-                About 편집
-            </h2>
-
+        <div className="space-y-6">
             {/* 프로필 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     프로필
                 </h3>
                 <div className="tablet:flex-row tablet:gap-6 flex flex-col items-start gap-4">
@@ -357,29 +355,28 @@ export default function AboutPanel() {
                     />
                 </div>
                 <div>
-                    <label className="mb-1 block text-sm font-medium text-(--color-muted)">
+                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
                         이름
                     </label>
-                    <Input
+                    <input
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="정호진"
+                        className={inputCls}
                     />
                 </div>
             </section>
 
-            <Separator />
-
             {/* 소개 - Default */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     소개 (Default)
                 </h3>
                 <p className="text-sm text-(--color-muted)">
                     Job Field override가 없을 때 표시됩니다.
                 </p>
                 <div>
-                    <label className="mb-1 block text-sm font-medium text-(--color-muted)">
+                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
                         메인 소개
                     </label>
                     <textarea
@@ -389,7 +386,7 @@ export default function AboutPanel() {
                     />
                 </div>
                 <div>
-                    <label className="mb-1 block text-sm font-medium text-(--color-muted)">
+                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
                         보조 소개
                     </label>
                     <textarea
@@ -400,11 +397,9 @@ export default function AboutPanel() {
                 </div>
             </section>
 
-            <Separator />
-
             {/* Job Field별 소개 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     Job Field별 소개
                 </h3>
                 <p className="text-sm text-(--color-muted)">
@@ -415,7 +410,7 @@ export default function AboutPanel() {
                     return (
                         <div
                             key={fieldId}
-                            className="space-y-3 border-b border-(--color-border) pb-4"
+                            className="space-y-3 rounded-lg border border-(--color-border) bg-(--color-surface-subtle) p-4"
                         >
                             <div className="flex items-center justify-between">
                                 <span className="font-medium text-(--color-foreground)">
@@ -434,7 +429,7 @@ export default function AboutPanel() {
                                 </Button>
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-(--color-muted)">
+                                <label className="mb-1 block text-xs font-medium text-(--color-muted)">
                                     메인 소개
                                 </label>
                                 <textarea
@@ -451,7 +446,7 @@ export default function AboutPanel() {
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-(--color-muted)">
+                                <label className="mb-1 block text-xs font-medium text-(--color-muted)">
                                     보조 소개
                                 </label>
                                 <textarea
@@ -494,11 +489,9 @@ export default function AboutPanel() {
                 )}
             </section>
 
-            <Separator />
-
             {/* 연락처 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     연락처
                 </h3>
                 <div>
@@ -530,12 +523,13 @@ export default function AboutPanel() {
                 </div>
             </section>
 
-            <Separator />
-
             {/* 랜딩 페이지 히어로 섹션 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
-                    Landing Page Hero Section
+            <section className="space-y-4 rounded-xl border border-(--color-accent) bg-(--color-surface) p-6">
+                <div className="w-fit rounded-lg bg-(--color-accent) px-2 py-0.5 text-sm font-medium text-(--color-on-accent)">
+                    Landing Page
+                </div>
+                <h3 className="text-xl font-bold text-(--color-foreground)">
+                    Hero Section
                 </h3>
 
                 {/* Value Pillars */}
@@ -691,11 +685,9 @@ export default function AboutPanel() {
                 </div>
             </section>
 
-            <Separator />
-
             {/* 경험 유형별 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     경험 유형별 리스트
                 </h3>
                 <p className="text-sm text-(--color-muted)">
@@ -718,11 +710,9 @@ export default function AboutPanel() {
                 ))}
             </section>
 
-            <Separator />
-
             {/* 역량 키워드별 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     역량 키워드별 리스트
                 </h3>
                 {COMPETENCY_SECTION_KEYS.map((key) => (
@@ -741,8 +731,6 @@ export default function AboutPanel() {
                     </div>
                 ))}
             </section>
-
-            <Separator />
 
             {/* 하단 여백 (sticky footer 공간 확보) */}
             <div className="h-20" />
@@ -766,7 +754,7 @@ export default function AboutPanel() {
                         variant="default"
                         onClick={handleSave}
                         disabled={saving}
-                        className="shrink-0 bg-(--color-accent) px-8 text-(--color-on-accent) hover:opacity-90"
+                        className="shrink-0 bg-green-600 px-8 text-white hover:bg-green-500"
                     >
                         {saving ? "저장 중..." : "변경사항 저장"}
                     </Button>
