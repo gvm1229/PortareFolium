@@ -573,24 +573,34 @@ export default function AboutPanel() {
 
             <Separator />
 
-            {/* 피드백 + 저장 */}
-            {status && (
-                <p
-                    className={`rounded-lg px-6 py-4 text-lg ${status.type === "error" ? "bg-red-50 text-red-500 dark:bg-red-950/30" : "bg-green-50 text-green-600 dark:bg-green-950/30"}`}
-                >
-                    {status.msg}
-                </p>
-            )}
+            {/* 하단 여백 (sticky footer 공간 확보) */}
+            <div className="h-20" />
 
-            {/* 액션 버튼 */}
-            <Button
-                variant="default"
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full bg-green-500 hover:bg-green-400 dark:bg-green-700 dark:hover:bg-green-600"
-            >
-                {saving ? "저장 중..." : "변경사항 저장"}
-            </Button>
+            {/* Sticky 저장 바 */}
+            <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-(--color-border) bg-(--color-surface)/90 px-6 py-3 backdrop-blur-sm">
+                <div className="mx-auto flex items-center justify-between gap-3">
+                    {status && (
+                        <span
+                            className={`text-sm ${status.type === "error" ? "text-red-500" : "text-green-600"}`}
+                        >
+                            {status.msg}
+                        </span>
+                    )}
+                    {!status && (
+                        <span className="text-sm text-(--color-muted)">
+                            About 페이지에 즉시 반영됩니다.
+                        </span>
+                    )}
+                    <Button
+                        variant="default"
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="shrink-0 bg-(--color-accent) px-8 text-(--color-on-accent) hover:opacity-90"
+                    >
+                        {saving ? "저장 중..." : "변경사항 저장"}
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 }
