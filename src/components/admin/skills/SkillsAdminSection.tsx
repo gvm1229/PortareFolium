@@ -626,7 +626,7 @@ export default function SkillsAdminSection({
                                     initialCategoryName: s.categoryName,
                                 });
                             }}
-                            className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                            className="rounded-lg bg-(--color-accent) px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90"
                         >
                             수정
                         </button>

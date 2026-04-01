@@ -555,11 +555,13 @@ export default function SiteConfigPanel() {
                                 className={`flex flex-1 items-center gap-2 rounded-lg p-3 text-left ${activeJobField === field.id ? "bg-(--color-accent)" : "bg-(--color-surface-subtle)"}`}
                             >
                                 <span className="text-xl">{field.emoji}</span>
-                                <span className="text-sm font-medium text-(--color-foreground)">
+                                <span
+                                    className={`text-sm font-medium ${activeJobField === field.id ? "text-(--color-on-accent)" : "text-(--color-foreground)"}`}
+                                >
                                     {field.name}
                                 </span>
                                 {activeJobField === field.id && (
-                                    <span className="ml-auto text-base font-semibold text-(--color-foreground)">
+                                    <span className="ml-auto text-base font-semibold text-(--color-on-accent)">
                                         활성
                                     </span>
                                 )}
@@ -735,7 +737,7 @@ export default function SiteConfigPanel() {
                 variant="default"
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full bg-green-500 hover:bg-green-400 dark:bg-green-700 dark:hover:bg-green-600"
+                className="w-full bg-(--color-accent) text-(--color-on-accent) hover:opacity-90"
             >
                 {saving ? "저장 중..." : "설정 저장"}
             </Button>

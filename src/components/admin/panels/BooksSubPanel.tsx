@@ -756,7 +756,7 @@ export default function BooksSubPanel({
                                     className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90 ${
                                         book.featured
                                             ? "bg-slate-500"
-                                            : "bg-indigo-600"
+                                            : "bg-(--color-accent)"
                                     }`}
                                 >
                                     {book.featured ? (
@@ -791,7 +791,7 @@ export default function BooksSubPanel({
                                 </button>
                                 <button
                                     onClick={() => openEdit(book)}
-                                    className="flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                                    className="flex items-center gap-1 rounded-lg bg-(--color-accent) px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90"
                                 >
                                     <Pencil className="h-3 w-3" />
                                     <span className="tablet:inline hidden">
