@@ -534,13 +534,37 @@ export default function AboutPanel() {
 
                 {/* Value Pillars */}
                 <div className="space-y-3">
-                    <h4 className="text-sm font-semibold text-(--color-foreground)">
-                        Value Pillars (3대 핵심 가치)
-                    </h4>
+                    <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold text-(--color-foreground)">
+                            Value Pillars (3대 핵심 가치)
+                        </h4>
+                        <span className="text-xs text-(--color-muted)">
+                            {valuePillars.length} / 3
+                        </span>
+                    </div>
                     {valuePillars.map((pillar, idx) => (
-                        <div key={idx} className="flex items-start gap-2">
-                            <div className="flex flex-1 flex-col gap-2">
-                                <Input
+                        <div
+                            key={idx}
+                            className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) p-4"
+                        >
+                            <div className="mb-2 flex items-center justify-between">
+                                <span className="text-xs font-bold text-(--color-accent)">
+                                    Pillar {idx + 1}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setValuePillars((prev) =>
+                                            prev.filter((_, i) => i !== idx)
+                                        )
+                                    }
+                                    className="shrink-0 rounded-lg bg-red-600 p-1.5 text-white"
+                                >
+                                    <Trash2 size={12} />
+                                </button>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <input
                                     value={pillar.label}
                                     onChange={(e) =>
                                         setValuePillars((prev) =>
@@ -555,8 +579,9 @@ export default function AboutPanel() {
                                         )
                                     }
                                     placeholder="짧은 키워드"
+                                    className={inputCls}
                                 />
-                                <Input
+                                <input
                                     value={pillar.sub}
                                     onChange={(e) =>
                                         setValuePillars((prev) =>
@@ -571,8 +596,9 @@ export default function AboutPanel() {
                                         )
                                     }
                                     placeholder="부제"
+                                    className={inputCls}
                                 />
-                                <Input
+                                <input
                                     value={pillar.description}
                                     onChange={(e) =>
                                         setValuePillars((prev) =>
@@ -588,43 +614,59 @@ export default function AboutPanel() {
                                         )
                                     }
                                     placeholder="설명"
+                                    className={inputCls}
                                 />
                             </div>
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setValuePillars((prev) =>
-                                        prev.filter((_, i) => i !== idx)
-                                    )
-                                }
-                                className="mt-1 shrink-0 rounded-lg bg-red-600 p-2 text-white"
-                            >
-                                <Trash2 size={14} />
-                            </button>
                         </div>
                     ))}
-                    <Button
-                        onClick={() =>
-                            setValuePillars((prev) => [
-                                ...prev,
-                                { label: "", sub: "", description: "" },
-                            ])
-                        }
-                        className="rounded-lg bg-(--color-accent) px-4 py-2 text-sm font-medium whitespace-nowrap text-(--color-on-accent)"
-                    >
-                        추가
-                    </Button>
+                    {valuePillars.length < 3 && (
+                        <Button
+                            onClick={() =>
+                                setValuePillars((prev) => [
+                                    ...prev,
+                                    { label: "", sub: "", description: "" },
+                                ])
+                            }
+                            className="rounded-lg bg-(--color-accent) px-4 py-2 text-sm font-medium whitespace-nowrap text-(--color-on-accent)"
+                        >
+                            추가
+                        </Button>
+                    )}
                 </div>
 
                 {/* Core Values */}
                 <div className="space-y-3">
-                    <h4 className="text-sm font-semibold text-(--color-foreground)">
-                        Core Values (핵심 역량)
-                    </h4>
+                    <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold text-(--color-foreground)">
+                            Core Values (핵심 역량)
+                        </h4>
+                        <span className="text-xs text-(--color-muted)">
+                            {coreValues.length} / 4
+                        </span>
+                    </div>
                     {coreValues.map((val, idx) => (
-                        <div key={idx} className="flex items-start gap-2">
-                            <div className="flex flex-1 flex-col gap-2">
-                                <Input
+                        <div
+                            key={idx}
+                            className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) p-4"
+                        >
+                            <div className="mb-2 flex items-center justify-between">
+                                <span className="text-xs font-bold text-(--color-accent)">
+                                    Value {idx + 1}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setCoreValues((prev) =>
+                                            prev.filter((_, i) => i !== idx)
+                                        )
+                                    }
+                                    className="shrink-0 rounded-lg bg-red-600 p-1.5 text-white"
+                                >
+                                    <Trash2 size={12} />
+                                </button>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <input
                                     value={val.title}
                                     onChange={(e) =>
                                         setCoreValues((prev) =>
@@ -639,8 +681,9 @@ export default function AboutPanel() {
                                         )
                                     }
                                     placeholder="제목"
+                                    className={inputCls}
                                 />
-                                <Input
+                                <input
                                     value={val.description}
                                     onChange={(e) =>
                                         setCoreValues((prev) =>
@@ -656,32 +699,24 @@ export default function AboutPanel() {
                                         )
                                     }
                                     placeholder="설명"
+                                    className={inputCls}
                                 />
                             </div>
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setCoreValues((prev) =>
-                                        prev.filter((_, i) => i !== idx)
-                                    )
-                                }
-                                className="mt-1 shrink-0 rounded-lg bg-red-600 p-2 text-white"
-                            >
-                                <Trash2 size={14} />
-                            </button>
                         </div>
                     ))}
-                    <Button
-                        onClick={() =>
-                            setCoreValues((prev) => [
-                                ...prev,
-                                { title: "", description: "" },
-                            ])
-                        }
-                        className="rounded-lg bg-(--color-accent) px-4 py-2 text-sm font-medium whitespace-nowrap text-(--color-on-accent)"
-                    >
-                        추가
-                    </Button>
+                    {coreValues.length < 4 && (
+                        <Button
+                            onClick={() =>
+                                setCoreValues((prev) => [
+                                    ...prev,
+                                    { title: "", description: "" },
+                                ])
+                            }
+                            className="rounded-lg bg-(--color-accent) px-4 py-2 text-sm font-medium whitespace-nowrap text-(--color-on-accent)"
+                        >
+                            추가
+                        </Button>
+                    )}
                 </div>
             </section>
 
