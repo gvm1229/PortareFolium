@@ -63,7 +63,7 @@ export default function AdminHeader({
                 {onToggleSidebar && (
                     <button
                         onClick={onToggleSidebar}
-                        className="tablet:block hidden rounded-md p-1.5 text-(--color-muted) transition-colors hover:bg-(--color-surface-subtle) hover:text-(--color-foreground)"
+                        className="tablet:block hidden rounded-md bg-(--color-surface-subtle) p-1.5 text-(--color-muted) transition-colors hover:bg-(--color-border) hover:text-(--color-foreground)"
                         aria-label={
                             sidebarVisible
                                 ? "사이드바 숨기기"

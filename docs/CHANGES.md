@@ -1,23 +1,46 @@
 # CHANGES
 
-## v0.10.5 (2026-04-01)
+## v0.10.11 (2026-04-01)
+
+### Feat: Admin 레이아웃 재구성 — 전체 너비 헤더 + 사이드바 토글 (v0.10.11)
+
+- `src/components/admin/AdminSidebar.tsx`: 사이드바 토글 버튼 추가
+- `src/components/admin/AdminHeader.tsx`: 전체 너비 헤더로 변경 & 사이드바 토글 버튼 추가
+- `src/components/admin/AdminDashboard.tsx`: 메인 영역 너비 조정
+
+### Fix: AboutPanel 히어로 섹션 개선 (v0.10.8~v0.10.10)
+
+- Pillar/Value 개별 카드 디자인 + 입력 필드 라벨 (Keyword/Sub/Description, Title/Description)
+- Max 제한: Pillars 3개, Values 4개
+- 삭제 시 confirm 팝업 + cursor-pointer
+- 연락처 Input 테마 적응 (inputCls + shadow-none)
+- 히어로 CTA 버튼 패딩 축소
+
+### Refactor: AboutPanel 카드 기반 UI 리디자인 (v0.10.7)
+
+- Separator 제거, 카드 기반 섹션 레이아웃 (ResumePanel 디자인 언어 통일)
+- 저장 버튼 green으로 변경
+
+### Feat: 랜딩 히어로 데이터 DB 이관 (v0.10.6)
+
+- `valuePillars`/`coreValues` hardcoded → `about_data` JSONB 동적 관리
+- AboutPanel에 "Landing Page Hero Section" 편집 UI 추가
+- DB 마이그레이션 v0.10.6: generic placeholder 데이터 시딩
+
+### Feat: Admin 저장 버튼 하단 고정 footer (v0.10.5)
+
+- SiteConfigPanel, AboutPanel: 저장 버튼을 sticky bottom footer bar로 이동
+
+### Feat: Squircle (G2 Continuity) 디자인 (v0.10.4)
+
+- 사이트 전체 `rounded-full` → squircle 스타일 통일: 버튼 `rounded-2xl`, 태그/배지 `rounded-lg`, 필터 `rounded-xl`
+- shadcn Badge 컴포넌트 `rounded-full` → `rounded-lg`
 
 ### Fix: Admin 버튼 컬러 테마 적응 (v0.10.3)
 
 - `bg-blue-600 text-white` → `bg-(--color-accent) text-(--color-on-accent)` 전환 (7개 패널, 12건)
 - `bg-indigo-600` → `bg-(--color-accent)` 전환 (2건)
 - SiteConfigPanel: 저장 버튼 + 직군 선택 버튼 테마 적응형으로 수정
-
-### Feat: Squircle (G2 Continuity) 디자인 (v0.10.4)
-
-- 사이트 전체 `rounded-full` → squircle 스타일 통일: 버튼 `rounded-2xl`, 태그/배지 `rounded-lg`, 필터 `rounded-xl`
-- shadcn Badge 컴포넌트 `rounded-full` → `rounded-lg`
-- 15개 파일, 32건 변경
-
-### Feat: Admin 저장 버튼 하단 고정 footer (v0.10.5)
-
-- SiteConfigPanel, AboutPanel: 저장 버튼을 sticky bottom footer bar로 이동
-- 스크롤 없이 항상 접근 가능
 
 ## v0.10.0 (2026-04-01)
 
