@@ -727,7 +727,7 @@ export default function SiteConfigPanel() {
             <div className="h-20" />
 
             {/* Sticky 저장 바 */}
-            <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-(--color-border) bg-(--color-surface)/90 px-6 py-3 backdrop-blur-sm">
+            <div className="tablet:-mx-6 laptop:-mx-8 sticky bottom-0 z-50 -mx-4 border-t border-(--color-border) bg-(--color-surface)/90 px-6 py-3 backdrop-blur-sm">
                 <div className="mx-auto flex items-center justify-between gap-3">
                     {status && (
                         <span

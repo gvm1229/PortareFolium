@@ -223,7 +223,6 @@ export default async function HomePage() {
                 descriptionSub={about.descriptionSub}
                 profileImage={profileImage}
                 valuePillars={valuePillars}
-                coreCompetencies={coreValues}
             />
 
             {/* Portfolio Featured */}
@@ -500,7 +499,7 @@ export default async function HomePage() {
                     {latestPosts[0] && (
                         <Link
                             href={`/blog/${latestPosts[0].slug}`}
-                            className="card-lift group mb-4 block overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-surface-subtle)"
+                            className="card-lift group mb-4 block overflow-hidden rounded-xl border border-(--color-border) bg-(--color-surface-subtle)"
                         >
                             <div className="tablet:flex-row flex flex-col">
                                 {latestPosts[0].thumbnailUrl && (
@@ -541,7 +540,7 @@ export default async function HomePage() {
                     )}
 
                     {latestPosts.length > 1 && (
-                        <ul className="divide-y divide-(--color-border) overflow-hidden rounded-2xl border border-(--color-border)">
+                        <ul className="divide-y divide-(--color-border) overflow-hidden rounded-xl border border-(--color-border)">
                             {latestPosts.slice(1).map((post) => (
                                 <li key={post.slug}>
                                     <Link

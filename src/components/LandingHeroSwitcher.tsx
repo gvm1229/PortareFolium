@@ -6,18 +6,12 @@ interface ValuePillar {
     description: string;
 }
 
-interface CoreCompetency {
-    title: string;
-    description: string;
-}
-
 interface Props {
     heroName: string;
     heroDesc: string;
     descriptionSub?: string;
     profileImage?: string;
     valuePillars: ValuePillar[];
-    coreCompetencies: CoreCompetency[];
 }
 
 // 히어로 이름에서 첫 단어를 accent 색상으로 분리
@@ -38,16 +32,6 @@ export default function LandingHero({
 
     return (
         <section className="tablet:py-32 relative mx-auto max-w-5xl py-24">
-            {/* 배경 glow */}
-            <div
-                aria-hidden="true"
-                className="tablet:h-[28rem] tablet:w-[28rem] pointer-events-none absolute top-1/4 left-1/4 -z-10 h-64 w-64 rounded-full bg-(--color-accent) opacity-[0.08] blur-3xl"
-            />
-            <div
-                aria-hidden="true"
-                className="tablet:h-[18rem] tablet:w-[18rem] pointer-events-none absolute right-0 bottom-1/4 -z-10 h-48 w-48 rounded-full bg-(--color-accent) opacity-[0.05] blur-3xl"
-            />
-
             {/* 히어로 레이아웃 */}
             <div className="tablet:flex-row tablet:items-start tablet:gap-16 flex flex-col gap-12">
                 {/* 왼쪽: 텍스트 + CTA */}
