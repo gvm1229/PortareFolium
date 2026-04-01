@@ -57,7 +57,7 @@ export default function LoginForm({ siteName = "" }: { siteName?: string }) {
                             {siteName}
                         </span>
                     </div>
-                    <h1 className="text-3xl font-black tracking-tight text-(--color-foreground)">
+                    <h1 className="text-3xl font-(--font-display) font-black tracking-tight text-(--color-foreground)">
                         Admin 로그인
                     </h1>
                     <p className="text-sm text-(--color-muted)">
@@ -66,7 +66,7 @@ export default function LoginForm({ siteName = "" }: { siteName?: string }) {
                 </div>
 
                 {/* 로그인 카드 */}
-                <div className="rounded-2xl border border-(--color-border) bg-(--color-surface-subtle) p-7">
+                <div className="rounded-2xl border border-(--color-border) bg-(--color-surface-subtle) p-7 shadow-sm ring-1 ring-(--color-border)/40">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
                             <label
@@ -116,7 +116,7 @@ export default function LoginForm({ siteName = "" }: { siteName?: string }) {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full rounded-full bg-(--color-accent) py-3 text-sm font-bold text-(--color-on-accent) transition-all hover:-translate-y-0.5 hover:opacity-90 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="w-full rounded-2xl bg-(--color-accent) py-3 text-sm font-bold text-(--color-on-accent) transition-all hover:-translate-y-0.5 hover:opacity-90 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {loading ? "로그인 중..." : "로그인"}
                         </button>

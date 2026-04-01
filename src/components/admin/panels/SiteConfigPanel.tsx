@@ -14,19 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Trash2 } from "lucide-react";
 
-type ColorScheme =
-    | "blue"
-    | "gray"
-    | "beige"
-    | "blackwhite"
-    | "forest"
-    | "sunset"
-    | "lavender"
-    | "blue-plain"
-    | "beige-plain"
-    | "forest-plain"
-    | "sunset-plain"
-    | "lavender-plain";
+type ColorScheme = "slate" | "ember" | "circuit" | "phantom";
 
 type JobFieldItem = {
     id: string;
@@ -35,38 +23,10 @@ type JobFieldItem = {
 };
 
 const COLOR_OPTIONS: { value: ColorScheme; label: string; desc: string }[] = [
-    { value: "gray", label: "Gray", desc: "중립 회색" },
-    { value: "blackwhite", label: "Black & White", desc: "순수 흑백" },
-    { value: "blue", label: "Blue", desc: "파란톤 액센트" },
-    {
-        value: "blue-plain",
-        label: "Blue (Plain)",
-        desc: "포인트 배경 없는 파란톤",
-    },
-    { value: "beige", label: "Beige", desc: "따뜻한 베이지" },
-    {
-        value: "beige-plain",
-        label: "Beige (Plain)",
-        desc: "포인트 배경 없는 베이지",
-    },
-    { value: "forest", label: "Forest", desc: "깊은 숲의 그린" },
-    {
-        value: "forest-plain",
-        label: "Forest (Plain)",
-        desc: "포인트 배경 없는 그린",
-    },
-    { value: "sunset", label: "Sunset", desc: "따뜻한 석양 (오렌지)" },
-    {
-        value: "sunset-plain",
-        label: "Sunset (Plain)",
-        desc: "포인트 배경 없는 오렌지",
-    },
-    { value: "lavender", label: "Lavender", desc: "차분한 보라" },
-    {
-        value: "lavender-plain",
-        label: "Lavender (Plain)",
-        desc: "포인트 배경 없는 보라",
-    },
+    { value: "slate", label: "Slate", desc: "UE5 다크 슬레이트 + Unreal Blue" },
+    { value: "ember", label: "Ember", desc: "고에너지 오렌지/파이어" },
+    { value: "circuit", label: "Circuit", desc: "매트릭스 그린" },
+    { value: "phantom", label: "Phantom", desc: "바이올렛/퍼플" },
 ];
 
 export default function SiteConfigPanel() {
@@ -76,7 +36,7 @@ export default function SiteConfigPanel() {
                 document.documentElement.getAttribute("data-color-scheme");
             if (attr) return attr as ColorScheme;
         }
-        return "gray";
+        return "slate";
     });
     const [activeJobField, setActiveJobField] = useState<string>("");
     const [jobFields, setJobFields] = useState<JobFieldItem[]>([]);
@@ -524,7 +484,7 @@ export default function SiteConfigPanel() {
 
     return (
         <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-(--color-foreground)">
+            <h2 className="text-3xl font-bold text-(--color-foreground)">
                 사이트 설정
             </h2>
 
@@ -595,11 +555,13 @@ export default function SiteConfigPanel() {
                                 className={`flex flex-1 items-center gap-2 rounded-lg p-3 text-left ${activeJobField === field.id ? "bg-(--color-accent)" : "bg-(--color-surface-subtle)"}`}
                             >
                                 <span className="text-xl">{field.emoji}</span>
-                                <span className="text-sm font-medium text-(--color-foreground)">
+                                <span
+                                    className={`text-sm font-medium ${activeJobField === field.id ? "text-(--color-on-accent)" : "text-(--color-foreground)"}`}
+                                >
                                     {field.name}
                                 </span>
                                 {activeJobField === field.id && (
-                                    <span className="ml-auto text-base font-semibold text-(--color-foreground)">
+                                    <span className="ml-auto text-base font-semibold text-(--color-on-accent)">
                                         활성
                                     </span>
                                 )}
@@ -761,24 +723,35 @@ export default function SiteConfigPanel() {
 
             <Separator />
 
-            {/* 피드백 */}
-            {status && (
-                <p
-                    className={`rounded-lg px-6 py-4 text-lg ${status.type === "error" ? "bg-red-50 text-red-500 dark:bg-red-950/30" : "bg-green-50 text-green-600 dark:bg-green-950/30"}`}
-                >
-                    {status.msg}
-                </p>
-            )}
+            {/* 하단 여백 (sticky footer 공간 확보) */}
+            <div className="h-20" />
 
-            {/* 액션 버튼 */}
-            <Button
-                variant="default"
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full bg-green-500 hover:bg-green-400 dark:bg-green-700 dark:hover:bg-green-600"
-            >
-                {saving ? "저장 중..." : "설정 저장"}
-            </Button>
+            {/* Sticky 저장 바 */}
+            <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-(--color-border) bg-(--color-surface)/90 px-6 py-3 backdrop-blur-sm">
+                <div className="mx-auto flex items-center justify-between gap-3">
+                    {status && (
+                        <span
+                            className={`text-sm ${status.type === "error" ? "text-red-500" : "text-green-600"}`}
+                        >
+                            {status.msg}
+                        </span>
+                    )}
+                    {!status && (
+                        <span className="text-sm text-(--color-muted)">
+                            &apos;저장&apos; 버튼을 누르면 다른 사용자들에게도
+                            배포됩니다.
+                        </span>
+                    )}
+                    <Button
+                        variant="default"
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="shrink-0 bg-(--color-accent) px-8 text-(--color-on-accent) hover:opacity-90"
+                    >
+                        {saving ? "저장 중..." : "설정 저장"}
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 }

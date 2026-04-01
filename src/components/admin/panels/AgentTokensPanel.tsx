@@ -91,7 +91,7 @@ export default function AgentTokensPanel() {
         <div className="mx-auto max-w-3xl space-y-8">
             {/* 헤더 */}
             <div>
-                <h2 className="mb-1 text-2xl font-black tracking-tight text-(--color-foreground)">
+                <h2 className="mb-1 text-3xl font-bold tracking-tight text-(--color-foreground)">
                     Agent 토큰
                 </h2>
                 <p className="text-sm text-(--color-muted)">

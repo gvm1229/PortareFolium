@@ -65,6 +65,7 @@ interface AdminSidebarProps {
     onTabClick: (tabId: TabId) => void;
     open: boolean;
     onClose: () => void;
+    visible?: boolean;
 }
 
 // 어드민 사이드바 네비게이션
@@ -73,6 +74,7 @@ export default function AdminSidebar({
     onTabClick,
     open,
     onClose,
+    visible = true,
 }: AdminSidebarProps) {
     return (
         <>
@@ -86,18 +88,22 @@ export default function AdminSidebar({
             {/* 사이드바 본체 */}
             <nav
                 className={[
-                    "flex w-48 shrink-0 flex-col border-r border-(--color-border) bg-(--color-surface) py-4",
-                    "fixed inset-y-0 left-0 z-40 transition-transform duration-200",
-                    "tablet:relative tablet:translate-x-0 tablet:z-auto tablet:transition-none",
-                    open ? "translate-x-0" : "-translate-x-full",
+                    "flex shrink-0 flex-col overflow-hidden border-r border-(--color-border) bg-(--color-surface) py-4 transition-all duration-200",
+                    "fixed inset-y-0 left-0 z-40 w-48",
+                    "tablet:relative tablet:z-auto",
+                    visible ? "tablet:w-48" : "tablet:w-0 tablet:border-r-0",
+                    open
+                        ? "translate-x-0"
+                        : "tablet:translate-x-0 -translate-x-full",
                 ].join(" ")}
             >
                 {SECTIONS.map((section, sectionIdx) => (
                     <div key={section.label}>
                         {sectionIdx > 0 && (
-                            <div className="mx-4 my-2 h-px bg-(--color-border)" />
+                            // 섹션 구분선
+                            <div className="mx-3 my-2.5 h-px bg-(--color-border) opacity-70" />
                         )}
-                        <p className="mb-1 px-4 text-[10px] font-bold tracking-[0.15em] text-(--color-muted) uppercase">
+                        <p className="mb-1 px-4 text-[9px] font-black tracking-[0.2em] text-(--color-muted) uppercase opacity-60">
                             {section.label}
                         </p>
                         {section.items.map((item) => {
@@ -109,13 +115,21 @@ export default function AdminSidebar({
                                     key={item.id}
                                     onClick={() => onTabClick(item.id as TabId)}
                                     className={[
-                                        "admin-sidebar-item flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium",
+                                        // 사이드바 아이템 기본 스타일
+                                        "admin-sidebar-item flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-sm font-medium transition-colors",
                                         isActive
-                                            ? "border-l-2 border-(--color-accent) bg-(--color-surface-subtle) text-(--color-foreground)"
+                                            ? "border-l-2 border-(--color-accent) bg-(--color-accent)/8 text-(--color-foreground)"
                                             : "border-l-2 border-transparent text-(--color-muted) hover:bg-(--color-surface-subtle) hover:text-(--color-foreground)",
                                     ].join(" ")}
                                 >
-                                    <Icon className="h-4 w-4 shrink-0" />
+                                    <Icon
+                                        className={[
+                                            "h-3.5 w-3.5 shrink-0",
+                                            isActive
+                                                ? "text-(--color-accent)"
+                                                : "",
+                                        ].join(" ")}
+                                    />
                                     <span>{item.label}</span>
                                 </button>
                             );

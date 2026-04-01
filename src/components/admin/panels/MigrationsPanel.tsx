@@ -74,7 +74,7 @@ export default function MigrationsPanel() {
         return (
             <div className="mx-auto max-w-3xl space-y-6">
                 <div>
-                    <h2 className="mb-1 text-2xl font-black tracking-tight text-(--color-foreground)">
+                    <h2 className="mb-1 text-3xl font-bold tracking-tight text-(--color-foreground)">
                         DB 마이그레이션
                     </h2>
                 </div>
@@ -126,7 +126,7 @@ export default function MigrationsPanel() {
             {/* 헤더 */}
             <div className="tablet:gap-4 flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <h2 className="mb-1 text-2xl font-black tracking-tight text-(--color-foreground)">
+                    <h2 className="mb-1 text-3xl font-bold tracking-tight text-(--color-foreground)">
                         DB 마이그레이션
                     </h2>
                     <div className="flex flex-wrap items-center gap-3 text-sm text-(--color-muted)">

@@ -46,6 +46,18 @@ export interface FieldIntroduction {
     descriptionSub: string;
 }
 
+// 랜딩 페이지 히어로 섹션 데이터
+export interface ValuePillar {
+    label: string;
+    sub: string;
+    description: string;
+}
+
+export interface CoreValue {
+    title: string;
+    description: string;
+}
+
 export interface AboutData {
     profileImage?: string;
     name?: string;
@@ -54,6 +66,9 @@ export interface AboutData {
     contacts?: AboutContacts;
     // Job Field ID → 소개 오버라이드
     introductions?: Record<string, FieldIntroduction>;
+    // 랜딩 페이지 히어로 데이터
+    valuePillars?: ValuePillar[];
+    coreValues?: CoreValue[];
     /** 경험 유형별 리스트 (테이블 1) */
     sections?: AboutSections;
     /** 역량 키워드별 리스트 (테이블 2) */

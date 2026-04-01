@@ -68,6 +68,7 @@ export default function AdminDashboard() {
     const [tabKey, setTabKey] = useState(0);
     const [commandOpen, setCommandOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarVisible, setSidebarVisible] = useState(true);
     const [remainingMs, setRemainingMs] = useState(INACTIVITY_LIMIT_MS);
     const lastActivityRef = useRef(Date.now());
 
@@ -138,23 +139,28 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="flex h-screen overflow-hidden bg-(--color-surface)">
-            <AdminSidebar
-                activeTab={activeTab}
-                onTabClick={(id) => {
-                    handleTabClick(id);
-                    setSidebarOpen(false);
-                }}
-                open={sidebarOpen}
-                onClose={() => setSidebarOpen(false)}
+        <div className="flex h-screen flex-col overflow-hidden bg-(--color-surface)">
+            {/* 헤더: 전체 너비 */}
+            <AdminHeader
+                timeLeft={remainingMs}
+                onLogout={handleLogout}
+                onCommandOpen={() => setCommandOpen(true)}
+                onMenuOpen={() => setSidebarOpen(true)}
+                sidebarVisible={sidebarVisible}
+                onToggleSidebar={() => setSidebarVisible((v) => !v)}
             />
 
-            <div className="flex flex-1 flex-col overflow-hidden">
-                <AdminHeader
-                    timeLeft={remainingMs}
-                    onLogout={handleLogout}
-                    onCommandOpen={() => setCommandOpen(true)}
-                    onMenuOpen={() => setSidebarOpen(true)}
+            {/* 사이드바 + 메인: 헤더 아래 */}
+            <div className="flex flex-1 overflow-hidden">
+                <AdminSidebar
+                    activeTab={activeTab}
+                    onTabClick={(id) => {
+                        handleTabClick(id);
+                        setSidebarOpen(false);
+                    }}
+                    open={sidebarOpen}
+                    onClose={() => setSidebarOpen(false)}
+                    visible={sidebarVisible}
                 />
 
                 <main className="tablet:p-6 laptop:p-8 flex-1 overflow-y-auto p-4">

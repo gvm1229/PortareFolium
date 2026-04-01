@@ -12,7 +12,9 @@ import type {
     AboutData,
     AboutSectionKey,
     CompetencySectionKey,
+    CoreValue,
     FieldIntroduction,
+    ValuePillar,
 } from "@/types/about";
 import {
     ABOUT_SECTION_KEYS,
@@ -22,7 +24,6 @@ import {
 } from "@/types/about";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Trash2 } from "lucide-react";
 
 type JobFieldItem = { id: string; name: string; emoji: string };
@@ -52,6 +53,10 @@ export default function AboutPanel() {
         type: "error" | "success";
         msg: string;
     } | null>(null);
+
+    // 랜딩 페이지 히어로 섹션
+    const [valuePillars, setValuePillars] = useState<ValuePillar[]>([]);
+    const [coreValues, setCoreValues] = useState<CoreValue[]>([]);
 
     // Job Field별 소개
     const [jobFields, setJobFields] = useState<JobFieldItem[]>([]);
@@ -119,6 +124,8 @@ export default function AboutPanel() {
                             );
                     });
                     setIntroductions(d.introductions ?? {});
+                    setValuePillars(d.valuePillars ?? []);
+                    setCoreValues(d.coreValues ?? []);
                 }
                 // resume_data.basics.image를 프로필 이미지 단일 출처로 사용
                 if (resumeRow) {
@@ -219,6 +226,8 @@ export default function AboutPanel() {
                 Object.keys(introductions).length > 0
                     ? introductions
                     : undefined,
+            valuePillars: valuePillars.length > 0 ? valuePillars : undefined,
+            coreValues: coreValues.length > 0 ? coreValues : undefined,
             sections: Object.fromEntries(
                 ABOUT_SECTION_KEYS.map((k) => [
                     k,
@@ -287,21 +296,20 @@ export default function AboutPanel() {
         );
     };
 
-    const textareaCls =
-        "w-full px-3 py-2 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-foreground) text-sm resize-y focus:outline-none focus:ring-2 focus:ring-(--color-accent)/40";
+    // input 공통 클래스
+    const inputCls =
+        "w-full rounded-lg border border-(--color-border) bg-transparent px-3 py-2 text-sm text-(--color-foreground) placeholder-(--color-muted) focus:border-(--color-accent) focus:outline-none";
+    // textarea 공통 클래스
+    const textareaCls = `${inputCls} resize-y`;
 
     // override가 없는 job fields만 선택 목록에 표시
     const availableFields = jobFields.filter((f) => !introductions[f.id]);
 
     return (
-        <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-(--color-foreground)">
-                About 편집
-            </h2>
-
+        <div className="space-y-6">
             {/* 프로필 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     프로필
                 </h3>
                 <div className="tablet:flex-row tablet:gap-6 flex flex-col items-start gap-4">
@@ -347,29 +355,28 @@ export default function AboutPanel() {
                     />
                 </div>
                 <div>
-                    <label className="mb-1 block text-sm font-medium text-(--color-muted)">
+                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
                         이름
                     </label>
-                    <Input
+                    <input
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="정호진"
+                        className={inputCls}
                     />
                 </div>
             </section>
 
-            <Separator />
-
             {/* 소개 - Default */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     소개 (Default)
                 </h3>
                 <p className="text-sm text-(--color-muted)">
                     Job Field override가 없을 때 표시됩니다.
                 </p>
                 <div>
-                    <label className="mb-1 block text-sm font-medium text-(--color-muted)">
+                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
                         메인 소개
                     </label>
                     <textarea
@@ -379,7 +386,7 @@ export default function AboutPanel() {
                     />
                 </div>
                 <div>
-                    <label className="mb-1 block text-sm font-medium text-(--color-muted)">
+                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
                         보조 소개
                     </label>
                     <textarea
@@ -390,11 +397,9 @@ export default function AboutPanel() {
                 </div>
             </section>
 
-            <Separator />
-
             {/* Job Field별 소개 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     Job Field별 소개
                 </h3>
                 <p className="text-sm text-(--color-muted)">
@@ -405,7 +410,7 @@ export default function AboutPanel() {
                     return (
                         <div
                             key={fieldId}
-                            className="space-y-3 border-b border-(--color-border) pb-4"
+                            className="space-y-3 rounded-lg border border-(--color-border) bg-(--color-surface-subtle) p-4"
                         >
                             <div className="flex items-center justify-between">
                                 <span className="font-medium text-(--color-foreground)">
@@ -424,7 +429,7 @@ export default function AboutPanel() {
                                 </Button>
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-(--color-muted)">
+                                <label className="mb-1 block text-xs font-medium text-(--color-muted)">
                                     메인 소개
                                 </label>
                                 <textarea
@@ -441,7 +446,7 @@ export default function AboutPanel() {
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-(--color-muted)">
+                                <label className="mb-1 block text-xs font-medium text-(--color-muted)">
                                     보조 소개
                                 </label>
                                 <textarea
@@ -484,11 +489,9 @@ export default function AboutPanel() {
                 )}
             </section>
 
-            <Separator />
-
             {/* 연락처 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     연락처
                 </h3>
                 <div>
@@ -498,6 +501,7 @@ export default function AboutPanel() {
                     <Input
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        className={`${inputCls} shadow-none`}
                     />
                 </div>
                 <div>
@@ -507,6 +511,7 @@ export default function AboutPanel() {
                     <Input
                         value={github}
                         onChange={(e) => setGithub(e.target.value)}
+                        className={`${inputCls} shadow-none`}
                     />
                 </div>
                 <div>
@@ -516,15 +521,253 @@ export default function AboutPanel() {
                     <Input
                         value={linkedin}
                         onChange={(e) => setLinkedin(e.target.value)}
+                        className={`${inputCls} shadow-none`}
                     />
                 </div>
             </section>
 
-            <Separator />
+            {/* 랜딩 페이지 히어로 섹션 */}
+            <section className="space-y-4 rounded-xl border border-(--color-accent) bg-(--color-surface) p-6">
+                <div className="w-fit rounded-lg bg-(--color-accent) px-2 py-0.5 text-sm font-medium text-(--color-on-accent)">
+                    Landing Page
+                </div>
+                <h3 className="text-xl font-bold text-(--color-foreground)">
+                    Hero Section
+                </h3>
+
+                {/* Value Pillars */}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <h4 className="text-base font-semibold text-(--color-foreground)">
+                            Value Pillars (3대 핵심 가치)
+                        </h4>
+                        <span className="text-sm text-(--color-muted)">
+                            {valuePillars.length} / 3
+                        </span>
+                    </div>
+                    {valuePillars.map((pillar, idx) => (
+                        <div
+                            key={idx}
+                            className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) p-4"
+                        >
+                            <div className="mb-2 flex items-center justify-between">
+                                <span className="text-sm font-bold text-(--color-accent)">
+                                    Pillar {idx + 1}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (
+                                            !confirm(
+                                                `Pillar ${idx + 1}을 삭제하시겠습니까?`
+                                            )
+                                        )
+                                            return;
+                                        setValuePillars((prev) =>
+                                            prev.filter((_, i) => i !== idx)
+                                        );
+                                    }}
+                                    className="shrink-0 cursor-pointer rounded-lg bg-red-600 p-1.5 text-white"
+                                >
+                                    <Trash2 size={12} />
+                                </button>
+                            </div>
+                            <div className="flex flex-col gap-3">
+                                <div>
+                                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
+                                        Keyword
+                                    </label>
+                                    <input
+                                        value={pillar.label}
+                                        onChange={(e) =>
+                                            setValuePillars((prev) =>
+                                                prev.map((p, i) =>
+                                                    i === idx
+                                                        ? {
+                                                              ...p,
+                                                              label: e.target
+                                                                  .value,
+                                                          }
+                                                        : p
+                                                )
+                                            )
+                                        }
+                                        placeholder="짧은 키워드"
+                                        className={inputCls}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
+                                        Sub
+                                    </label>
+                                    <input
+                                        value={pillar.sub}
+                                        onChange={(e) =>
+                                            setValuePillars((prev) =>
+                                                prev.map((p, i) =>
+                                                    i === idx
+                                                        ? {
+                                                              ...p,
+                                                              sub: e.target
+                                                                  .value,
+                                                          }
+                                                        : p
+                                                )
+                                            )
+                                        }
+                                        placeholder="부제"
+                                        className={inputCls}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
+                                        Description
+                                    </label>
+                                    <input
+                                        value={pillar.description}
+                                        onChange={(e) =>
+                                            setValuePillars((prev) =>
+                                                prev.map((p, i) =>
+                                                    i === idx
+                                                        ? {
+                                                              ...p,
+                                                              description:
+                                                                  e.target
+                                                                      .value,
+                                                          }
+                                                        : p
+                                                )
+                                            )
+                                        }
+                                        placeholder="설명"
+                                        className={inputCls}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    {valuePillars.length < 3 && (
+                        <Button
+                            onClick={() =>
+                                setValuePillars((prev) => [
+                                    ...prev,
+                                    { label: "", sub: "", description: "" },
+                                ])
+                            }
+                            className="rounded-lg bg-(--color-accent) px-4 py-2 text-sm font-medium whitespace-nowrap text-(--color-on-accent)"
+                        >
+                            추가
+                        </Button>
+                    )}
+                </div>
+
+                {/* Core Values */}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <h4 className="text-base font-semibold text-(--color-foreground)">
+                            Core Values (핵심 역량)
+                        </h4>
+                        <span className="text-sm text-(--color-muted)">
+                            {coreValues.length} / 4
+                        </span>
+                    </div>
+                    {coreValues.map((val, idx) => (
+                        <div
+                            key={idx}
+                            className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) p-4"
+                        >
+                            <div className="mb-2 flex items-center justify-between">
+                                <span className="text-sm font-bold text-(--color-accent)">
+                                    Value {idx + 1}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (
+                                            !confirm(
+                                                `Value ${idx + 1}을 삭제하시겠습니까?`
+                                            )
+                                        )
+                                            return;
+                                        setCoreValues((prev) =>
+                                            prev.filter((_, i) => i !== idx)
+                                        );
+                                    }}
+                                    className="shrink-0 cursor-pointer rounded-lg bg-red-600 p-1.5 text-white"
+                                >
+                                    <Trash2 size={12} />
+                                </button>
+                            </div>
+                            <div className="flex flex-col gap-3">
+                                <div>
+                                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
+                                        Title
+                                    </label>
+                                    <input
+                                        value={val.title}
+                                        onChange={(e) =>
+                                            setCoreValues((prev) =>
+                                                prev.map((v, i) =>
+                                                    i === idx
+                                                        ? {
+                                                              ...v,
+                                                              title: e.target
+                                                                  .value,
+                                                          }
+                                                        : v
+                                                )
+                                            )
+                                        }
+                                        placeholder="제목"
+                                        className={inputCls}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-xs font-medium text-(--color-muted)">
+                                        Description
+                                    </label>
+                                    <input
+                                        value={val.description}
+                                        onChange={(e) =>
+                                            setCoreValues((prev) =>
+                                                prev.map((v, i) =>
+                                                    i === idx
+                                                        ? {
+                                                              ...v,
+                                                              description:
+                                                                  e.target
+                                                                      .value,
+                                                          }
+                                                        : v
+                                                )
+                                            )
+                                        }
+                                        placeholder="설명"
+                                        className={inputCls}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    {coreValues.length < 4 && (
+                        <Button
+                            onClick={() =>
+                                setCoreValues((prev) => [
+                                    ...prev,
+                                    { title: "", description: "" },
+                                ])
+                            }
+                            className="rounded-lg bg-(--color-accent) px-4 py-2 text-sm font-medium whitespace-nowrap text-(--color-on-accent)"
+                        >
+                            추가
+                        </Button>
+                    )}
+                </div>
+            </section>
 
             {/* 경험 유형별 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     경험 유형별 리스트
                 </h3>
                 <p className="text-sm text-(--color-muted)">
@@ -547,11 +790,9 @@ export default function AboutPanel() {
                 ))}
             </section>
 
-            <Separator />
-
             {/* 역량 키워드별 */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-(--color-foreground)">
+            <section className="space-y-4 rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
+                <h3 className="text-xl font-bold text-(--color-foreground)">
                     역량 키워드별 리스트
                 </h3>
                 {COMPETENCY_SECTION_KEYS.map((key) => (
@@ -571,26 +812,34 @@ export default function AboutPanel() {
                 ))}
             </section>
 
-            <Separator />
+            {/* 하단 여백 (sticky footer 공간 확보) */}
+            <div className="h-20" />
 
-            {/* 피드백 + 저장 */}
-            {status && (
-                <p
-                    className={`rounded-lg px-6 py-4 text-lg ${status.type === "error" ? "bg-red-50 text-red-500 dark:bg-red-950/30" : "bg-green-50 text-green-600 dark:bg-green-950/30"}`}
-                >
-                    {status.msg}
-                </p>
-            )}
-
-            {/* 액션 버튼 */}
-            <Button
-                variant="default"
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full bg-green-500 hover:bg-green-400 dark:bg-green-700 dark:hover:bg-green-600"
-            >
-                {saving ? "저장 중..." : "변경사항 저장"}
-            </Button>
+            {/* Sticky 저장 바 */}
+            <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-(--color-border) bg-(--color-surface)/90 px-6 py-3 backdrop-blur-sm">
+                <div className="mx-auto flex items-center justify-between gap-3">
+                    {status && (
+                        <span
+                            className={`text-sm ${status.type === "error" ? "text-red-500" : "text-green-600"}`}
+                        >
+                            {status.msg}
+                        </span>
+                    )}
+                    {!status && (
+                        <span className="text-sm text-(--color-muted)">
+                            About 페이지에 즉시 반영됩니다.
+                        </span>
+                    )}
+                    <Button
+                        variant="default"
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="shrink-0 bg-green-600 px-8 text-white hover:bg-green-500"
+                    >
+                        {saving ? "저장 중..." : "변경사항 저장"}
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 }

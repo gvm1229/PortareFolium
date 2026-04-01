@@ -59,7 +59,7 @@ export default function SnapshotsPanel() {
         <div className="mx-auto max-w-3xl space-y-8">
             {/* 헤더 */}
             <div>
-                <h2 className="mb-1 text-2xl font-black tracking-tight text-(--color-foreground)">
+                <h2 className="mb-1 text-3xl font-bold tracking-tight text-(--color-foreground)">
                     콘텐츠 스냅샷
                 </h2>
                 <p className="text-sm text-(--color-muted)">

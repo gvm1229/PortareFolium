@@ -14,27 +14,14 @@ export const metadata: Metadata = {
     icons: { icon: "/favicon.svg" },
 };
 
-const VALID_SCHEMES = [
-    "blue",
-    "gray",
-    "beige",
-    "blackwhite",
-    "forest",
-    "sunset",
-    "lavender",
-    "blue-plain",
-    "beige-plain",
-    "forest-plain",
-    "sunset-plain",
-    "lavender-plain",
-];
+const VALID_SCHEMES = ["slate", "ember", "circuit", "phantom"];
 
 export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    let colorScheme: string = process.env.NEXT_PUBLIC_COLOR_SCHEME ?? "gray";
+    let colorScheme: string = process.env.NEXT_PUBLIC_COLOR_SCHEME ?? "slate";
 
     const configRows = await getSiteConfig();
     for (const row of configRows) {
@@ -46,7 +33,7 @@ export default async function RootLayout({
 
     const validScheme = VALID_SCHEMES.includes(colorScheme)
         ? colorScheme
-        : "gray";
+        : "slate";
     const isDev = process.env.NODE_ENV === "development";
 
     return (

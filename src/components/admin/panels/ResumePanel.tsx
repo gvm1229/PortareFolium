@@ -555,7 +555,7 @@ export default function ResumePanel() {
             {/* 커리어 타임라인 — phases 디자인 전용 */}
             {resumeLayout === "phases" ? (
                 <section className="space-y-4 rounded-xl border border-(--color-accent) bg-(--color-surface) p-6">
-                    <div className="w-fit rounded-full bg-(--color-accent) px-2 py-0.5 text-sm font-medium text-(--color-on-accent)">
+                    <div className="w-fit rounded-lg bg-(--color-accent) px-2 py-0.5 text-sm font-medium text-(--color-on-accent)">
                         Phases 전용
                     </div>
                     <div className="flex items-center justify-between">
@@ -1342,7 +1342,7 @@ export default function ResumePanel() {
                                                     setBackupData(resumeData);
                                                     setEditingWork(idx);
                                                 }}
-                                                className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                                                className="rounded-lg bg-(--color-accent) px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90"
                                             >
                                                 수정
                                             </button>
@@ -2139,7 +2139,7 @@ export default function ResumePanel() {
                                                     }
                                                     setEditingProject(idx);
                                                 }}
-                                                className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                                                className="rounded-lg bg-(--color-accent) px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90"
                                             >
                                                 수정
                                             </button>
@@ -2566,7 +2566,7 @@ export default function ResumePanel() {
                                                 setBackupData(resumeData);
                                                 setEditingEducation(idx);
                                             }}
-                                            className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                                            className="rounded-lg bg-(--color-accent) px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90"
                                         >
                                             수정
                                         </button>
@@ -2877,7 +2877,7 @@ export default function ResumePanel() {
                                                 setBackupData(resumeData);
                                                 setEditingAward(idx);
                                             }}
-                                            className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                                            className="rounded-lg bg-(--color-accent) px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90"
                                         >
                                             수정
                                         </button>
@@ -3098,7 +3098,7 @@ export default function ResumePanel() {
                                                 setBackupData(resumeData);
                                                 setEditingLanguage(idx);
                                             }}
-                                            className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                                            className="rounded-lg bg-(--color-accent) px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90"
                                         >
                                             수정
                                         </button>

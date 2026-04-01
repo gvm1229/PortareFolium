@@ -146,7 +146,7 @@ export default function PromptLibraryPanel() {
     return (
         <div className="mx-auto max-w-4xl space-y-8 pb-12">
             <div>
-                <h1 className="text-3xl font-light tracking-tight text-(--color-foreground)">
+                <h1 className="text-3xl font-bold text-(--color-foreground)">
                     프롬프트 라이브러리
                 </h1>
                 <p className="mt-2 text-(--color-muted)">

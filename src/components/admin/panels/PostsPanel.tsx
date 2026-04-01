@@ -955,7 +955,7 @@ export default function PostsPanel({
                                             </Badge>
                                         )}
                                         {stateCount > 0 && (
-                                            <span className="rounded-full bg-yellow-400 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-yellow-900">
+                                            <span className="rounded-lg bg-yellow-400 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-yellow-900">
                                                 상태: {stateCount}
                                             </span>
                                         )}
@@ -984,7 +984,7 @@ export default function PostsPanel({
                                         {post.tags.slice(0, 3).map((t) => (
                                             <span
                                                 key={t}
-                                                className="rounded-full bg-(--color-tag-bg) px-2 py-0.5 text-xs text-(--color-tag-fg)"
+                                                className="rounded-lg bg-(--color-tag-bg) px-2 py-0.5 text-xs text-(--color-tag-fg)"
                                             >
                                                 {t}
                                             </span>
@@ -1018,7 +1018,7 @@ export default function PostsPanel({
                                     </button>
                                     <button
                                         onClick={() => openEdit(post)}
-                                        className="flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                                        className="flex items-center gap-1 rounded-lg bg-(--color-accent) px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90"
                                     >
                                         <Pencil size={12} />
                                         <span className="tablet:inline hidden">
