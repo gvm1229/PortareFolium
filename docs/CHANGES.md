@@ -1,5 +1,24 @@
 # CHANGES
 
+## v0.10.5 (2026-04-01)
+
+### Fix: Admin 버튼 컬러 테마 적응 (v0.10.3)
+
+- `bg-blue-600 text-white` → `bg-(--color-accent) text-(--color-on-accent)` 전환 (7개 패널, 12건)
+- `bg-indigo-600` → `bg-(--color-accent)` 전환 (2건)
+- SiteConfigPanel: 저장 버튼 + 직군 선택 버튼 테마 적응형으로 수정
+
+### Feat: Squircle (G2 Continuity) 디자인 (v0.10.4)
+
+- 사이트 전체 `rounded-full` → squircle 스타일 통일: 버튼 `rounded-2xl`, 태그/배지 `rounded-lg`, 필터 `rounded-xl`
+- shadcn Badge 컴포넌트 `rounded-full` → `rounded-lg`
+- 15개 파일, 32건 변경
+
+### Feat: Admin 저장 버튼 하단 고정 footer (v0.10.5)
+
+- SiteConfigPanel, AboutPanel: 저장 버튼을 sticky bottom footer bar로 이동
+- 스크롤 없이 항상 접근 가능
+
 ## v0.10.0 (2026-04-01)
 
 ### Feat: 프론트엔드 디자인 오버홀 — UE5 게임 개발자 미학 (v0.10.0)
