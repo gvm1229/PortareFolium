@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { browserClient } from "@/lib/supabase";
+import { toSlug } from "@/lib/slug";
 import {
     Eye,
     EyeOff,
@@ -85,15 +86,6 @@ const EMPTY_FORM: BookForm = {
     meta_description: "",
     og_image: "",
 };
-
-function toSlug(title: string): string {
-    return title
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "")
-        .replace(/-+/g, "-")
-        .slice(0, 80);
-}
 
 function itemToForm(item: BookItem): BookForm {
     return {
@@ -483,6 +475,12 @@ export default function BooksSubPanel({
                     placeholder="도서 제목을 입력하세요"
                     className="w-full border-none bg-transparent py-4 text-3xl font-bold text-(--color-foreground) placeholder:text-(--color-muted) focus:outline-none"
                 />
+                {/* slug 표시 */}
+                <div className="border-t border-(--color-border) px-1 py-2">
+                    <span className="text-xs text-(--color-muted)">
+                        /{form.slug || "..."}
+                    </span>
+                </div>
 
                 {/* 본문 에디터 */}
                 <div className="min-h-[400px] flex-1">

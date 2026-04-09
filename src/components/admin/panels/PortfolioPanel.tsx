@@ -2,6 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { browserClient } from "@/lib/supabase";
+import {
+    moveStorageFolder,
+    deleteStorageFolder,
+    replaceImageUrls,
+} from "@/lib/image-upload";
+import { toSlug } from "@/lib/slug";
 import { revalidatePortfolioItem } from "@/app/admin/actions/revalidate";
 import {
     Eye,
@@ -100,15 +106,6 @@ const EMPTY_FORM: ItemForm = {
     og_image: "",
 };
 
-function toSlug(title: string): string {
-    return title
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "")
-        .replace(/-+/g, "-")
-        .slice(0, 80);
-}
-
 // PortfolioItem의 data JSONB에서 폼 필드를 추출
 function itemToForm(item: PortfolioItem): ItemForm {
     const d = item.data ?? {};
@@ -165,6 +162,9 @@ export default function PortfolioPanel({
     const [snapshotCount, setSnapshotCount] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [slugLocked, setSlugLocked] = useState(false);
+    const [transferring, setTransferring] = useState(false);
+    const savedSlugRef = useRef<string>("");
     const [jobFields, setJobFields] = useState<JobFieldItem[]>([]);
     const [activeJobField, setActiveJobField] = useState<string>("");
     // MetadataSheet 상태
@@ -327,6 +327,8 @@ export default function PortfolioPanel({
     const openEdit = (item: PortfolioItem) => {
         const f = itemToForm(item);
         initialFormRef.current = f;
+        savedSlugRef.current = item.slug;
+        setSlugLocked(true);
         setForm(f);
         setEditTarget(item);
         onEditPathChange?.(`edit/${item.slug}`);
@@ -341,6 +343,8 @@ export default function PortfolioPanel({
             jobField: activeJobField ? [activeJobField] : [],
         };
         initialFormRef.current = base;
+        savedSlugRef.current = "";
+        setSlugLocked(false);
         setForm(base);
         setEditTarget("new");
         onEditPathChange?.("new");
@@ -348,10 +352,35 @@ export default function PortfolioPanel({
         setSuccess(null);
     };
 
+    // slug 변경 시 에셋 이전
+    const migrateAssetsIfNeeded = async (): Promise<string> => {
+        const oldSlug = savedSlugRef.current;
+        const newSlug = form.slug;
+        if (!oldSlug || oldSlug === newSlug) return form.content;
+        setTransferring(true);
+        try {
+            await moveStorageFolder(
+                `portfolio/${oldSlug}`,
+                `portfolio/${newSlug}`
+            );
+            const updated = replaceImageUrls(
+                form.content,
+                `portfolio/${oldSlug}`,
+                `portfolio/${newSlug}`
+            );
+            setForm((f) => ({ ...f, content: updated }));
+            savedSlugRef.current = newSlug;
+            return updated;
+        } finally {
+            setTransferring(false);
+        }
+    };
+
     // 자동 저장 (DB에 직접 저장)
     const autoSave = async () => {
         if (!browserClient || !form.title || !form.slug) return;
-        const payload = buildPayload();
+        const migratedContent = await migrateAssetsIfNeeded();
+        const payload = { ...buildPayload(), content: migratedContent };
         if (editTarget === "new") {
             const { data: newItem, error: err } = await browserClient
                 .from("portfolio_items")
@@ -360,6 +389,7 @@ export default function PortfolioPanel({
                 .single();
             if (!err && newItem) {
                 initialFormRef.current = form;
+                savedSlugRef.current = newItem.slug;
                 setEditTarget(newItem);
                 await revalidatePortfolioItem(newItem.slug);
             }
@@ -431,7 +461,9 @@ export default function PortfolioPanel({
 
     const handleDelete = async (id: string) => {
         if (!browserClient || !confirm("정말 삭제하시겠습니까?")) return;
+        const target = items.find((i) => i.id === id);
         await browserClient.from("portfolio_items").delete().eq("id", id);
+        if (target?.slug) deleteStorageFolder(`portfolio/${target.slug}`);
         if (
             editTarget !== null &&
             editTarget !== "new" &&
@@ -580,12 +612,52 @@ export default function PortfolioPanel({
                         setForm((f) => ({
                             ...f,
                             title: t,
-                            slug: f.slug || toSlug(t),
+                            slug: slugLocked ? f.slug : toSlug(t),
                         }));
                     }}
                     placeholder="프로젝트 이름을 입력하세요"
                     className="w-full border-none bg-transparent py-4 text-3xl font-bold text-(--color-foreground) placeholder:text-(--color-muted) focus:outline-none"
                 />
+                {/* slug 입력 */}
+                <div className="flex items-center gap-2 border-t border-(--color-border) px-1 py-2">
+                    <span className="shrink-0 text-xs text-(--color-muted)">
+                        /{slugLocked ? "🔒" : "🔓"}
+                    </span>
+                    <input
+                        type="text"
+                        value={form.slug}
+                        onChange={(e) => {
+                            setSlugLocked(true);
+                            setForm((f) => ({
+                                ...f,
+                                slug: e.target.value
+                                    .toLowerCase()
+                                    .replace(/\s+/g, "-")
+                                    .replace(
+                                        /[^a-z0-9가-힣ぁ-んァ-ヶ一-龥-]/g,
+                                        ""
+                                    )
+                                    .slice(0, 80),
+                            }));
+                        }}
+                        className="min-w-0 flex-1 bg-transparent text-xs text-(--color-muted) focus:text-(--color-foreground) focus:outline-none"
+                    />
+                    {slugLocked && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSlugLocked(false);
+                                setForm((f) => ({
+                                    ...f,
+                                    slug: toSlug(f.title),
+                                }));
+                            }}
+                            className="shrink-0 rounded bg-(--color-surface-subtle) px-2 py-0.5 text-xs text-(--color-muted) hover:text-(--color-foreground)"
+                        >
+                            자동 생성
+                        </button>
+                    )}
+                </div>
 
                 {/* 본문 에디터 */}
                 <div className="min-h-[400px] flex-1">
@@ -596,6 +668,7 @@ export default function PortfolioPanel({
                         folderPath={`portfolio/${form.slug || "untitled"}`}
                         storageKey={`portfolio_${form.slug || "new"}`}
                         onEditorReady={setEditorInstance}
+                        transferring={transferring}
                     />
                 </div>
 

@@ -1,5 +1,17 @@
 # CHANGES
 
+## v0.10.18 (2026-04-09)
+
+### Feat: Slug 자동 생성 (한글 romanization) + 에셋 이전 + 삭제 cleanup
+
+- `src/lib/slug.ts`: `toSlug` (transliteration 기반 한글→romanized slug), `uniqueSlug` (DB 중복 검사 + suffix)
+- `src/lib/image-upload.ts`: `listStorageFiles`, `moveStorageFolder`, `deleteStorageFolder`, `replaceImageUrls` 유틸 추가 + 이미지 중복 처리 TODO
+- `src/components/admin/RichMarkdownEditor.tsx`: `transferring` prop + "에셋 이전 중..." overlay
+- `src/components/admin/panels/PostsPanel.tsx`: slug 변경 감지 → 에셋 자동 이전, 삭제 시 스토리지 cleanup, slug UI (수동 편집 + 자동 생성 토글)
+- `src/components/admin/panels/PortfolioPanel.tsx`: 동일 패턴 적용
+- `src/components/admin/panels/BooksSubPanel.tsx`: inline toSlug 제거, slug.ts import
+- `src/__tests__/slug.test.ts`: toSlug + uniqueSlug 테스트 (9개)
+
 ## v0.10.17 (2026-04-09)
 
 ### Feat: 스크롤 reveal 애니메이션 + active nav 표시
