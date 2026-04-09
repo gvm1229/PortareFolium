@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { COLOR_SCHEMES, type ColorScheme } from "@/lib/color-schemes";
+import AdminSaveBar from "@/components/admin/AdminSaveBar";
 
 type JobFieldItem = {
     id: string;
@@ -819,31 +820,29 @@ export default function SiteConfigPanel() {
             <Separator />
 
             {/* Sticky 저장 바 */}
-            <div className="tablet:-mx-6 tablet:-mb-6 laptop:-mx-8 laptop:-mb-8 sticky bottom-0 z-50 -mx-4 -mb-4 border-t border-(--color-border) bg-(--color-surface)/90 px-6 py-3 backdrop-blur-sm">
-                <div className="mx-auto flex items-center justify-between gap-3">
-                    {status && (
-                        <span
-                            className={`text-sm ${status.type === "error" ? "text-red-500" : "text-green-600"}`}
-                        >
-                            {status.msg}
-                        </span>
-                    )}
-                    {!status && (
-                        <span className="text-sm text-(--color-muted)">
-                            &apos;저장&apos; 버튼을 누르면 다른 사용자들에게도
-                            배포됩니다.
-                        </span>
-                    )}
-                    <Button
-                        variant="default"
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="shrink-0 bg-(--color-accent) px-8 text-(--color-on-accent) hover:opacity-90"
+            <AdminSaveBar>
+                {status && (
+                    <span
+                        className={`text-sm ${status.type === "error" ? "text-red-500" : "text-green-600"}`}
                     >
-                        {saving ? "저장 중..." : "설정 저장"}
-                    </Button>
-                </div>
-            </div>
+                        {status.msg}
+                    </span>
+                )}
+                {!status && (
+                    <span className="text-sm text-(--color-muted)">
+                        &apos;저장&apos; 버튼을 누르면 다른 사용자들에게도
+                        배포됩니다.
+                    </span>
+                )}
+                <Button
+                    variant="default"
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="shrink-0 bg-(--color-accent) px-8 text-(--color-on-accent) hover:opacity-90"
+                >
+                    {saving ? "저장 중..." : "설정 저장"}
+                </Button>
+            </AdminSaveBar>
         </div>
     );
 }

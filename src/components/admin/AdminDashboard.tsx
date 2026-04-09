@@ -163,7 +163,7 @@ export default function AdminDashboard() {
                     visible={sidebarVisible}
                 />
 
-                <main className="tablet:p-6 laptop:p-8 flex-1 overflow-y-auto p-4">
+                <main className="tablet:px-6 tablet:pt-6 laptop:px-8 laptop:pt-8 flex-1 overflow-y-auto px-4 pt-4">
                     {activeTab === "posts" && (
                         <PostsPanel
                             key={`posts-${tabKey}`}

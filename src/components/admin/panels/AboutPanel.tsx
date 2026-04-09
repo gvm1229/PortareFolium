@@ -24,6 +24,7 @@ import {
 } from "@/types/about";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import AdminSaveBar from "@/components/admin/AdminSaveBar";
 
 type JobFieldItem = { id: string; name: string; emoji: string };
 
@@ -812,30 +813,28 @@ export default function AboutPanel() {
             </section>
 
             {/* Sticky 저장 바 */}
-            <div className="tablet:-mx-6 tablet:-mb-6 laptop:-mx-8 laptop:-mb-8 sticky bottom-0 z-50 -mx-4 -mb-4 border-t border-(--color-border) bg-(--color-surface)/90 px-6 py-3 backdrop-blur-sm">
-                <div className="mx-auto flex items-center justify-between gap-3">
-                    {status && (
-                        <span
-                            className={`text-sm ${status.type === "error" ? "text-red-500" : "text-green-600"}`}
-                        >
-                            {status.msg}
-                        </span>
-                    )}
-                    {!status && (
-                        <span className="text-sm text-(--color-muted)">
-                            About 페이지에 즉시 반영됩니다.
-                        </span>
-                    )}
-                    <Button
-                        variant="default"
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="shrink-0 bg-green-600 px-8 text-white hover:bg-green-500"
+            <AdminSaveBar>
+                {status && (
+                    <span
+                        className={`text-sm ${status.type === "error" ? "text-red-500" : "text-green-600"}`}
                     >
-                        {saving ? "저장 중..." : "변경사항 저장"}
-                    </Button>
-                </div>
-            </div>
+                        {status.msg}
+                    </span>
+                )}
+                {!status && (
+                    <span className="text-sm text-(--color-muted)">
+                        About 페이지에 즉시 반영됩니다.
+                    </span>
+                )}
+                <Button
+                    variant="default"
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="shrink-0 bg-green-600 px-8 text-white hover:bg-green-500"
+                >
+                    {saving ? "저장 중..." : "변경사항 저장"}
+                </Button>
+            </AdminSaveBar>
         </div>
     );
 }

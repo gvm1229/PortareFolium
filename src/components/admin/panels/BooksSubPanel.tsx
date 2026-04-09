@@ -30,6 +30,7 @@ import {
 } from "@/components/admin/JobFieldSelector";
 import MetadataSheet from "@/components/admin/MetadataSheet";
 import SaveIndicator from "@/components/admin/SaveIndicator";
+import AdminSaveBar from "@/components/admin/AdminSaveBar";
 import { revalidateBook } from "@/app/admin/actions/revalidate";
 
 interface BookItem {
@@ -506,48 +507,46 @@ export default function BooksSubPanel({
                 )}
 
                 {/* Sticky 저장 바 */}
-                <div className="tablet:-mx-6 tablet:-mb-6 laptop:-mx-8 laptop:-mb-8 sticky bottom-0 z-50 -mx-4 -mb-4 border-t border-(--color-border) bg-(--color-surface)/90 px-6 py-3 backdrop-blur-sm">
-                    <div className="mx-auto flex items-center justify-between gap-3">
-                        <span className="text-xs text-(--color-muted)">
-                            저장 후 미리보기를 방문하면 캐시가 갱신됩니다.
-                        </span>
+                <AdminSaveBar>
+                    <span className="text-xs text-(--color-muted)">
+                        저장 후 미리보기를 방문하면 캐시가 갱신됩니다.
+                    </span>
+                    <div className="flex items-center gap-3">
+                        <SaveIndicator
+                            saving={autoSaving}
+                            savedAt={autoSavedAt}
+                            isDirty={isDirty}
+                        />
                         <div className="flex items-center gap-3">
-                            <SaveIndicator
-                                saving={autoSaving}
-                                savedAt={autoSavedAt}
-                                isDirty={isDirty}
-                            />
-                            <div className="flex items-center gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setStateModalOpen(true)}
+                                className="rounded-lg bg-yellow-500 px-4 py-2 text-base font-medium whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                            >
+                                상태 기록: {snapshotCount}/6
+                            </button>
+                            {editTarget !== "new" && (
                                 <button
-                                    type="button"
-                                    onClick={() => setStateModalOpen(true)}
-                                    className="rounded-lg bg-yellow-500 px-4 py-2 text-base font-medium whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                                    onClick={() =>
+                                        handleDelete(
+                                            (editTarget as BookItem).id
+                                        )
+                                    }
+                                    className="rounded-lg bg-red-600 px-5 py-2 text-xl font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
                                 >
-                                    상태 기록: {snapshotCount}/6
+                                    삭제
                                 </button>
-                                {editTarget !== "new" && (
-                                    <button
-                                        onClick={() =>
-                                            handleDelete(
-                                                (editTarget as BookItem).id
-                                            )
-                                        }
-                                        className="rounded-lg bg-red-600 px-5 py-2 text-xl font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
-                                    >
-                                        삭제
-                                    </button>
-                                )}
-                                <button
-                                    onClick={handleSave}
-                                    disabled={saving || !isDirty}
-                                    className="rounded-lg bg-(--color-accent) px-5 py-2 text-xl font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90 disabled:opacity-50"
-                                >
-                                    {saving ? "저장 중..." : "저장"}
-                                </button>
-                            </div>
+                            )}
+                            <button
+                                onClick={handleSave}
+                                disabled={saving || !isDirty}
+                                className="rounded-lg bg-(--color-accent) px-5 py-2 text-xl font-semibold whitespace-nowrap text-(--color-on-accent) transition-opacity hover:opacity-90 disabled:opacity-50"
+                            >
+                                {saving ? "저장 중..." : "저장"}
+                            </button>
                         </div>
                     </div>
-                </div>
+                </AdminSaveBar>
 
                 {/* MetadataSheet */}
                 <MetadataSheet

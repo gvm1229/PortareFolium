@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.10.22 (2026-04-09)
+
+### Refactor: AdminSaveBar 공통 컴포넌트 추출
+
+- `src/components/admin/AdminSaveBar.tsx`: sticky 저장 바 래퍼 공통 컴포넌트 신규 추출
+- `src/components/admin/AdminDashboard.tsx`: `<main>` 하단 패딩 제거 — sticky 저장 바가 화면 바닥에 붙도록 수정
+- 어드민 패널 5개 (PostsPanel, PortfolioPanel, BooksSubPanel, AboutPanel, SiteConfigPanel): 중복 div 패턴 → `<AdminSaveBar>` 교체
+
 ## v0.10.21 (2026-04-09)
 
 ### Refactor: 프론트엔드 max-width 통합 + 컬러 스킴 revalidation 수정
