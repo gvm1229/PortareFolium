@@ -1,5 +1,14 @@
 # CHANGES
 
+## v0.10.17 (2026-04-09)
+
+### Feat: 스크롤 reveal 애니메이션 + active nav 표시
+
+- `src/components/ScrollRevealInit.tsx`: IntersectionObserver + MutationObserver 기반 scroll reveal (viewport 내 요소 즉시 reveal, 동적 렌더링 요소 자동 감지)
+- `src/styles/global.css`: `.scroll-reveal`, `.stagger-child`, `.img-hover-zoom`, `:focus-visible`, active nav 스타일 추가
+- `src/components/Header.tsx`: `usePathname` 기반 `aria-current="page"` active nav 표시
+- `src/app/(frontend)/page.tsx`, `portfolio/page.tsx`, `blog/page.tsx`, `AboutView.tsx`: 주요 섹션에 `scroll-reveal` 적용
+
 ## v0.10.16 (2026-04-09)
 
 ### Refactor: 프론트엔드 max-width 축소

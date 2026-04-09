@@ -98,7 +98,7 @@ export default async function PortfolioPage() {
 
     return (
         <PdfExportButton fileName="portfolio">
-            <div className="mx-auto max-w-4xl">
+            <div className="scroll-reveal mx-auto max-w-4xl">
                 <h1 className="mb-8 text-3xl font-bold text-(--color-foreground)">
                     Portfolio
                 </h1>

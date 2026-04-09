@@ -126,7 +126,7 @@ export default function AboutView() {
     );
 
     return (
-        <article className="mx-auto max-w-4xl py-12">
+        <article className="scroll-reveal mx-auto max-w-4xl py-12">
             {/* 프로필 섹션 */}
             <div className="tablet:flex-row tablet:items-start tablet:gap-12 flex flex-col gap-8">
                 {/* 프로필 이미지 */}

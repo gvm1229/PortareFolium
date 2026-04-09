@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 import UserMenu from "@/components/UserMenu";
 import Link from "next/link";
@@ -13,6 +14,7 @@ export default function Header({
     githubUrl: string;
 }) {
     const [open, setOpen] = useState(false);
+    const pathname = usePathname();
 
     return (
         <header
@@ -106,6 +108,9 @@ export default function Header({
                             key={href}
                             href={href}
                             className="nav-link px-3 py-2 text-sm font-medium text-(--color-muted) transition-colors hover:text-(--color-foreground)"
+                            aria-current={
+                                pathname.startsWith(href) ? "page" : undefined
+                            }
                             onClick={() => setOpen(false)}
                         >
                             {label}

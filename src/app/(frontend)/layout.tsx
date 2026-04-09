@@ -1,5 +1,6 @@
 import { getSiteConfig } from "@/lib/queries";
 import Header from "@/components/Header";
+import ScrollRevealInit from "@/components/ScrollRevealInit";
 
 export default async function FrontendLayout({
     children,
@@ -40,6 +41,7 @@ export default async function FrontendLayout({
         <>
             <Header siteName={siteName} githubUrl={githubUrl} />
             <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+            <ScrollRevealInit />
         </>
     );
 }
