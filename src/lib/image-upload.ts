@@ -95,7 +95,13 @@ export async function uploadImageToSupabase(
 // 폴더 내 파일 목록 조회
 export async function listStorageFiles(folder: string): Promise<string[]> {
     if (!browserClient) return [];
-    const { data } = await browserClient.storage.from(BUCKET).list(folder);
+    const { data, error } = await browserClient.storage
+        .from(BUCKET)
+        .list(folder);
+    if (error) {
+        console.error("[image-upload::listStorageFiles]", error.message);
+        return [];
+    }
     if (!data) return [];
     return data
         .filter((f) => f.name && !f.name.startsWith("."))
@@ -112,9 +118,16 @@ export async function moveStorageFolder(
     if (files.length === 0) return;
     for (const filePath of files) {
         const fileName = filePath.split("/").pop()!;
-        await browserClient.storage
+        const { error } = await browserClient.storage
             .from(BUCKET)
             .move(filePath, `${newFolder}/${fileName}`);
+        if (error) {
+            console.error(
+                "[image-upload::moveStorageFolder]",
+                filePath,
+                error.message
+            );
+        }
     }
 }
 
@@ -123,7 +136,10 @@ export async function deleteStorageFolder(folder: string): Promise<void> {
     if (!browserClient) return;
     const files = await listStorageFiles(folder);
     if (files.length === 0) return;
-    await browserClient.storage.from(BUCKET).remove(files);
+    const { error } = await browserClient.storage.from(BUCKET).remove(files);
+    if (error) {
+        console.error("[image-upload::deleteStorageFolder]", error.message);
+    }
 }
 
 // 콘텐츠 내 이미지 URL 폴더 경로 치환

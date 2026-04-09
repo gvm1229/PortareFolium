@@ -422,7 +422,8 @@ export default function PortfolioPanel({
         setSaving(true);
         setError(null);
 
-        const payload = buildPayload();
+        const migratedContent = await migrateAssetsIfNeeded();
+        const payload = { ...buildPayload(), content: migratedContent };
         let err;
         if (editTarget === "new") {
             ({ error: err } = await browserClient
@@ -440,6 +441,7 @@ export default function PortfolioPanel({
             setError(err.message);
         } else {
             initialFormRef.current = form;
+            savedSlugRef.current = form.slug;
             setSuccess("저장 완료");
             loadItems();
             if (editTarget === "new") setEditTarget(null);

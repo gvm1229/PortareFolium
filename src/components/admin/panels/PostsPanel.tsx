@@ -402,7 +402,8 @@ export default function PostsPanel({
         setSaving(true);
         setError(null);
 
-        const payload = buildPayload();
+        const migratedContent = await migrateAssetsIfNeeded();
+        const payload = { ...buildPayload(), content: migratedContent };
         let err;
         if (editTarget === "new") {
             ({ error: err } = await browserClient
@@ -420,6 +421,7 @@ export default function PostsPanel({
             setError(err.message);
         } else {
             initialFormRef.current = form;
+            savedSlugRef.current = form.slug;
             setSuccess("저장 완료");
             loadPosts();
             if (editTarget === "new") setEditTarget(null);

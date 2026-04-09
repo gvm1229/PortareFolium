@@ -1,5 +1,14 @@
 # CHANGES
 
+## v0.10.19 (2026-04-09)
+
+### Fix: 에셋 이전 handleSave 누락 + Storage RLS 정책 마이그레이션
+
+- `src/components/admin/panels/PostsPanel.tsx`: `handleSave`에 `migrateAssetsIfNeeded()` 호출 추가 (수동 저장 시에도 에셋 이전 실행)
+- `src/components/admin/panels/PortfolioPanel.tsx`: 동일 수정
+- `src/lib/image-upload.ts`: `listStorageFiles`, `moveStorageFolder`, `deleteStorageFolder` 에러 로깅 추가
+- `src/lib/migrations.ts`: Storage RLS 정책 마이그레이션 2건 추가 (SELECT authenticated, UPDATE/DELETE authenticated) — 수동 실행 필요
+
 ## v0.10.18 (2026-04-09)
 
 ### Feat: Slug 자동 생성 (한글 romanization) + 에셋 이전 + 삭제 cleanup
