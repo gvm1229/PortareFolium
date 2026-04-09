@@ -89,7 +89,6 @@ export default function SiteConfigPanel() {
                             : row.value;
                     if (row.key === "color_scheme") {
                         setColorScheme(v as ColorScheme);
-                        localStorage.setItem("folium_color_scheme", v);
                         document.documentElement.setAttribute(
                             "data-color-scheme",
                             v as ColorScheme
@@ -504,7 +503,6 @@ export default function SiteConfigPanel() {
             .upsert(rows, { onConflict: "key" });
 
         if (!error) {
-            localStorage.setItem("folium_color_scheme", colorScheme);
             localStorage.setItem("folium_plain_mode", String(plainMode));
             await revalidateHome();
             await revalidateResume();

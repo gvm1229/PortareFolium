@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.10.24 (2026-04-09)
+
+### Fix: 컬러 스킴 localStorage 의존성 제거 — DB 기반 서버 렌더링으로 통일
+
+- `src/app/layout.tsx`: 인라인 스크립트에서 `folium_color_scheme` localStorage 읽기 제거 — 서버 렌더링 값(`data-color-scheme`)이 항상 DB 기준
+- `src/components/admin/panels/SiteConfigPanel.tsx`: 저장 시 `localStorage.setItem("folium_color_scheme")` 제거 (초기 로드 시 동기화 포함)
+- dev/prod 환경 간 localStorage 교차 오염 방지
+
 ## v0.10.23 (2026-04-09)
 
 ### Refactor: AdminSaveBar portal 방식으로 전환 — main 패딩 완전 복원
