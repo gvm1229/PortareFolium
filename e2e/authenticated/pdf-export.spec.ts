@@ -69,6 +69,24 @@ test.describe("PDF Export — Resume", () => {
         expect(afterCount).toBe(initialCount);
     });
 
+    test("프로젝트 카드 grid 2열 레이아웃 유지", async ({ page }) => {
+        await page.goto("/resume");
+        await page.getByRole("button", { name: /pdf 내보내기/i }).click();
+        await page.locator("h2:text('PDF 내보내기')").waitFor();
+        await page.waitForTimeout(1500);
+
+        // data-pdf-block-item 부모 grid의 column 수 확인
+        const colCount = await page.evaluate(() => {
+            const item = document.querySelector("[data-pdf-block-item]");
+            if (!item?.parentElement) return 0;
+            const cols = getComputedStyle(
+                item.parentElement
+            ).gridTemplateColumns;
+            return cols.split(" ").filter((c) => c !== "").length;
+        });
+        expect(colCount).toBeGreaterThanOrEqual(2);
+    });
+
     test("ESC 키로 모달 닫기", async ({ page }) => {
         await page.goto("/resume");
         await page.getByRole("button", { name: /pdf 내보내기/i }).click();

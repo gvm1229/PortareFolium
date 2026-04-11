@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.11.2 (2026-04-12)
+
+### Feat: 수동 체크리스트 E2E 자동화 — PDF grid 검증 + 콘텐츠 렌더링
+
+- `e2e/authenticated/pdf-export.spec.ts`: 프로젝트 카드 grid 2열 레이아웃 유지 검증 테스트 추가 (7 테스트)
+- `e2e/content-rendering.spec.ts`: 블로그 콘텐츠 렌더링 5개 테스트 — Shiki 코드 블록, 이미지 lazy loading, 목차 (TOC), Mermaid 다이어그램, KaTeX 수식
+- `docs/TEST.md`: 자동화된 항목을 수동 체크리스트에서 제거, E2E 목록에 새 테스트 문서화
+
 ## v0.11.1 (2026-04-11)
 
 ### Feat: 인증 필요 E2E 테스트 — PDF Export 프리뷰 검증
