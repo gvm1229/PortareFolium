@@ -159,7 +159,8 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Backend/DB: Supabase (PostgreSQL + Storage)
 - Deployment: Vercel
 - Package Manager: pnpm 10
-- Testing: Vitest + Testing Library
+- Testing: Vitest + Testing Library (unit) / Playwright (E2E)
+- CI: GitHub Actions (`.github/workflows/e2e.yml` — push/PR 시 크로스 브라우저 E2E)
 - Editor: Tiptap (Rich Markdown Editor)
 - Diagrams: Mermaid 11
 - Code Highlighting: Shiki
@@ -272,17 +273,30 @@ src/
 │   └── resume.ts
 ├── styles/
 │   └── global.css
-└── __tests__/                          # Vitest 테스트
+└── __tests__/                          # Vitest 단위 테스트
     ├── blog.test.ts
     ├── toc.test.ts
     ├── job-field.test.ts
-    └── image-upload.test.ts
+    ├── image-upload.test.ts
+    ├── mdx-directive-converter.test.ts
+    ├── mermaid-themes.test.ts
+    ├── tailwind-colors.test.ts
+    └── tiptap-utils.test.ts
 
+e2e/                                    # Playwright E2E 테스트
+├── smoke.spec.ts                       # 주요 페이지 로딩 + 404
+├── navigation.spec.ts                  # 헤더 네비게이션 + 페이지 이동
+├── theme.spec.ts                       # 다크/라이트 모드 토글
+├── responsive.spec.ts                  # mobile/tablet/desktop overflow 검증
+└── seo.spec.ts                         # 메타데이터 + 접근성 기본 검증
+playwright.config.ts                    # Playwright 설정 (5 projects: desktop 3 + mobile 2)
+.github/workflows/e2e.yml              # CI: push/PR 시 크로스 브라우저 E2E 자동 실행
 supabase/
 ├── setup.sql                           # 전체 스키마 초기화 (신규 설치용)
 └── migration-whole.sql                 # 구버전 DB → 현재 스키마 일괄 업데이트
 public/                                 # 정적 에셋 (favicon 등)
 docs/CHANGES.md                         # 변경 이력 (기능/디자인 변경 시 항상 업데이트)
+docs/TEST.md                            # 테스트 전략 (수동 체크리스트 + E2E 구조 + 확장 기준)
 ```
 
 **Key Conventions:**

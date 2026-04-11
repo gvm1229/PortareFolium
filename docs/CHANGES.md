@@ -2,7 +2,7 @@
 
 ## v0.11.0 (2026-04-11)
 
-### Feat: Playwright E2E 테스트 인프라 구축
+### Feat: Playwright E2E 테스트 인프라 + GitHub Actions CI
 
 - Playwright 설치 (Chromium, Firefox, WebKit + mobile viewport)
 - `playwright.config.ts`: 5개 프로젝트 (desktop 3 + mobile 2), dev 서버 자동 기동
@@ -13,6 +13,7 @@
 - `e2e/seo.spec.ts`: 메타데이터 + 접근성 기본 검증 (alt, lang, viewport)
 - `package.json`: `test:e2e`, `test:e2e:ui`, `test:e2e:chromium` 스크립트 추가
 - `.gitignore`: Playwright 산출물 제외
+- `.github/workflows/e2e.yml`: push(`main`/`test`)/PR(`main`) 시 크로스 브라우저 E2E 자동 실행 — Chromium/Firefox/WebKit 병렬 매트릭스, Vitest + Playwright 순차 실행, 실패 시 playwright-report artifact 7일 보존
 
 ### Chore: 불필요한 구조 검증 테스트 정리 (142→79개)
 
