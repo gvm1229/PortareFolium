@@ -27,6 +27,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Dead Code**: If your changes make imports/variables/functions unused, remove them. Mention pre-existing dead code but do not delete it unless asked.
 - **Comments**: No "deprecated" markers or "logic moved" comments. Delete unused code immediately.
 - **File Separation**: Find suitable existing files or create new ones if logic doesn't fit.
+- **Technical Terms**: UI/UX 및 개발 용어의 한글 음차 표기(예: "푸터", "헤더", "모달", "사이드바")를 사용하지 않는다. 해당 단어가 한국어에서 일상적으로 통용되지 않는 한(예: "파일", "버튼"은 허용) 영어 원문을 그대로 사용한다. 이 규칙은 주석, 변수명, aria-label, UI 텍스트, 문서 등 코드베이스 전체에 적용된다.
 
 ### Implementation Specifics
 
