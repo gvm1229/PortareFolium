@@ -1,5 +1,11 @@
 # CHANGES
 
+## v0.11.14 (2026-04-14)
+
+### UI: GlobalSearch loading spinner 추가
+
+- `src/components/GlobalSearch.tsx`: "Searching..." 텍스트 앞에 spinning SVG icon 추가
+
 ## v0.11.12 (2026-04-14)
 
 ### Test: Blog view toggle + search + pagination E2E 검증
