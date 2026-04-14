@@ -10,33 +10,31 @@ interface Props {
     activeJobField?: string;
 }
 
-// 핵심역량 (포트폴리오 기반 추출)
-const CORE_COMPETENCIES = [
+// 핵심역량 placeholder (Admin에서 입력 유도)
+const PLACEHOLDER_CORE_COMPETENCIES = [
     {
-        title: "C++ 게임 로직 설계 & 엔진 아키텍처",
-        situation:
-            "콘솔 엔진 프로젝트 2개 (턴제 전술 게임, Fruit Ninja 아케이드)",
-        action: "엔진 DLL 분리, 전투·AI·물리 시스템, ANSI 트루컬러 렌더러, Quadtree 충돌 판정 직접 구현",
-        result: "5일 내 완성도 높은 게임 프로토타입 2개 독립 개발",
+        title: "Competency 1",
+        situation: "Admin에서 핵심역량을 입력하세요",
+        action: "Admin에서 핵심역량을 입력하세요",
+        result: "Admin에서 핵심역량을 입력하세요",
     },
     {
-        title: "게이머 커뮤니티 풀스택 서비스 기획·개발",
-        situation:
-            "카트라이더 러쉬플러스 공략 사이트, 메이플스토리 경매장 사이트",
-        action: "Next.js + MongoDB/Nexon API 기반 서비스 설계·배포, MDX 자동 포스트 생성",
-        result: "게임 유저 니즈를 직접 파악하고 기획~배포까지 독립 수행",
+        title: "Competency 2",
+        situation: "Admin에서 핵심역량을 입력하세요",
+        action: "Admin에서 핵심역량을 입력하세요",
+        result: "Admin에서 핵심역량을 입력하세요",
     },
     {
-        title: "게임 모딩 — 상용 엔진 분석 & 커스터마이징",
-        situation: "몬스터 헌터 와일즈/라이즈 SFX 커스텀 모드",
-        action: "RE Engine 기반 사운드 에셋 분석·교체, Nexus Mods 배포",
-        result: "고유 다운로드 8,000명 이상, 상용 엔진 내부 구조 이해 입증",
+        title: "Competency 3",
+        situation: "Admin에서 핵심역량을 입력하세요",
+        action: "Admin에서 핵심역량을 입력하세요",
+        result: "Admin에서 핵심역량을 입력하세요",
     },
     {
-        title: "대규모 시스템 리드 개발 & DevOps",
-        situation: "인천 ITS 디지털 트윈 API 서버 (Global Bridge)",
-        action: "FastAPI + DLR SUMO 기반 시간당 500만 건(일 약 1.2억 건) 데이터 처리 서버 리드 개발",
-        result: "Docker 원클릭 배포 파이프라인 구축, 테스트 시간 50~70% 단축",
+        title: "Competency 4",
+        situation: "Admin에서 핵심역량을 입력하세요",
+        action: "Admin에서 핵심역량을 입력하세요",
+        result: "Admin에서 핵심역량을 입력하세요",
     },
 ];
 
@@ -198,7 +196,7 @@ export default async function ResumePhases({ resume, activeJobField }: Props) {
                     핵심역량
                 </h2>
                 <div className="tablet:grid-cols-2 grid grid-cols-1 gap-4">
-                    {CORE_COMPETENCIES.map((comp, idx) => (
+                    {PLACEHOLDER_CORE_COMPETENCIES.map((comp, idx) => (
                         <div
                             key={idx}
                             className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-5 py-4"
