@@ -74,7 +74,6 @@ export function executeUndoRedoAction(
     action: UndoRedoAction
 ): boolean {
     if (!editor || !editor.isEditable) return false;
-    if (!canExecuteUndoRedoAction(editor, action)) return false;
 
     const chain = editor.chain().focus();
     return action === "undo" ? chain.undo().run() : chain.redo().run();
@@ -151,7 +150,7 @@ export function useUndoRedo(config: UseUndoRedoConfig) {
 
     const { editor } = useTiptapEditor(providedEditor);
     const [isVisible, setIsVisible] = useState<boolean>(true);
-    const canExecute = canExecuteUndoRedoAction(editor, action);
+    const [canExecute, setCanExecute] = useState<boolean>(false);
 
     useEffect(() => {
         if (!editor) return;
@@ -160,6 +159,7 @@ export function useUndoRedo(config: UseUndoRedoConfig) {
             setIsVisible(
                 shouldShowButton({ editor, hideWhenUnavailable, action })
             );
+            setCanExecute(canExecuteUndoRedoAction(editor, action));
         };
 
         handleUpdate();

@@ -107,6 +107,7 @@ export const UndoRedoButton = forwardRef<
                 tabIndex={-1}
                 aria-label={label}
                 tooltip={label}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={handleClick}
                 {...buttonProps}
                 ref={ref}

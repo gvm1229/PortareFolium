@@ -105,6 +105,7 @@ export const HeadingButton = forwardRef<HTMLButtonElement, HeadingButtonProps>(
                 aria-label={label}
                 aria-pressed={isActive}
                 tooltip={label}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={handleClick}
                 {...buttonProps}
                 ref={ref}

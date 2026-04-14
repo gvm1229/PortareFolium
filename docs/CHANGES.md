@@ -1,5 +1,14 @@
 # CHANGES
 
+## v0.11.26 (2026-04-14)
+
+### fix: EditorToolbar undo/redo 영구 disabled + fullscreen dropdown z-index
+
+- `src/components/tiptap-ui/undo-redo-button/use-undo-redo.ts`: `canExecute`를 plain const → `useState` reactive state로 변경, `transaction` handler에서 갱신. 기존 중복 `canExecuteUndoRedoAction()` guard 제거
+- `src/components/tiptap-ui/undo-redo-button/undo-redo-button.tsx`: `onMouseDown={e => e.preventDefault()}` 추가 (editor blur 방지)
+- `heading-button.tsx`, `list-button.tsx`, `blockquote-button.tsx`, `code-block-button.tsx`, `mark-button.tsx`, `text-align-button.tsx`: 동일 `onMouseDown` blur 방지 추가
+- `dropdown-menu.scss`, `popover.scss`: `z-index: 50` → `200` (fullscreen overlay `z-100` 뒤로 숨김 방지)
+
 ## v0.11.25 (2026-04-14)
 
 ### perf: Supabase egress 절감 — auth.getUser→getSession, content 컬럼 제거, 프로필 이미지 cache

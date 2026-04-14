@@ -104,6 +104,7 @@ export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
                 aria-label={label}
                 aria-pressed={isActive}
                 tooltip={label}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={handleClick}
                 {...buttonProps}
                 ref={ref}

@@ -103,6 +103,7 @@ export const CodeBlockButton = forwardRef<
                 aria-label={label}
                 aria-pressed={isActive}
                 tooltip="Code Block"
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={handleClick}
                 {...buttonProps}
                 ref={ref}
