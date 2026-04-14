@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.11.24 (2026-04-14)
+
+### perf: AboutView SSR 전환 — browserClient fetch 제거
+
+- `src/components/AboutView.tsx`: `"use client"` 제거, `useEffect`/`useState`/`browserClient` 의존 제거 → Server Component로 전환. `data`/`profileImage` props 수신
+- `src/app/(frontend)/about/page.tsx`: `serverClient`로 `about_data` + `resume_data` 서버 사이드 fetch 추가. `revalidate = false` (ISR 정적 생성)
+- **효과**: `/about` 방문 시 `browserClient` 2회 API 호출(cached egress) 완전 제거
+
 ## v0.11.23 (2026-04-14)
 
 ### refactor: ColoredTable 기본 색상 — slate 고정 → 테마 상대 색상

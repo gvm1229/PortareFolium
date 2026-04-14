@@ -1,16 +1,7 @@
-"use client";
+// AboutView — About 페이지 렌더러 (Server Component)
+// about_data + resume_data를 서버에서 받아 렌더링
 
-/**
- * AboutView
- *
- * Supabase about_data 테이블에서 런타임으로 데이터를 fetch해서
- * About me 페이지를 렌더링한다.
- * 로딩 중에는 스켈레톤, 에러 시에는 메시지를 표시한다.
- */
-import { useEffect, useState } from "react";
-import { browserClient } from "@/lib/supabase";
-
-interface AboutData {
+export interface AboutData {
     name?: string;
     description?: string;
     descriptionSub?: string;
@@ -23,78 +14,15 @@ interface AboutData {
     competencySections?: Record<string, string[]>;
 }
 
-// resume_data.basics 타입 (image만 사용)
-interface ResumeBasics {
-    image?: string;
-}
-
 const PLACEHOLDER_IMAGE =
     "https://urqqfjxocxfrvuozgobi.supabase.co/storage/v1/object/public/images/legacy/avatar-placeholder-c9516fa9.svg";
 
-export default function AboutView() {
-    const [data, setData] = useState<AboutData | null>(null);
-    const [profileImage, setProfileImage] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+interface Props {
+    data: AboutData;
+    profileImage: string | null;
+}
 
-    useEffect(() => {
-        if (!browserClient) {
-            setError("Supabase 클라이언트를 초기화할 수 없습니다.");
-            setLoading(false);
-            return;
-        }
-
-        // about_data + resume_data 병렬 fetch
-        Promise.all([
-            browserClient.from("about_data").select("data").limit(1).single(),
-            browserClient
-                .from("resume_data")
-                .select("data")
-                .eq("lang", "ko")
-                .single(),
-        ]).then(
-            ([{ data: aboutRow, error: aboutErr }, { data: resumeRow }]) => {
-                if (aboutErr || !aboutRow) {
-                    setError("About 데이터를 불러오지 못했습니다.");
-                } else {
-                    setData(aboutRow.data as AboutData);
-                }
-                // resume_data.basics.image를 단일 출처로 사용
-                if (resumeRow?.data) {
-                    const basics = (resumeRow.data as { basics?: ResumeBasics })
-                        .basics;
-                    const img = basics?.image?.trim();
-                    if (img) setProfileImage(img);
-                }
-                setLoading(false);
-            }
-        );
-    }, []);
-
-    if (loading) {
-        return (
-            <div className="animate-pulse space-y-4 py-12">
-                <div className="h-8 w-40 rounded bg-(--color-border)" />
-                <div className="flex gap-8">
-                    <div className="h-40 w-40 shrink-0 rounded-full bg-(--color-border)" />
-                    <div className="flex-1 space-y-3">
-                        <div className="h-5 w-48 rounded bg-(--color-border)" />
-                        <div className="h-4 w-full rounded bg-(--color-border)" />
-                        <div className="h-4 w-3/4 rounded bg-(--color-border)" />
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (error || !data) {
-        return (
-            <div className="py-12">
-                <p className="text-sm text-red-500">{error ?? "데이터 없음"}</p>
-            </div>
-        );
-    }
-
+export default function AboutView({ data, profileImage }: Props) {
     const resolvedProfileImage = profileImage || PLACEHOLDER_IMAGE;
     const contacts = data.contacts ?? {};
     const sections = data.sections ?? {};
