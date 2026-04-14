@@ -8,6 +8,7 @@ import type { PortfolioProject } from "@/types/portfolio";
 import { getCachedMarkdown } from "@/lib/markdown";
 import { extractTocFromHtml } from "@/lib/toc";
 import TableOfContents from "@/components/TableOfContents";
+import GithubToc from "@/components/GithubToc";
 import MermaidRenderer from "@/components/MermaidRenderer";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import Link from "next/link";
@@ -258,6 +259,8 @@ export default async function PortfolioDetailPage({
                 {contentHtml && (
                     <div className="my-10 h-px bg-(--color-border)" />
                 )}
+
+                {tocEntries.length > 0 && <GithubToc entries={tocEntries} />}
 
                 <div
                     className="portfolio-markdoc-body prose max-w-none text-(--color-foreground)"

@@ -8,9 +8,23 @@ export default function GithubToc({ entries }: { entries: TocEntry[] }) {
             className="github-toc mb-8 rounded-xl border border-(--color-border) bg-(--color-surface) p-3 text-[0.9rem]"
             aria-label="목차"
         >
-            <details open>
-                <summary className="cursor-pointer list-none py-1 font-semibold text-(--color-foreground) before:mr-1 before:inline-block before:text-[0.7em] before:transition-transform before:content-['▶'] open:before:rotate-90">
-                    목차
+            <details open className="github-toc-details">
+                <summary className="github-toc-summary flex cursor-pointer items-center gap-2 py-1 font-semibold text-(--color-foreground)">
+                    <svg
+                        className="github-toc-arrow shrink-0 text-(--color-muted)"
+                        viewBox="0 0 24 24"
+                        width="14"
+                        height="14"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M9 6l6 6-6 6" />
+                    </svg>
+                    <span>목차</span>
                 </summary>
                 <ol className="mt-2 ml-5 space-y-0.5">
                     {entries.map((entry) => (

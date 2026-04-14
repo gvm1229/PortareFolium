@@ -1,5 +1,14 @@
 # CHANGES
 
+## v0.11.28 (2026-04-15)
+
+### feat: GithubToc 아코디언 icon animation + portfolio slug 페이지 적용
+
+- `src/components/GithubToc.tsx`: 기존 `▶` 텍스트 문자 → SVG 화살표 교체 (Accordion 컴포넌트와 동일 디자인). `.github-toc-arrow` 클래스 기반으로 CSS 제어
+- `src/styles/global.css`: `.github-toc-arrow` smooth rotation (0° → 90°) CSS 추가, default marker 제거. Accordion과 동일 패턴
+- `src/app/(frontend)/portfolio/[slug]/page.tsx`: `GithubToc` import + 콘텐츠 상단에 렌더링 (tocEntries가 있을 때)
+- **효과**: blog + portfolio slug 페이지 모두에서 동일한 아코디언 아이콘 애니메이션으로 TOC 표시
+
 ## v0.11.27 (2026-04-15)
 
 ### feat: Accordion (collapsible block) markdown 기능

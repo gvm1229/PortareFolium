@@ -306,6 +306,24 @@ html.dark .prose :where(td) {
     opacity: 0.85;
 }
 
+/* ── GithubToc ──────────────────────────────────────────────────────── */
+/* 기본 marker 제거 + 화살표 smooth 회전 (Accordion과 동일 패턴) */
+.github-toc-summary {
+    list-style: none;
+}
+.github-toc-summary::-webkit-details-marker {
+    display: none;
+}
+.github-toc-summary::marker {
+    content: "";
+}
+.github-toc-arrow {
+    transition: transform 0.2s ease;
+}
+.github-toc-details[open] > .github-toc-summary .github-toc-arrow {
+    transform: rotate(90deg);
+}
+
 /* ── Accordion ─────────────────────────────────────────────────────── */
 /* 네이티브 <details>/<summary> 기반 collapsible block */
 .accordion-block {
