@@ -730,6 +730,13 @@ html.dark .prose :where(td) {
     margin-bottom: 0;
 }
 
+/* 일반 table overflow 방지 (ColoredTable은 자체 wrapper 사용) */
+.post-content.prose :where(table),
+.portfolio-markdoc-body.prose :where(table) {
+    display: block;
+    overflow-x: auto;
+}
+
 /* ── Admin 마크다운 미리보기: 커스텀 태그 PLACEHOLDER */
 .admin-preview-body .preview-placeholder {
     padding: 0.75rem 1rem;

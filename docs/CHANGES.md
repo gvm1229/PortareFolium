@@ -1,5 +1,11 @@
 # CHANGES
 
+## v0.11.18 (2026-04-14)
+
+### Fix: 일반 table overflow 방지
+
+- `src/styles/global.css`: `.post-content.prose` / `.portfolio-markdoc-body.prose` 내 일반 table에 `display: block; overflow-x: auto` 적용 — 넓은 테이블에 horizontal scroll 추가. ColoredTable은 자체 wrapper 사용으로 영향 없음
+
 ## v0.11.17 (2026-04-14)
 
 ### Feat: SEO — robots.txt + sitemap.xml + 검색 엔진 인증
