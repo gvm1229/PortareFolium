@@ -225,11 +225,11 @@ export function getCachedMarkdown(
 }
 
 export async function renderMarkdown(content: string): Promise<string> {
+    // JSX 태그 내부 \[ \] escape 복원 (예외 경로로 DB에 오염된 content 방어)
+    let mdx = unescapeJsxBrackets(content);
+    mdx = directiveToJsx(mdx);
+    mdx = transformOutsideCodeBlocks(mdx, escapeStrayCurlyBraces);
     try {
-        // JSX 태그 내부 \[ \] escape 복원 (예외 경로로 DB에 오염된 content 방어)
-        let mdx = unescapeJsxBrackets(content);
-        mdx = directiveToJsx(mdx);
-        mdx = transformOutsideCodeBlocks(mdx, escapeStrayCurlyBraces);
         // 콘텐츠 내 next/image import 제거 — renderToString 서버 컨텍스트 호환
         mdx = mdx.replace(
             /^import\s+\S+\s+from\s+['"]next\/image['"]\s*;?\s*$/gm,
@@ -258,6 +258,41 @@ export async function renderMarkdown(content: string): Promise<string> {
         return html;
     } catch (e) {
         console.error("MDX Rendering Error:", e);
+        // diagnostic: dump content around error location
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const err = e as any;
+        if (err?.line && err?.column != null) {
+            const line = mdx.split("\n")[err.line - 1] ?? "";
+            const col = Number(err.column);
+            console.error(
+                `[mdx-debug] line ${err.line} col ${col} ± 40:`,
+                JSON.stringify(line.substring(Math.max(0, col - 40), col + 40))
+            );
+            console.error(
+                `[mdx-debug] hex around col ${col}:`,
+                [...line.substring(Math.max(0, col - 10), col + 10)]
+                    .map(
+                        (c) =>
+                            c +
+                            "(U+" +
+                            c.charCodeAt(0).toString(16).toUpperCase() +
+                            ")"
+                    )
+                    .join(" ")
+            );
+        }
+        if (err?.cause?.pos != null) {
+            const p = Number(err.cause.pos);
+            console.error(
+                `[mdx-debug] cause.pos ${p} ± 60:`,
+                JSON.stringify(mdx.substring(Math.max(0, p - 60), p + 60))
+            );
+        }
+        if (err?.cause?.raisedAt != null) {
+            console.error(
+                `[mdx-debug] cause.raisedAt ${err.cause.raisedAt} (position within JSX expression)`
+            );
+        }
         return `<p class="text-red-500">MDX 렌더링 중 오류가 발생했습니다: ${(e as Error).message}</p>`;
     }
 }

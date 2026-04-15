@@ -1,5 +1,12 @@
 # CHANGES
 
+## v0.11.38 (2026-04-15)
+
+### chore: MDX 렌더 에러 진단 로깅 추가 (임시)
+
+- `src/lib/markdown.tsx`: `renderMarkdown()` catch 블록에 에러 위치 주변 content dump 추가 — line±40 substring (JSON-stringify), col±10 codepoint hex dump, `cause.pos`±60 global substring, `cause.raisedAt` 위치. 성공 path는 무영향.
+- 목적: "Expecting Unicode escape sequence \\uXXXX" acorn 에러의 실제 위치 content를 파악하기 위함. 원인 확정 후 롤백 예정.
+
 ## v0.11.37 (2026-04-15)
 
 ### fix: JSX 속성 `\[ \]` escape 방어 — render-time + MCP save-time layer 추가
