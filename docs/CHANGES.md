@@ -1,5 +1,14 @@
 # CHANGES
 
+## v0.11.30 (2026-04-15)
+
+### fix: 우측 TOC 비활성 시 slug 페이지 좌측 쏠림 — article max-width 조건부 적용
+
+- `src/app/(frontend)/portfolio/[slug]/page.tsx`: `hasRightToc = tocEntries.length > 0` 계산. article className에 `max-w-3xl`을 `hasRightToc`일 때만 적용
+- `src/app/(frontend)/blog/[slug]/page.tsx`: `hasRightToc = (tocStyle === "hover" || tocStyle === "both") && tocEntries.length > 0` 계산. 동일하게 `max-w-3xl` 조건부 적용
+- **원인**: flex 컨테이너에 article(`max-w-3xl flex-1`) + `TableOfContents`(`w-52`) 구조에서 TOC가 렌더되지 않으면 article이 768px 상한에 막혀 우측이 비고 좌측 쏠림 발생
+- **효과**: 우측 TOC OFF 시 article이 부모 ContentWrapper(`laptop:max-w-6xl`) 폭까지 stretch — 헤더/푸터와 동일한 최대 폭
+
 ## v0.11.29 (2026-04-15)
 
 ### feat: Portfolio PDF export에 Books 섹션 포함 여부 toggle 추가

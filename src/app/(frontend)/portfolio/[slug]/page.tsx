@@ -70,10 +70,13 @@ export default async function PortfolioDetailPage({
 
     const contentHtml = await getCachedMarkdown(slug, item.content ?? "");
     const tocEntries = extractTocFromHtml(contentHtml);
+    const hasRightToc = tocEntries.length > 0;
 
     return (
         <div className="flex gap-12">
-            <article className="max-w-3xl min-w-0 flex-1">
+            <article
+                className={`min-w-0 flex-1 ${hasRightToc ? "max-w-3xl" : ""}`}
+            >
                 <Link
                     href="/portfolio"
                     className="inline-flex items-center gap-2 rounded-xl border border-(--color-border) px-4 py-2 text-sm font-medium text-(--color-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent)"
