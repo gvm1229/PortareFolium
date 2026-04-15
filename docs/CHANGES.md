@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.11.46 (2026-04-16)
+
+### fix: admin-editor-viewport E2E 셀렉터 복원 + 빈 DB 회피
+
+- `e2e/authenticated/admin-editor-viewport.spec.ts`: 기존 테스트가 `aria-label="편집"` / `[data-post-slug]` / `[data-portfolio-slug]` 3가지 셀렉터로 편집 진입을 시도했지만 해당 attribute들이 실제 `PostsPanel`/`PortfolioPanel` 마크업에 존재하지 않아 fallback까지 전부 실패 (CI `FoliumTeam/PortareFolium` 회귀). 실제 DOM 구조에 맞춰 `button:has-text('편집')`로 교체하고, Supabase test DB에 posts/portfolio가 없을 때는 `test.skip()`으로 graceful skip
+- 원인: 테스트가 참조하던 `data-*` attribute와 `aria-label`은 코드베이스에 한 번도 존재한 적이 없었음. 과거 CI에서는 fallback까지 도달하기 전에 데이터가 존재해 `editBtn.click()` 경로로 우연히 통과했을 가능성이 높음. PR #32 빌드에서는 fallback에 도달 → timeout → 실패
+- 수정: 실제 존재하는 마크업(`<button>` 내부 `<span>편집</span>`)을 기준으로 `button:has-text('편집')` 단일 셀렉터 사용. 데이터 없는 환경에서는 viewport overflow 검증 자체가 불가하므로 `test.skip()` 처리
+
 ## v0.11.45 (2026-04-16)
 
 ### refactor: Resume layout editor 코드 정리
