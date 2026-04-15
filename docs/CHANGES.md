@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.11.31 (2026-04-15)
+
+### chore: Release workflow + fork owner 이메일 알림 안내 추가
+
+- `.github/workflows/release.yml` 신규 — `v*.*.0` 태그 push 트리거. `docs/CHANGES.md`에서 해당 버전 섹션을 awk로 추출해 release body로 사용 (없으면 fallback). `softprops/action-gh-release@v2`로 GitHub Release 생성, `generate_release_notes: true`로 commit 목록 자동 첨부
+- `README.md`: "방법 A" 섹션에 "새 버전 알림 받기 (이메일)" 서브섹션 추가 — Watch → Custom → Releases 안내
+- **운영 정책**: patch bump는 release 없이 누적, minor bump (`v0.x.0`) 시점에 수동 태그 push로 release 발행. fork owner는 노이즈 없이 의미 있는 update만 수신
+
 ## v0.11.30 (2026-04-15)
 
 ### fix: 우측 TOC 비활성 시 slug 페이지 좌측 쏠림 — article max-width 조건부 적용

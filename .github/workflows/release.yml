@@ -1,0 +1,44 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - "v*.*.0"
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Extract changelog section for ${{ github.ref_name }}
+              id: changelog
+              shell: bash
+              run: |
+                  VERSION="${GITHUB_REF_NAME#v}"
+                  BODY=$(awk -v ver="## v${VERSION} " '
+                      $0 ~ "^"ver { found=1; next }
+                      found && /^## v/ { exit }
+                      found { print }
+                  ' docs/CHANGES.md)
+                  if [ -z "$BODY" ]; then
+                      BODY="See commit history for changes in ${GITHUB_REF_NAME}."
+                  fi
+                  {
+                      echo "body<<CHANGELOG_EOF"
+                      echo "$BODY"
+                      echo "CHANGELOG_EOF"
+                  } >> "$GITHUB_OUTPUT"
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ github.ref_name }}
+                  name: ${{ github.ref_name }}
+                  body: ${{ steps.changelog.outputs.body }}
+                  generate_release_notes: true
