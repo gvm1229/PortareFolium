@@ -3,10 +3,7 @@
 import { useRef } from "react";
 import type { Resume } from "@/types/resume";
 import { defaultSectionLabels } from "@/types/resume";
-import {
-    ALL_RESUME_SECTION_KEYS,
-    type ResumeSectionLayout,
-} from "@/lib/resume-layout";
+import { normalizeLayout, type ResumeSectionLayout } from "@/lib/resume-layout";
 import ResumeClassicPreview from "@/components/resume/ResumeClassicPreview";
 import ResumeModernPreview from "@/components/resume/ResumeModernPreview";
 import { GripVertical } from "lucide-react";
@@ -18,7 +15,7 @@ interface Props {
     theme: "classic" | "modern";
 }
 
-// coreCompetencies / careerPhases는 defaultSectionLabels에 없어서 별도 fallback label
+// defaultSectionLabels에 없는 섹션 fallback label
 const EXTRA_LABELS: Record<string, string> = {
     coreCompetencies: "핵심역량",
     careerPhases: "커리어 타임라인",
@@ -32,22 +29,6 @@ const getSectionLabel = (key: string): string => {
     );
 };
 
-// 모든 13개 키가 layout.order에 존재하도록 보장
-function ensureAllKeys(order: string[]): string[] {
-    const seen = new Set<string>();
-    const out: string[] = [];
-    for (const k of order) {
-        if (ALL_RESUME_SECTION_KEYS.includes(k) && !seen.has(k)) {
-            out.push(k);
-            seen.add(k);
-        }
-    }
-    for (const k of ALL_RESUME_SECTION_KEYS) {
-        if (!seen.has(k)) out.push(k);
-    }
-    return out;
-}
-
 export default function ResumeLayoutEditor({
     resume,
     layout,
@@ -57,7 +38,7 @@ export default function ResumeLayoutEditor({
     const dragSrcRef = useRef<number | null>(null);
     const dragOverRef = useRef<number | null>(null);
 
-    const order = ensureAllKeys(layout.order);
+    const order = normalizeLayout(layout).order;
     const disabledSet = new Set(layout.disabled);
 
     const handleToggle = (key: string) => {

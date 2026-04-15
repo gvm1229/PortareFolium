@@ -1,5 +1,12 @@
 # CHANGES
 
+## v0.11.45 (2026-04-16)
+
+### refactor: Resume layout editor 코드 정리
+
+- `src/components/admin/panels/ResumeLayoutEditor.tsx`: 로컬 `ensureAllKeys` 헬퍼 제거. `@/lib/resume-layout`의 `normalizeLayout()`을 재사용해 중복 정규화 로직 제거 (-14 lines)
+- 동작 변화 없음. vitest 103/103 pass, `pnpm build` 성공
+
 ## v0.11.44 (2026-04-16)
 
 ### feat: Resume Layout Editor + ResumePanel 통합 + E2E (US-004, US-005, US-006, US-007)
