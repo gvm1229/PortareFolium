@@ -13,6 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Chat
 
 - **Language**: Answer everything in Korean.
+- **English Input Handling**: When the user sends a question in English (often happens on remote environments where Korean IME is unavailable), answer in Korean as usual, then append `> Corrected English: "<교정된 영어 문장>"` at the end. The corrected sentence is for the user's English study reference — fix grammar/word choice while preserving the original intent.
 - **Token Efficiency**:
     - **No Full Scan**: Do not scan the entire project. If context is missing, ask the user for specific file paths.
     - **Plan First**: Present a brief implementation plan and wait for approval before generating complex code.
@@ -28,6 +29,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Comments**: No "deprecated" markers or "logic moved" comments. Delete unused code immediately.
 - **File Separation**: Find suitable existing files or create new ones if logic doesn't fit.
 - **Technical Terms**: UI/UX 및 개발 용어의 한글 음차 표기(예: "푸터", "헤더", "모달", "사이드바")를 사용하지 않는다. 해당 단어가 한국어에서 일상적으로 통용되지 않는 한(예: "파일", "버튼"은 허용) 영어 원문을 그대로 사용한다. 이 규칙은 주석, 변수명, aria-label, UI 텍스트, 문서 등 코드베이스 전체에 적용된다.
+- **TypeScript**: `strict` 활성화. `any` 사용 금지. `interface`보다 `type` alias 선호 (일관성). 경로 별칭 `@/*` 사용 (`@/components`, `@/lib` 등).
+- **React/Next.js**: `const` 함수형 컴포넌트만 사용. Server Component 기본, 클라이언트 인터랙션 필요 시 파일 최상단에 `"use client"` 명시. Next.js 16: dynamic route의 `params`는 Promise이므로 `await` 필수.
+
+### File Naming
+
+- **Components** (`src/components/**/*.tsx`): **PascalCase** (`BlogPage.tsx`, `ContentWrapper.tsx`, `GithubToc.tsx`). admin sub-folder도 동일.
+- **React hooks** (`src/lib/hooks/*.ts`): **camelCase**, prefix `use` (`useAutoSave.ts`, `useKeyboardSave.ts`).
+- **Library / utility modules** (`src/lib/*.ts`): **kebab-case** 또는 단일 단어 lowercase (`mdx-directive-converter.ts`, `auto-migrate.ts`, `queries.ts`).
+- **Type definitions** (`src/types/*.ts`): **lowercase** (`portfolio.ts`, `resume.ts`).
+- **App Router files**: Next.js 규칙 그대로 (`page.tsx`, `layout.tsx`, `not-found.tsx`).
+- **Tests** (`src/__tests__/*.test.ts`, `e2e/*.spec.ts`): **kebab-case**.
+- **Server Actions** (`src/app/admin/actions/*.ts`): **kebab-case**.
+- 신규 파일을 만들 때 반드시 위 카테고리에 맞는 케이스를 선택. 기존 파일과 같은 디렉토리/역할이면 그 컨벤션을 따른다.
+
+### Branch Strategy
+
+- **Trunk-based hybrid**: `main` 브랜치가 production이며 작은 변경(bug fix, doc update, single-file refactor)은 `main`에 직접 commit + push.
+- **Large work**: 여러 commit이 필요하거나 리뷰가 필요한 큰 작업(신규 feature, 광범위 refactor, 디자인 시스템 변경 등)은 `feature/<설명>` 브랜치를 만들어 작업 후 `gh pr create`로 PR을 열고 main에 머지.
+- 판단 기준: **3 commit 이상 예상되거나 ≥3 파일 도메인 영역에 걸쳐 있으면 feature branch 권장**. 그 외엔 main 직접 push.
+- `main`에는 절대 force push 하지 않는다. release tag(`v*.*.0`)는 `main`의 head에서만 생성.
+
+### PR Conventions
+
+- PR template은 `.github/PULL_REQUEST_TEMPLATE.md`에 위치 — `gh pr create` 시 자동 적용.
+- **PR 제목 형식**: `<source> → <target>: <설명>` (예: `feature/blog-search → main: Blog 검색 모달 + 키보드 단축키`). 70자 이하.
+- **Test plan checklist**는 항상 채울 것 (`pnpm build`, `pnpm test`, E2E 등 해당 변경에 맞춰 조정).
+- **Claude 협력 문구 (Co-Authored-By 등) 절대 포함 금지**.
 
 ### Implementation Specifics
 

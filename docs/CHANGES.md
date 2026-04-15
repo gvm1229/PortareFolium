@@ -1,5 +1,24 @@
 # CHANGES
 
+## v0.11.34 (2026-04-15)
+
+### docs: AGENTS.md + ship/docs skills 보강 + PR template 추가
+
+- `AGENTS.md`:
+    - Chat 섹션에 **English Input Handling** rule 추가 — 영어 입력 시 한국어 답변 + 끝에 `> Corrected English: "..."` 첨부
+    - Coding Rules에 **TypeScript** (`any` 금지, `type` > `interface`, `@/*` 별칭) + **React/Next.js** (`const` 함수형 컴포넌트, Server Component 기본, Next.js 16 `params` Promise) 명문화
+    - **File Naming** 신규 섹션 — Components PascalCase, hooks camelCase, lib kebab-case, types lowercase, App Router는 Next.js 규칙
+    - **Branch Strategy** 신규 섹션 — trunk-based hybrid (작은 변경 main 직접 push, 3+ commits 또는 ≥3 도메인 영역 변경 시 `feature/*` 브랜치)
+    - **PR Conventions** 신규 섹션 — 제목 형식 `<source> → <target>: <설명>`, template 위치, Claude 협력 문구 금지
+- `.claude/commands/ship.md`:
+    - commit format에 `(v<version>)` suffix 명시
+    - title rules 추가 (명령형 현재 시제, 첫 글자 소문자, 끝 punctuation 없음, 한글)
+    - **commit grouping** rule 추가 — 무관한 변경 묶음 금지
+    - **path quoting** rule 추가 — `(frontend)`, `[slug]` 등은 반드시 `""` 인용
+- `.claude/commands/docs.md`:
+    - CHANGES.md를 single source of truth로 명시 — daily log 파일 생성 금지
+- `.github/PULL_REQUEST_TEMPLATE.md` 신규 — `gh pr create` 자동 적용. Summary / Changes(기능/스타일/기타) / Test plan checklist / Screenshots / Notes 구조
+
 ## v0.11.33 (2026-04-15)
 
 ### fix: blog-views E2E placeholder 한국어 동기화

@@ -12,6 +12,8 @@ Update project documentation to reflect recent code changes. Run the following s
     - List changed files with brief descriptions
 4. If CHANGES.md is already up to date, say so and move on.
 
+**Single source of truth**: `docs/CHANGES.md` is the **only** project-level changelog. Do **not** create daily log files (e.g., `docs/logs/YYYYMMDD-*.md`) or alternative changelogs — version-grouped CHANGES.md is the canonical history. The release workflow (`.github/workflows/release.yml`) extracts release notes directly from this file via `awk` matching `## v<version>`, so format consistency is critical.
+
 ## Step 2: Write PR\_<branch>.md (non-main branches only)
 
 1. Check the current branch with `git branch --show-current`.
