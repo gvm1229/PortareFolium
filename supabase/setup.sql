@@ -137,6 +137,19 @@ CREATE TABLE IF NOT EXISTS editor_states (
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Gantt Chart archive
+CREATE TABLE IF NOT EXISTS gantt_chart_archives (
+    id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    title           TEXT        NOT NULL,
+    source_filename TEXT        NOT NULL,
+    csv_content     TEXT        NOT NULL,
+    tasks           JSONB       NOT NULL DEFAULT '[]'::jsonb,
+    color_scheme    TEXT        NOT NULL DEFAULT 'emerald',
+    bar_style       TEXT        NOT NULL DEFAULT 'rounded',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- ── 인덱스 ──────────────────────────────────────────────────
 
 CREATE INDEX IF NOT EXISTS idx_posts_slug        ON posts(slug);
@@ -148,6 +161,7 @@ CREATE INDEX IF NOT EXISTS idx_books_slug        ON books(slug);
 CREATE INDEX IF NOT EXISTS idx_books_published   ON books(published, order_idx);
 CREATE INDEX IF NOT EXISTS idx_database_snapshots_created_at ON database_snapshots(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_editor_states_entity ON editor_states(entity_type, entity_slug, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_gantt_chart_archives_created_at ON gantt_chart_archives(created_at DESC);
 
 -- ── updated_at 자동 갱신 트리거 ─────────────────────────────
 
@@ -181,6 +195,10 @@ CREATE OR REPLACE TRIGGER trg_site_config_updated_at
 
 CREATE OR REPLACE TRIGGER trg_books_updated_at
     BEFORE UPDATE ON books
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE OR REPLACE TRIGGER trg_gantt_chart_archives_updated_at
+    BEFORE UPDATE ON gantt_chart_archives
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ── Row Level Security ───────────────────────────────────────
@@ -266,6 +284,9 @@ ALTER TABLE database_snapshots ENABLE ROW LEVEL SECURITY;
 -- editor_states: 인증된 사용자만 접근
 ALTER TABLE editor_states ENABLE ROW LEVEL SECURITY;
 
+-- gantt_chart_archives: 인증된 사용자만 접근
+ALTER TABLE gantt_chart_archives ENABLE ROW LEVEL SECURITY;
+
 CREATE POLICY "database_snapshots_admin_all"
     ON database_snapshots FOR ALL
     TO authenticated
@@ -274,6 +295,12 @@ CREATE POLICY "database_snapshots_admin_all"
 
 CREATE POLICY "editor_states_admin_all"
     ON editor_states FOR ALL
+    TO authenticated
+    USING (true)
+    WITH CHECK (true);
+
+CREATE POLICY "gantt_chart_archives_admin_all"
+    ON gantt_chart_archives FOR ALL
     TO authenticated
     USING (true)
     WITH CHECK (true);
@@ -388,5 +415,5 @@ INSERT INTO site_config (key, value) VALUES
     ('seo_config',         '{"default_title":"PortareFolium","default_description":"포트폴리오 & 기술 블로그","default_og_image":""}'),
     ('resume_layout',      '"modern"'),
     -- 신규 설치: setup.sql이 최신 스키마를 적용하므로 현재 버전으로 초기화
-    ('db_schema_version',  '"0.11.68"')
+    ('db_schema_version',  '"0.11.74"')
 ON CONFLICT (key) DO NOTHING;

@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.11.74 (2026-04-16)
+
+### feat: Gantt Chart panel에 bar shape 설정과 최종 chart 정리 반영
+
+- `src/components/admin/panels/GanttChartPanel.tsx`: 최종 chart 우측 상단의 color scheme label 제거
+- `src/components/admin/panels/GanttChartPanel.tsx`: `Bar Shape` selector 추가, `rounded`/`square` 전환과 저장 지원
+- `src/lib/migrations.ts`, `supabase/setup.sql`, `supabase/migration-whole.sql`: `gantt_chart_archives.bar_style` 컬럼과 최신 schema version 반영
+
 ## v0.11.71 (2026-04-16)
 
 ### test: resume-layout test의 coreCompetencies 타입 케이스 정리
