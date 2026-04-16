@@ -1,5 +1,12 @@
 # CHANGES
 
+## v0.11.71 (2026-04-16)
+
+### test: resume-layout test의 coreCompetencies 타입 케이스 정리
+
+- `src/__tests__/resume-layout.test.ts`: 현재 `Resume` 타입에 맞는 `coreCompetencies` wrapper 형식으로 기본 fixture 수정
+- `src/__tests__/resume-layout.test.ts`: legacy 배열 형식을 검증하는 empty case는 명시적 캐스팅으로 유지해 `resolveSectionOrder()` 하위 호환 경로 검증 복구
+
 ## v0.11.70 (2026-04-16)
 
 ### feat: admin content 카테고리에 Gantt Chart 패널 추가

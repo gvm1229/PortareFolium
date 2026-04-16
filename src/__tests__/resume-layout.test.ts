@@ -16,7 +16,11 @@ function makeFullResume(): Resume {
     });
     return {
         basics: { name: "Test" },
-        coreCompetencies: [{ title: "t", description: "d" }],
+        coreCompetencies: {
+            emoji: "",
+            showEmoji: false,
+            entries: [{ title: "t", description: "d" }],
+        },
         careerPhases: sec({ name: "p1" }),
         work: sec({ name: "w1" }),
         projects: sec({ name: "pr1" }),
@@ -152,11 +156,11 @@ describe("resolveSectionOrder", () => {
     });
 
     it("skips coreCompetencies when array is empty", () => {
-        const resume: Resume = {
+        const resume = {
             basics: {},
             coreCompetencies: [],
             work: { emoji: "", showEmoji: false, entries: [{ name: "w" }] },
-        };
+        } as unknown as Resume;
         const result = resolveSectionOrder(resume, DEFAULT_RESUME_LAYOUT);
         expect(result).not.toContain("coreCompetencies");
         expect(result).toContain("work");
