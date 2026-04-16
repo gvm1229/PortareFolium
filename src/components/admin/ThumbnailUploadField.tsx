@@ -8,7 +8,7 @@
  * 최종적으로 DB에 저장되는 값은 Storage URL.
  */
 import { useState, useRef } from "react";
-import { uploadImageToSupabase } from "@/lib/image-upload";
+import { uploadImage } from "@/lib/image-upload";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -45,7 +45,7 @@ export default function ThumbnailUploadField({
         setUploadError(null);
         setUploading(true);
         try {
-            const url = await uploadImageToSupabase(file, folderPath);
+            const url = await uploadImage(file, folderPath);
             onChange(url);
         } catch (err) {
             setUploadError(

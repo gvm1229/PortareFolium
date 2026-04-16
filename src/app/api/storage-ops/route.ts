@@ -1,0 +1,103 @@
+import { NextRequest, NextResponse } from "next/server";
+import {
+    ListObjectsV2Command,
+    CopyObjectCommand,
+    DeleteObjectCommand,
+    DeleteObjectsCommand,
+} from "@aws-sdk/client-s3";
+import { createClient } from "@supabase/supabase-js";
+import { r2Client, R2_BUCKET } from "@/lib/r2";
+
+// Supabase 세션으로 admin 인증
+async function getAuthUser(req: NextRequest) {
+    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    if (!token) return null;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !anon) return null;
+    const client = createClient(url, anon);
+    const { data } = await client.auth.getUser(token);
+    return data?.user ?? null;
+}
+
+// R2 prefix 하위 파일 목록
+async function listFiles(prefix: string): Promise<string[]> {
+    const normalizedPrefix = prefix.endsWith("/") ? prefix : `${prefix}/`;
+    const result = await r2Client.send(
+        new ListObjectsV2Command({
+            Bucket: R2_BUCKET,
+            Prefix: normalizedPrefix,
+        })
+    );
+    return (result.Contents ?? []).map((obj) => obj.Key!).filter(Boolean);
+}
+
+// 폴더 이동 (copy + delete)
+async function moveFolder(oldPrefix: string, newPrefix: string) {
+    const files = await listFiles(oldPrefix);
+    if (files.length === 0) return;
+
+    for (const key of files) {
+        const fileName = key.split("/").pop()!;
+        const newKey = `${newPrefix}/${fileName}`;
+        await r2Client.send(
+            new CopyObjectCommand({
+                Bucket: R2_BUCKET,
+                CopySource: `${R2_BUCKET}/${key}`,
+                Key: newKey,
+            })
+        );
+    }
+
+    // copy 완료 후 원본 삭제
+    await r2Client.send(
+        new DeleteObjectsCommand({
+            Bucket: R2_BUCKET,
+            Delete: {
+                Objects: files.map((key) => ({ Key: key })),
+            },
+        })
+    );
+}
+
+// 폴더 삭제
+async function deleteFolder(prefix: string) {
+    const files = await listFiles(prefix);
+    if (files.length === 0) return;
+
+    await r2Client.send(
+        new DeleteObjectsCommand({
+            Bucket: R2_BUCKET,
+            Delete: {
+                Objects: files.map((key) => ({ Key: key })),
+            },
+        })
+    );
+}
+
+export async function POST(req: NextRequest) {
+    const user = await getAuthUser(req);
+    if (!user) {
+        return NextResponse.json({ error: "인증 필요" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { action } = body as { action: string };
+
+    if (action === "list") {
+        const files = await listFiles(body.prefix);
+        return NextResponse.json({ files });
+    }
+
+    if (action === "move") {
+        await moveFolder(body.oldPrefix, body.newPrefix);
+        return NextResponse.json({ ok: true });
+    }
+
+    if (action === "delete") {
+        await deleteFolder(body.prefix);
+        return NextResponse.json({ ok: true });
+    }
+
+    return NextResponse.json({ error: "unknown action" }, { status: 400 });
+}

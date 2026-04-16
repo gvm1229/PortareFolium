@@ -220,7 +220,8 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Framework: Next.js 16 (App Router) + React 19
 - Styling: Tailwind CSS v4
 - Font: Pretendard Variable (로컬 dynamic subset) + Space Grotesk (Google Fonts CDN)
-- Backend/DB: Supabase (PostgreSQL + Storage)
+- Backend/DB: Supabase (PostgreSQL)
+- Image Storage: Cloudflare R2 (Wrangler CLI 관리, S3 호환 API)
 - Deployment: Vercel
 - Package Manager: pnpm 10
 - Testing: Vitest + Testing Library (unit) / Playwright (E2E)
@@ -258,6 +259,8 @@ src/
 │   │       └── snapshots.ts            # DB 스냅샷 관리
 │   └── api/
 │       ├── mcp/route.ts                # MCP 서버 엔드포인트
+│       ├── upload-image/route.ts       # R2 이미지 업로드 (admin 인증 + S3 SDK)
+│       ├── storage-ops/route.ts        # R2 파일 list/move/delete (admin 인증)
 │       └── run-migrations/route.ts
 ├── components/
 │   ├── Header.tsx                      # 네비게이션 + UserMenu + ThemeToggle
@@ -334,7 +337,8 @@ src/
 │   ├── mcp-tools.ts                    # MCP 툴 정의
 │   ├── agent-token.ts                  # Agent 토큰 검증 유틸
 │   ├── toc.ts                          # 목차 생성
-│   ├── image-upload.ts                 # 이미지 업로드 + Storage 에셋 이전/삭제
+│   ├── r2.ts                           # Cloudflare R2 S3 호환 client (Vercel 서버 런타임)
+│   ├── image-upload.ts                 # 이미지 업로드 (R2 API route 경유) + 에셋 이전/삭제
 │   ├── job-field.ts                    # 직군 필드 유틸
 │   ├── mermaid-render.ts               # Mermaid 렌더링
 │   ├── mermaid-themes.ts               # Mermaid 테마 설정 (컬러 스킴 동기화)

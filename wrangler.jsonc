@@ -1,0 +1,11 @@
+{
+    // PortareFolium — Cloudflare R2 설정
+    // Wrangler CLI 관리 + 로컬 개발용 (production은 Vercel + S3 SDK)
+    "name": "portare-folium",
+    "r2_buckets": [
+        {
+            "binding": "IMAGES",
+            "bucket_name": "gvm1229-portfolio-images"
+        }
+    ]
+}

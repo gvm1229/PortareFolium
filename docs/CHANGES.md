@@ -1,5 +1,20 @@
 # CHANGES
 
+## v0.11.69 (2026-04-16)
+
+### feat: image storage Supabase → Cloudflare R2 마이그레이션 (Wrangler 기반)
+
+- `wrangler.jsonc`: R2 bucket binding 설정 (`gvm1229-portfolio-images`)
+- `src/lib/r2.ts`: Cloudflare R2 S3 호환 client (Vercel 서버 런타임용)
+- `src/app/api/upload-image/route.ts`: admin 인증 + R2 upload API route
+- `src/app/api/storage-ops/route.ts`: R2 파일 list/move/delete API route
+- `src/lib/image-upload.ts`: Supabase Storage → R2 API route 호출로 전환, `uploadImageToSupabase()` → `uploadImage()` rename
+- `ThumbnailUploadField`, `AboutPanel`, `ResumePanel`: upload 함수명 갱신
+- `scripts/migrate-supabase-to-r2.ts`: Supabase Storage → R2 파일 복사 스크립트
+- `scripts/rewrite-image-urls.ts`: DB 내 이미지 URL 일괄 치환 스크립트 (dry-run 지원)
+- `.env.example`: R2 환경변수 5개 추가
+- `.gitignore`: `.wrangler/` 추가
+
 ## v0.11.68 (2026-04-16)
 
 ### feat: DB Snapshot을 전체 public schema 백업 방식으로 전환

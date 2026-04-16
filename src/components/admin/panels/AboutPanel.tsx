@@ -7,7 +7,7 @@ import {
     revalidateHome,
     revalidateResume,
 } from "@/app/admin/actions/revalidate";
-import { uploadImageToSupabase } from "@/lib/image-upload";
+import { uploadImage } from "@/lib/image-upload";
 import type {
     AboutData,
     AboutSectionKey,
@@ -162,7 +162,7 @@ export default function AboutPanel() {
         if (!file) return;
         setImageUploading(true);
         try {
-            const url = await uploadImageToSupabase(file, "about/profile");
+            const url = await uploadImage(file, "about/profile");
             setProfileImage(url);
         } catch {
             setStatus({ type: "error", msg: "이미지 업로드에 실패했습니다." });

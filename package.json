@@ -1,6 +1,6 @@
 {
     "name": "portare-folium",
-    "version": "0.11.68",
+    "version": "0.11.69",
     "engines": {
         "node": ">=24.13.0"
     },
@@ -17,9 +17,12 @@
         "format:check": "prettier --check .",
         "purge": "rm -rf .next",
         "reinstall": "rm -rf node_modules pnpm-lock.yaml && pnpm install",
-        "prepare": "husky || true"
+        "prepare": "husky || true",
+        "r2:list": "wrangler r2 object list gvm1229-portfolio-images",
+        "r2:put": "wrangler r2 object put gvm1229-portfolio-images"
     },
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.1030.0",
         "@emoji-mart/data": "^1.2.1",
         "@emoji-mart/react": "^1.1.1",
         "@floating-ui/react": "^0.27.19",

@@ -6,7 +6,7 @@ import {
     revalidateHome,
     revalidateResume,
 } from "@/app/admin/actions/revalidate";
-import { uploadImageToSupabase } from "@/lib/image-upload";
+import { uploadImage } from "@/lib/image-upload";
 import { useAutoSave } from "@/lib/hooks/useAutoSave";
 import { matchesJobField } from "@/lib/job-field";
 import {
@@ -474,7 +474,7 @@ export default function ResumePanel() {
         setUploadingImage(true);
         setStatus(null);
         try {
-            const url = await uploadImageToSupabase(file, "resume");
+            const url = await uploadImage(file, "resume");
             setResumeData({
                 ...resumeData,
                 basics: { ...resumeData.basics, image: url },

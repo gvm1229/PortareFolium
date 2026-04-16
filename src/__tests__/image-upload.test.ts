@@ -1,36 +1,36 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-    toWebPBlob,
-    uploadImageToSupabase,
-    getStoragePath,
-} from "@/lib/image-upload";
-import { browserClient } from "@/lib/supabase";
+import { toWebPBlob, uploadImage, getStoragePath } from "@/lib/image-upload";
 
-// Mock Supabase Client
+// Mock Supabase Client (getAccessToken에서 세션 토큰 조회용)
 vi.mock("@/lib/supabase", () => {
     return {
         browserClient: {
-            storage: {
-                from: vi.fn(),
+            auth: {
+                getSession: vi.fn(() =>
+                    Promise.resolve({
+                        data: { session: { access_token: "mock-token" } },
+                    })
+                ),
             },
         },
     };
 });
+
+// Mock fetch (API route 호출)
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
 describe("이미지 업로드 및 변환 (Image Upload & Conversion)", () => {
     let originalURL: typeof URL;
     let originalImage: typeof Image;
 
     beforeEach(() => {
-        // 백업
         originalURL = global.URL;
         originalImage = global.Image;
 
-        // Mock URL 객체
         global.URL.createObjectURL = vi.fn(() => "blob:mock-url");
         global.URL.revokeObjectURL = vi.fn();
 
-        // Mock Image 객체
         global.Image = class MockImage {
             onload: (() => void) | null = null;
             onerror: (() => void) | null = null;
@@ -50,7 +50,6 @@ describe("이미지 업로드 및 변환 (Image Upload & Conversion)", () => {
             }
         } as any;
 
-        // Mock Canvas (JSDOM Canvas 한계 극복)
         vi.spyOn(document, "createElement").mockImplementation((tagName) => {
             if (tagName === "canvas") {
                 return {
@@ -59,8 +58,7 @@ describe("이미지 업로드 및 변환 (Image Upload & Conversion)", () => {
                     getContext: vi.fn(() => ({
                         drawImage: vi.fn(),
                     })),
-                    toBlob: vi.fn((callback, type, quality) => {
-                        // WebP 변환 성공 콜백 시뮬레이션
+                    toBlob: vi.fn((callback) => {
                         callback(
                             new Blob(["mock webp content"], {
                                 type: "image/webp",
@@ -107,41 +105,29 @@ describe("이미지 업로드 및 변환 (Image Upload & Conversion)", () => {
         });
     });
 
-    describe("uploadImageToSupabase", () => {
-        let mockUpload: ReturnType<typeof vi.fn>;
-        let mockGetPublicUrl: ReturnType<typeof vi.fn>;
-
-        beforeEach(() => {
-            mockUpload = vi.fn();
-            mockGetPublicUrl = vi.fn();
-            (browserClient!.storage.from as any).mockReturnValue({
-                upload: mockUpload,
-                getPublicUrl: mockGetPublicUrl,
-            });
-        });
-
-        it("WebP가 아닌 이미지가 전달되면 WebP로 변환한 후 업로드", async () => {
+    describe("uploadImage", () => {
+        it("WebP가 아닌 이미지가 전달되면 WebP로 변환한 후 R2에 업로드", async () => {
             const mockFile = new File(["dummy jpg"], "original.jpg", {
                 type: "image/jpeg",
             });
 
-            // Mock Supabase 응답
-            mockUpload.mockResolvedValueOnce({
-                data: { path: "mock" },
-                error: null,
-            });
-            mockGetPublicUrl.mockReturnValueOnce({
-                data: { publicUrl: "https://supabase.com/mock.webp" },
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: () =>
+                    Promise.resolve({
+                        url: "https://pub-xxx.r2.dev/misc/2026/04/mock.webp",
+                    }),
             });
 
-            const url = await uploadImageToSupabase(mockFile);
+            const url = await uploadImage(mockFile);
 
-            expect(url).toBe("https://supabase.com/mock.webp");
-            // 변환된 Blob 데이터가 전달되었는지 검증 (toWebPBlob을 거쳤는지)
-            expect(mockUpload).toHaveBeenCalledWith(
-                expect.any(String),
-                expect.any(Blob), // WebpBlob
-                { contentType: "image/webp", upsert: false }
+            expect(url).toBe("https://pub-xxx.r2.dev/misc/2026/04/mock.webp");
+            expect(mockFetch).toHaveBeenCalledWith(
+                "/api/upload-image",
+                expect.objectContaining({
+                    method: "POST",
+                    headers: { Authorization: "Bearer mock-token" },
+                })
             );
         });
 
@@ -150,37 +136,33 @@ describe("이미지 업로드 및 변환 (Image Upload & Conversion)", () => {
                 type: "image/webp",
             });
 
-            mockUpload.mockResolvedValueOnce({
-                data: { path: "mock" },
-                error: null,
-            });
-            mockGetPublicUrl.mockReturnValueOnce({
-                data: { publicUrl: "https://supabase.com/fast.webp" },
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: () =>
+                    Promise.resolve({
+                        url: "https://pub-xxx.r2.dev/misc/2026/04/fast.webp",
+                    }),
             });
 
-            const url = await uploadImageToSupabase(mockWebpFile);
+            const url = await uploadImage(mockWebpFile);
 
-            expect(url).toBe("https://supabase.com/fast.webp");
-            // 파일 원본이 그대로 전달되었는지 검증
-            expect(mockUpload).toHaveBeenCalledWith(
-                expect.any(String),
-                mockWebpFile,
-                { contentType: "image/webp", upsert: false }
-            );
-            expect(global.URL.createObjectURL).not.toHaveBeenCalled(); // 변환 생략됨
+            expect(url).toBe("https://pub-xxx.r2.dev/misc/2026/04/fast.webp");
+            // WebP는 변환 생략
+            expect(global.URL.createObjectURL).not.toHaveBeenCalled();
         });
 
-        it("Supabase 오류 발생 시 예외를 던짐", async () => {
+        it("API 오류 발생 시 예외를 던짐", async () => {
             const mockErrorFile = new File(["error"], "err.webp", {
                 type: "image/webp",
             });
 
-            mockUpload.mockResolvedValueOnce({
-                data: null,
-                error: new Error("Storage Quota Exceeded"),
+            mockFetch.mockResolvedValueOnce({
+                ok: false,
+                json: () =>
+                    Promise.resolve({ error: "Storage Quota Exceeded" }),
             });
 
-            await expect(uploadImageToSupabase(mockErrorFile)).rejects.toThrow(
+            await expect(uploadImage(mockErrorFile)).rejects.toThrow(
                 "Storage Quota Exceeded"
             );
         });
