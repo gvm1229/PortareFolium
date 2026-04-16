@@ -258,6 +258,33 @@ async function rewriteBooks() {
     }
 }
 
+// editor_states: content (draft/autosave 상태)
+async function rewriteEditorStates() {
+    console.log("\n--- editor_states ---");
+    const { data: rows, error } = await supabase
+        .from("editor_states")
+        .select("id, content");
+    if (error) {
+        console.error(error.message);
+        return;
+    }
+
+    for (const row of rows ?? []) {
+        if (!row.content) continue;
+        if (hasChange(row.content, replaceUrls(row.content))) {
+            changeCount++;
+            console.log(`  [editor_state] id=${row.id}`);
+            if (!DRY_RUN) {
+                const { error: ue } = await supabase
+                    .from("editor_states")
+                    .update({ content: replaceUrls(row.content) })
+                    .eq("id", row.id);
+                if (ue) console.error(`    ERROR: ${ue.message}`);
+            }
+        }
+    }
+}
+
 async function main() {
     console.log(
         DRY_RUN
@@ -273,6 +300,7 @@ async function main() {
     await rewriteResume();
     await rewriteSiteConfig();
     await rewriteBooks();
+    await rewriteEditorStates();
 
     console.log(
         `\n총 ${changeCount}건 변경${DRY_RUN ? " 예정 (--apply 로 실제 적용)" : " 완료"}`
