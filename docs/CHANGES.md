@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.11.70 (2026-04-16)
+
+### feat: admin content 카테고리에 Gantt Chart 패널 추가
+
+- `src/components/admin/panels/GanttChartPanel.tsx`: `PostsPanel` 상단 구조를 참고한 sticky title 기반의 빈 패널 추가
+- `src/components/admin/AdminSidebar.tsx`: Content 섹션에 `Gantt Chart` 탭 추가, 최종 순서를 `포스트 → 포트폴리오 → 태그 → Gantt Chart`로 정렬
+- `src/components/admin/AdminDashboard.tsx`, `src/components/admin/CommandPalette.tsx`: 새 탭 라우팅과 커맨드 팔레트 탐색 항목 연결
+
 ## v0.11.69 (2026-04-16)
 
 ### feat: image storage Supabase → Cloudflare R2 마이그레이션 (Wrangler 기반)

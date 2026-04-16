@@ -8,6 +8,7 @@ import CommandPalette from "@/components/admin/CommandPalette";
 import PostsPanel from "@/components/admin/panels/PostsPanel";
 import PortfolioPanel from "@/components/admin/panels/PortfolioPanel";
 import TagsPanel from "@/components/admin/panels/TagsPanel";
+import GanttChartPanel from "@/components/admin/panels/GanttChartPanel";
 import AboutPanel from "@/components/admin/panels/AboutPanel";
 import SiteConfigPanel from "@/components/admin/panels/SiteConfigPanel";
 import ResumePanel from "@/components/admin/panels/ResumePanel";
@@ -28,6 +29,7 @@ const VALID_TABS: TabId[] = [
     "posts",
     "portfolio",
     "tags",
+    "gantt-chart",
     "about",
     "resume",
     "migrations",
@@ -74,6 +76,7 @@ export default function AdminDashboard() {
     const panelOwnsHeight =
         activeTab === "posts" ||
         activeTab === "portfolio" ||
+        activeTab === "gantt-chart" ||
         activeTab === "resume" ||
         activeTab === "migrations" ||
         activeTab === "snapshots" ||
@@ -176,6 +179,7 @@ export default function AdminDashboard() {
                     <main
                         className={`tablet:p-4 laptop:p-6 flex-1 p-2 ${
                             activeTab === "posts" ||
+                            activeTab === "gantt-chart" ||
                             activeTab === "resume" ||
                             activeTab === "migrations" ||
                             activeTab === "snapshots" ||
@@ -210,6 +214,11 @@ export default function AdminDashboard() {
                             )}
                             {activeTab === "tags" && (
                                 <TagsPanel key={`tags-${tabKey}`} />
+                            )}
+                            {activeTab === "gantt-chart" && (
+                                <GanttChartPanel
+                                    key={`gantt-chart-${tabKey}`}
+                                />
                             )}
                             {activeTab === "about" && (
                                 <AboutPanel key={`about-${tabKey}`} />

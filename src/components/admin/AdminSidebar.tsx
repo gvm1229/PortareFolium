@@ -4,6 +4,7 @@ import {
     FileText,
     Briefcase,
     Tag,
+    ChartNoAxesGantt,
     User,
     ScrollText,
     Database,
@@ -23,6 +24,7 @@ const SECTIONS = [
             { id: "posts", label: "포스트", icon: FileText },
             { id: "portfolio", label: "포트폴리오", icon: Briefcase },
             { id: "tags", label: "태그", icon: Tag },
+            { id: "gantt-chart", label: "Gantt Chart", icon: ChartNoAxesGantt },
         ],
     },
     {
@@ -51,6 +53,7 @@ const SECTIONS = [
 export type TabId =
     | "posts"
     | "portfolio"
+    | "gantt-chart"
     | "tags"
     | "about"
     | "resume"
