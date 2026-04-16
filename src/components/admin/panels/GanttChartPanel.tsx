@@ -73,6 +73,12 @@ type StatusMessage = {
     text: string;
 };
 
+type GanttChartArchiveDraft = {
+    title: string;
+    colorScheme: GanttChartColorSchemeId;
+    barStyle: GanttChartBarStyle;
+};
+
 const ARCHIVE_SELECT_FIELDS =
     "id, title, source_filename, csv_content, tasks, color_scheme, bar_style, created_at, updated_at";
 const DAY_WIDTH = 44;
@@ -174,6 +180,14 @@ const mapArchiveRow = (row: GanttChartArchiveRow): GanttChartArchive => ({
     barStyle: normalizeBarStyle(row.bar_style),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+});
+
+const toArchiveDraft = (
+    archive: Pick<GanttChartArchive, "title" | "colorScheme" | "barStyle">
+): GanttChartArchiveDraft => ({
+    title: archive.title,
+    colorScheme: archive.colorScheme,
+    barStyle: archive.barStyle,
 });
 
 const GanttChartPreview = ({ archive }: { archive: GanttChartArchive }) => {
@@ -374,31 +388,43 @@ const GanttChartPanel = () => {
     const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
     const [isDragging, setIsDragging] = useState(false);
     const [status, setStatus] = useState<StatusMessage | null>(null);
-    const [titleDraft, setTitleDraft] = useState("");
-    const [colorSchemeDraft, setColorSchemeDraft] =
-        useState<GanttChartColorSchemeId>(DEFAULT_COLOR_SCHEME);
-    const [barStyleDraft, setBarStyleDraft] =
-        useState<GanttChartBarStyle>(DEFAULT_BAR_STYLE);
+    const [draftsById, setDraftsById] = useState<
+        Record<string, GanttChartArchiveDraft>
+    >({});
     const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
     const [fitZoom, setFitZoom] = useState(1);
     const [zoom, setZoom] = useState(1);
 
     const selectedArchive =
         archives.find((archive) => archive.id === selectedArchiveId) ?? null;
+    const selectedDraft =
+        selectedArchive &&
+        (draftsById[selectedArchive.id] ?? toArchiveDraft(selectedArchive));
     const allSelected =
         archives.length > 0 &&
         archives.every((archive) => selectedIds.has(archive.id));
     const isSettingsDirty =
         !!selectedArchive &&
-        (titleDraft.trim() !== selectedArchive.title ||
-            colorSchemeDraft !== selectedArchive.colorScheme ||
-            barStyleDraft !== selectedArchive.barStyle);
+        !!selectedDraft &&
+        (selectedDraft.title.trim() !== selectedArchive.title ||
+            selectedDraft.colorScheme !== selectedArchive.colorScheme ||
+            selectedDraft.barStyle !== selectedArchive.barStyle);
 
     const syncArchiveList = (
         nextArchives: GanttChartArchive[],
         nextSelectedArchiveId?: string | null
     ) => {
         setArchives(nextArchives);
+        setDraftsById((current) => {
+            const next: Record<string, GanttChartArchiveDraft> = {};
+
+            for (const archive of nextArchives) {
+                next[archive.id] =
+                    current[archive.id] ?? toArchiveDraft(archive);
+            }
+
+            return next;
+        });
         setSelectedArchiveId(
             nextSelectedArchiveId ??
                 (nextArchives.some(
@@ -415,6 +441,19 @@ const GanttChartPanel = () => {
                     )
                 )
         );
+    };
+
+    const updateSelectedDraft = (patch: Partial<GanttChartArchiveDraft>) => {
+        if (!selectedArchive) return;
+
+        setDraftsById((current) => ({
+            ...current,
+            [selectedArchive.id]: {
+                ...(current[selectedArchive.id] ??
+                    toArchiveDraft(selectedArchive)),
+                ...patch,
+            },
+        }));
     };
 
     const loadArchives = async () => {
@@ -458,9 +497,6 @@ const GanttChartPanel = () => {
     }, []);
     useEffect(() => {
         if (!selectedArchive) return;
-        setTitleDraft(selectedArchive.title);
-        setColorSchemeDraft(selectedArchive.colorScheme);
-        setBarStyleDraft(selectedArchive.barStyle);
         shouldFitRef.current = true;
         userZoomedRef.current = false;
     }, [selectedArchive]);
@@ -672,8 +708,8 @@ const GanttChartPanel = () => {
     };
 
     const handleSaveSettings = async () => {
-        if (!selectedArchive || !browserClient) return;
-        const nextTitle = titleDraft.trim();
+        if (!selectedArchive || !selectedDraft || !browserClient) return;
+        const nextTitle = selectedDraft.title.trim();
         if (!nextTitle) {
             setStatus({ ok: false, text: "차트 제목은 비워둘 수 없습니다" });
             return;
@@ -684,8 +720,8 @@ const GanttChartPanel = () => {
             .from("gantt_chart_archives")
             .update({
                 title: nextTitle,
-                color_scheme: colorSchemeDraft,
-                bar_style: barStyleDraft,
+                color_scheme: selectedDraft.colorScheme,
+                bar_style: selectedDraft.barStyle,
             })
             .eq("id", selectedArchive.id)
             .select(ARCHIVE_SELECT_FIELDS)
@@ -1002,11 +1038,14 @@ const GanttChartPanel = () => {
                                             </label>
                                             <input
                                                 type="text"
-                                                value={titleDraft}
+                                                value={
+                                                    selectedDraft?.title ?? ""
+                                                }
                                                 onChange={(event) =>
-                                                    setTitleDraft(
-                                                        event.target.value
-                                                    )
+                                                    updateSelectedDraft({
+                                                        title: event.target
+                                                            .value,
+                                                    })
                                                 }
                                                 className="w-full rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-3 py-2 text-sm text-(--color-foreground) focus:ring-2 focus:ring-(--color-accent)/40 focus:outline-none"
                                             />
@@ -1016,12 +1055,16 @@ const GanttChartPanel = () => {
                                                 Color Scheme
                                             </label>
                                             <select
-                                                value={colorSchemeDraft}
+                                                value={
+                                                    selectedDraft?.colorScheme ??
+                                                    DEFAULT_COLOR_SCHEME
+                                                }
                                                 onChange={(event) =>
-                                                    setColorSchemeDraft(
-                                                        event.target
-                                                            .value as GanttChartColorSchemeId
-                                                    )
+                                                    updateSelectedDraft({
+                                                        colorScheme: event
+                                                            .target
+                                                            .value as GanttChartColorSchemeId,
+                                                    })
                                                 }
                                                 className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-3 py-2 text-sm text-(--color-foreground) focus:outline-none"
                                             >
@@ -1046,12 +1089,15 @@ const GanttChartPanel = () => {
                                                 Bar Shape
                                             </label>
                                             <select
-                                                value={barStyleDraft}
+                                                value={
+                                                    selectedDraft?.barStyle ??
+                                                    DEFAULT_BAR_STYLE
+                                                }
                                                 onChange={(event) =>
-                                                    setBarStyleDraft(
-                                                        event.target
-                                                            .value as GanttChartBarStyle
-                                                    )
+                                                    updateSelectedDraft({
+                                                        barStyle: event.target
+                                                            .value as GanttChartBarStyle,
+                                                    })
                                                 }
                                                 className="rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-3 py-2 text-sm text-(--color-foreground) focus:outline-none"
                                             >
@@ -1144,12 +1190,15 @@ const GanttChartPanel = () => {
                                             <GanttChartPreview
                                                 archive={{
                                                     ...selectedArchive,
-                                                    title: titleDraft.trim()
-                                                        ? titleDraft.trim()
+                                                    title: selectedDraft?.title.trim()
+                                                        ? selectedDraft.title.trim()
                                                         : selectedArchive.title,
                                                     colorScheme:
-                                                        colorSchemeDraft,
-                                                    barStyle: barStyleDraft,
+                                                        selectedDraft?.colorScheme ??
+                                                        selectedArchive.colorScheme,
+                                                    barStyle:
+                                                        selectedDraft?.barStyle ??
+                                                        selectedArchive.barStyle,
                                                 }}
                                             />
                                         </div>

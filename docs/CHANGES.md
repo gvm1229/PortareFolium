@@ -1,5 +1,18 @@
 # CHANGES
 
+## v0.11.76 (2026-04-17)
+
+### fix: MigrationsPanel 미적용 안내 영역 우측 padding 보정
+
+- `src/components/admin/panels/MigrationsPanel.tsx`: 안내 문구와 자동 적용 버튼이 우측 가장자리에 붙는 현상을 막기 위해 상단 안내 row에 `pr-4` 추가
+
+## v0.11.75 (2026-04-17)
+
+### fix: Gantt Chart panel refresh 시 archive별 draft 설정 유지
+
+- `src/components/admin/panels/GanttChartPanel.tsx`: title, color scheme, bar shape draft를 archive id 기준으로 분리 저장하도록 수정
+- `src/components/admin/panels/GanttChartPanel.tsx`: refresh와 archive 전환 이후에도 각 entry의 draft 설정이 서로 덮어쓰지 않도록 동작 보정
+
 ## v0.11.74 (2026-04-16)
 
 ### feat: Gantt Chart panel에 bar shape 설정과 최종 chart 정리 반영
