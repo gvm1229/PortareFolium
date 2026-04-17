@@ -191,39 +191,40 @@ const GanttChartPreview = ({ archive }: { archive: GanttChartArchive }) => {
                         <Fragment
                             key={`${archive.id}-${task.taskName}-${task.startDate}`}
                         >
-                            <div className="space-y-1 py-2">
-                                <p className="text-sm font-semibold text-slate-900">
-                                    {task.taskName}
-                                </p>
-                                {task.category && (
-                                    <span
-                                        className="inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
-                                        style={{ backgroundColor: barColor }}
-                                    >
-                                        {task.category}
-                                    </span>
-                                )}
+                            <div className="flex min-w-0 flex-col justify-center gap-1 py-2">
+                                <div className="flex min-w-0 items-center gap-2">
+                                    <p className="truncate text-sm font-semibold text-slate-900">
+                                        {task.taskName}
+                                    </p>
+                                    {task.category && (
+                                        <span
+                                            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
+                                            style={{
+                                                backgroundColor: barColor,
+                                            }}
+                                        >
+                                            {task.category}
+                                        </span>
+                                    )}
+                                </div>
                                 <p
-                                    className="text-xs"
+                                    className="truncate text-xs"
                                     style={{ color: AXIS_COLOR }}
                                 >
-                                    {formatDateLabel(task.startDate)} -{" "}
-                                    {formatDateLabel(task.endDate)} ({taskDays}
-                                    일)
-                                </p>
-                                <p className="text-xs leading-5 text-slate-400">
-                                    {task.comment || "No comment"}
+                                    {formatDateLabel(task.startDate)} –{" "}
+                                    {formatDateLabel(task.endDate)} · {taskDays}
+                                    일{task.comment ? ` · ${task.comment}` : ""}
                                 </p>
                             </div>
                             <div
                                 className={`relative overflow-hidden ${
                                     archive.barStyle === "square"
-                                        ? "rounded-md"
+                                        ? "rounded-lg"
                                         : "rounded-2xl"
                                 }`}
                                 style={{
                                     width: timelineWidth,
-                                    height: 64,
+                                    height: 44,
                                     backgroundColor: TRACK_COLOR,
                                 }}
                             >
@@ -242,11 +243,7 @@ const GanttChartPreview = ({ archive }: { archive: GanttChartArchive }) => {
                                     />
                                 ))}
                                 <div
-                                    className="pointer-events-none absolute inset-x-4 top-1/2 h-px -translate-y-1/2"
-                                    style={{ backgroundColor: GRID_COLOR }}
-                                />
-                                <div
-                                    className={`absolute top-1/2 flex h-10 -translate-y-1/2 items-center px-4 text-sm font-semibold whitespace-nowrap shadow-[0_10px_24px_rgba(15,23,42,0.18)] ${
+                                    className={`absolute top-1/2 flex h-8 -translate-y-1/2 items-center px-3 text-xs font-semibold whitespace-nowrap shadow-[0_6px_16px_rgba(15,23,42,0.18)] ${
                                         archive.barStyle === "square"
                                             ? "rounded-md"
                                             : "rounded-full"

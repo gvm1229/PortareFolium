@@ -1,5 +1,11 @@
 # CHANGES
 
+## v0.11.91 (2026-04-17)
+
+### fix: Gantt Chart task row를 compact 수평 레이아웃으로 변경
+
+- `src/components/admin/panels/GanttChartPanel.tsx`: task name + category tag를 한 줄에, 날짜+comment를 한 줄로 통합 / bar track 높이 64→44px, bar pill 높이 40→32px로 축소해 행 높이 최소화
+
 ## v0.11.90 (2026-04-17)
 
 ### feat: Gantt Chart 각 task에 category tag 표시
