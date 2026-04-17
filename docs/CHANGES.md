@@ -1,5 +1,11 @@
 # CHANGES
 
+## v0.11.79 (2026-04-17)
+
+### chore: next.config R2_PUBLIC_URL remotePattern 추가 및 Supabase storage 항목 제거
+
+- `next.config.ts`: `R2_PUBLIC_URL` 환경 변수에서 호스트네임을 파싱해 `images.remotePatterns`에 동적 추가, 더 이상 사용하지 않는 `*.supabase.co` 항목 제거
+
 ## v0.11.78 (2026-04-17)
 
 ### fix: avatar placeholder 로컬화 및 UserMenu 이미지 로드 실패 폴백 추가
