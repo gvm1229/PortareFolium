@@ -1358,6 +1358,17 @@ html.dark .colored-table td[data-ct-color="pink"] {
     margin-bottom: 0;
 }
 
+.prose .tiptap .editor-image-node {
+    max-width: 100%;
+}
+
+.prose .tiptap .editor-image-node img {
+    display: block;
+    height: auto;
+    margin: 0;
+    max-width: 100%;
+}
+
 .tiptap p.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
     color: oklch(0.65 0 0);

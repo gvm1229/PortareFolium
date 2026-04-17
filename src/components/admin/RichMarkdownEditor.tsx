@@ -149,31 +149,40 @@ export default function RichMarkdownEditor({
                     return ReactNodeViewRenderer(({ node }: NodeViewProps) => (
                         <NodeViewWrapper
                             as="span"
-                            // leading-none + img block으로 wrapper 높이를 이미지에 정확히 맞춤
-                            className="group relative inline-block align-top leading-none"
+                            className="editor-image-node group inline-block max-w-full align-top"
                         >
-                            <img
-                                src={node.attrs.src as string}
-                                alt={(node.attrs.alt as string) ?? ""}
-                                title={
-                                    (node.attrs.title as string) || undefined
-                                }
-                                className="block"
-                            />
-                            {onSetThumbnailRef.current && node.attrs.src && (
-                                <button
-                                    contentEditable={false}
-                                    onMouseDown={(e) => e.preventDefault()}
-                                    onClick={() =>
-                                        onSetThumbnailRef.current?.(
-                                            node.attrs.src as string
-                                        )
+                            <span
+                                contentEditable={false}
+                                className="relative inline-flex max-w-full align-top leading-none"
+                            >
+                                <img
+                                    src={node.attrs.src as string}
+                                    alt={(node.attrs.alt as string) ?? ""}
+                                    title={
+                                        (node.attrs.title as string) ||
+                                        undefined
                                     }
-                                    className="absolute top-2 right-2 rounded bg-(--color-accent) px-2 py-1 text-xs font-medium whitespace-nowrap text-(--color-on-accent) opacity-0 transition-opacity group-hover:opacity-100"
-                                >
-                                    Set as thumbnail
-                                </button>
-                            )}
+                                    className="block h-auto max-w-full"
+                                />
+                                {onSetThumbnailRef.current &&
+                                    node.attrs.src && (
+                                        <button
+                                            type="button"
+                                            contentEditable={false}
+                                            onMouseDown={(e) =>
+                                                e.preventDefault()
+                                            }
+                                            onClick={() =>
+                                                onSetThumbnailRef.current?.(
+                                                    node.attrs.src as string
+                                                )
+                                            }
+                                            className="absolute top-3 right-3 z-10 rounded bg-(--color-accent) px-2 py-1 text-xs font-medium whitespace-nowrap text-(--color-on-accent) opacity-0 transition-opacity group-hover:opacity-100"
+                                        >
+                                            썸네일로 설정
+                                        </button>
+                                    )}
+                            </span>
                         </NodeViewWrapper>
                     ));
                 },

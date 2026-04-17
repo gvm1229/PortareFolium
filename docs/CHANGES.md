@@ -1,5 +1,12 @@
 # CHANGES
 
+## v0.11.83 (2026-04-17)
+
+### fix: RichMarkdownEditor thumbnail 버튼 위치를 이미지 표시 영역 기준으로 보정
+
+- `src/components/admin/RichMarkdownEditor.tsx`: image NodeView에 실제 이미지 크기를 따라가는 내부 wrapper를 추가하고 `썸네일로 설정` 버튼을 그 wrapper 기준 absolute overlay로 재배치
+- `src/styles/global.css`: editor 내부 image node 전용 `max-width`, `margin: 0`, `height: auto` 스타일 추가로 `prose` 기본 이미지 스타일이 overlay 기준을 흔들지 않도록 수정
+
 ## v0.11.82 (2026-04-17)
 
 ### feat: GanttChartPanel 전면 개편 — 모달 기반 생성/편집 + 카테고리 색상
