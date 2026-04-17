@@ -195,6 +195,14 @@ const GanttChartPreview = ({ archive }: { archive: GanttChartArchive }) => {
                                 <p className="text-sm font-semibold text-slate-900">
                                     {task.taskName}
                                 </p>
+                                {task.category && (
+                                    <span
+                                        className="inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
+                                        style={{ backgroundColor: barColor }}
+                                    >
+                                        {task.category}
+                                    </span>
+                                )}
                                 <p
                                     className="text-xs"
                                     style={{ color: AXIS_COLOR }}

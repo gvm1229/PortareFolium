@@ -1,5 +1,11 @@
 # CHANGES
 
+## v0.11.90 (2026-04-17)
+
+### feat: Gantt Chart 각 task에 category tag 표시
+
+- `src/components/admin/panels/GanttChartPanel.tsx`: `GanttChartPreview` task 좌측 정보 영역에 category를 solid 배경 pill tag로 표시, 색상은 `categoryColors` 매핑 적용
+
 ## v0.11.89 (2026-04-17)
 
 ### fix: GanttChartCategoryColorModal 색상 picker가 color square 옆에 열리도록 수정
