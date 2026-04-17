@@ -7,8 +7,7 @@ import { usePathname } from "next/navigation";
 import { LogOut, Settings } from "lucide-react";
 
 // 프로필 이미지 placeholder
-const PLACEHOLDER_IMG =
-    "https://urqqfjxocxfrvuozgobi.supabase.co/storage/v1/object/public/images/legacy/avatar-placeholder-c9516fa9.svg";
+const PLACEHOLDER_IMG = "/avatar-placeholder.svg";
 
 export default function UserMenu() {
     const [user, setUser] = useState<{ id: string } | null>(null);
@@ -108,6 +107,10 @@ export default function UserMenu() {
                     src={profileImg}
                     alt="프로필"
                     className="h-full w-full object-cover"
+                    onError={() => {
+                        sessionStorage.removeItem("profile_image_url");
+                        setProfileImg(PLACEHOLDER_IMG);
+                    }}
                 />
             </button>
 

@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.11.78 (2026-04-17)
+
+### fix: avatar placeholder 로컬화 및 UserMenu 이미지 로드 실패 폴백 추가
+
+- `public/avatar-placeholder.svg`: Supabase Storage URL 의존 제거, 로컬 SVG 신규 추가
+- `src/components/UserMenu.tsx`: placeholder를 로컬 경로로 교체, `onError` 핸들러 추가 (실패 시 sessionStorage 캐시 삭제 + placeholder 폴백)
+- `src/components/AboutView.tsx`: placeholder를 로컬 경로로 교체
+
 ## v0.11.77 (2026-04-17)
 
 ### feat: RichMarkdownEditor 이미지 thumbnail 선택 기능 추가
