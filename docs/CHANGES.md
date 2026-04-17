@@ -1,5 +1,11 @@
 # CHANGES
 
+## v0.12.1 (2026-04-17)
+
+### fix: Tiptap 이미지 업로드 모달을 R2로 마이그레이션
+
+- `src/components/admin/TiptapImageUpload.tsx`: Supabase Storage `images` bucket 직접 호출 제거, `lib/image-upload.ts`의 `uploadImage()`를 통해 `/api/upload-image` R2 route 경유하도록 통일 — R2 전환 이후 발생하던 "no bucket" 에러 해소
+
 ## v0.12.0 (2026-04-17)
 
 ### release: minor 버전 release

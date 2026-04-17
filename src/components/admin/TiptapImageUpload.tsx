@@ -4,20 +4,18 @@
 // 파일 업로드 (drag & drop + file picker) 및 URL 입력 지원
 import { useState, useCallback } from "react";
 import type { Editor } from "@tiptap/react";
-import { browserClient } from "@/lib/supabase";
-import { toWebPBlob, getStoragePath } from "@/lib/image-upload";
+import { uploadImage } from "@/lib/image-upload";
 
-const BUCKET = "images";
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
 type Mode = "upload" | "url";
 
-interface TiptapImageUploadProps {
+type TiptapImageUploadProps = {
     editor: Editor | null;
     isOpen: boolean;
     onClose: () => void;
     folderPath?: string;
-}
+};
 
 export default function TiptapImageUpload({
     editor,
@@ -90,42 +88,15 @@ export default function TiptapImageUpload({
 
     const handleDragOver = (e: React.DragEvent) => e.preventDefault();
 
-    // 파일 업로드 → Supabase → 에디터 삽입
+    // 파일 업로드 → R2 → 에디터 삽입
     const handleUpload = async () => {
         if (!file) return;
         setUploading(true);
         setError(null);
 
         try {
-            const isGif =
-                file.type === "image/gif" ||
-                file.name.toLowerCase().endsWith(".gif");
-            const blob =
-                file.type === "image/webp" || isGif
-                    ? file
-                    : await toWebPBlob(file);
-            const ext = isGif ? "gif" : "webp";
-            const path = getStoragePath(folderPath, ext);
-
-            if (!browserClient) {
-                setError("Supabase가 설정되지 않음");
-                return;
-            }
-
-            const { error: uploadErr } = await browserClient.storage
-                .from(BUCKET)
-                .upload(path, blob, {
-                    contentType: isGif ? "image/gif" : "image/webp",
-                    upsert: false,
-                });
-
-            if (uploadErr) throw uploadErr;
-
-            const {
-                data: { publicUrl },
-            } = browserClient.storage.from(BUCKET).getPublicUrl(path);
-
-            insertImage(publicUrl, altInput.trim());
+            const url = await uploadImage(file, folderPath);
+            insertImage(url, altInput.trim());
             handleClose();
         } catch (err) {
             setError(err instanceof Error ? err.message : "업로드 실패");
@@ -134,7 +105,7 @@ export default function TiptapImageUpload({
         }
     };
 
-    // URL → WebP 변환 업로드 시도, 실패 시 URL 그대로 삽입
+    // URL fetch → R2 업로드 시도, 실패 시 URL 그대로 삽입
     const handleUrlUpload = async () => {
         const url = urlInput.trim();
         if (!url) return;
@@ -150,36 +121,16 @@ export default function TiptapImageUpload({
         setError(null);
 
         try {
-            // URL에서 fetch → WebP 변환 → Supabase 업로드
             const res = await fetch(url);
             const blob = await res.blob();
-            const converted = await toWebPBlob(blob);
-            const path = getStoragePath(folderPath);
-
-            if (!browserClient) {
-                // Supabase 미설정 → URL 그대로 삽입
-                insertImage(url, altInput.trim());
-                handleClose();
-                return;
-            }
-
-            const { error: uploadErr } = await browserClient.storage
-                .from(BUCKET)
-                .upload(path, converted, {
-                    contentType: "image/webp",
-                    upsert: false,
-                });
-
-            if (uploadErr) throw uploadErr;
-
-            const {
-                data: { publicUrl },
-            } = browserClient.storage.from(BUCKET).getPublicUrl(path);
-
-            insertImage(publicUrl, altInput.trim());
+            const fetched = new File([blob], "remote-image", {
+                type: blob.type || "image/png",
+            });
+            const uploadedUrl = await uploadImage(fetched, folderPath);
+            insertImage(uploadedUrl, altInput.trim());
             handleClose();
         } catch {
-            // 변환/업로드 실패 → URL 그대로 삽입
+            // R2 업로드 실패 시 원본 URL fallback
             insertImage(url, altInput.trim());
             handleClose();
         } finally {
@@ -308,7 +259,7 @@ export default function TiptapImageUpload({
                             className="w-full rounded-lg border border-(--color-border) bg-(--color-surface-subtle) px-3 py-2 text-base text-(--color-foreground)"
                         />
                         <p className="mt-1 text-sm text-(--color-muted)">
-                            Supabase 업로드 시도 후, 실패하면 URL 그대로 삽입
+                            R2 업로드 시도 후, 실패하면 URL 그대로 삽입
                         </p>
                     </div>
                 )}
@@ -350,7 +301,7 @@ export default function TiptapImageUpload({
                                 disabled={!urlInput.trim() || uploading}
                                 className="rounded-lg bg-green-500 px-4 py-2 text-base font-medium text-white transition-colors hover:bg-green-400 disabled:opacity-50 dark:bg-green-600 dark:text-white dark:hover:bg-green-500"
                             >
-                                {uploading ? "업로드 중..." : "Supabase에 저장"}
+                                {uploading ? "업로드 중..." : "R2에 저장"}
                             </button>
                         </>
                     )}
