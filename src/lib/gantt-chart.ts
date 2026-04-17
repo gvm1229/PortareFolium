@@ -1,8 +1,21 @@
 export type GanttChartTask = {
     taskName: string;
+    category: string;
     startDate: string;
     endDate: string;
     comment: string;
+};
+
+export type GanttChartBarStyle = "rounded" | "square";
+
+export type GanttChartArchive = {
+    id: string;
+    title: string;
+    tasks: GanttChartTask[];
+    categoryColors: Record<string, string>;
+    barStyle: GanttChartBarStyle;
+    createdAt: string;
+    updatedAt: string;
 };
 
 export type GanttChartDay = {
@@ -21,6 +34,7 @@ export type GanttChartMonthGroup = {
 
 const REQUIRED_HEADERS = [
     "task name",
+    "category",
     "start date",
     "end date",
     "comment",
@@ -121,7 +135,7 @@ export function parseGanttCsv(csvContent: string): GanttChartTask[] {
         !header.every((cell, index) => cell === REQUIRED_HEADERS[index])
     ) {
         throw new Error(
-            "CSV 헤더는 task name,start date,end date,comment 형식이어야 합니다"
+            "CSV 헤더는 task name,category,start date,end date,comment 형식이어야 합니다"
         );
     }
 
@@ -129,14 +143,15 @@ export function parseGanttCsv(csvContent: string): GanttChartTask[] {
         const lineNumber = index + 2;
         const cells = parseCsvRow(row);
 
-        if (cells.length !== 4) {
-            throw new Error(`${lineNumber}행 컬럼 수가 4개가 아닙니다`);
+        if (cells.length !== 5) {
+            throw new Error(`${lineNumber}행 컬럼 수가 5개가 아닙니다`);
         }
 
         const taskName = cells[0].trim();
-        const startDateRaw = cells[1].trim();
-        const endDateRaw = cells[2].trim();
-        const comment = cells[3].trim();
+        const category = cells[1].trim();
+        const startDateRaw = cells[2].trim();
+        const endDateRaw = cells[3].trim();
+        const comment = cells[4].trim();
         const startDate = parseDateString(startDateRaw);
         const endDate = parseDateString(endDateRaw);
 
@@ -160,6 +175,7 @@ export function parseGanttCsv(csvContent: string): GanttChartTask[] {
 
         return {
             taskName,
+            category,
             startDate: dateToKey(startDate),
             endDate: dateToKey(endDate),
             comment,
@@ -186,6 +202,8 @@ export function normalizeStoredGanttTasks(value: unknown): GanttChartTask[] {
         const row = item as Record<string, unknown>;
         const taskName =
             typeof row.taskName === "string" ? row.taskName.trim() : "";
+        const category =
+            typeof row.category === "string" ? row.category.trim() : "";
         const startDate =
             typeof row.startDate === "string" ? row.startDate.trim() : "";
         const endDate =
@@ -206,6 +224,7 @@ export function normalizeStoredGanttTasks(value: unknown): GanttChartTask[] {
 
         return {
             taskName,
+            category,
             startDate: dateToKey(parsedStartDate),
             endDate: dateToKey(parsedEndDate),
             comment,

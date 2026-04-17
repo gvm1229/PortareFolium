@@ -1,5 +1,133 @@
 # CHANGES
 
+## v0.11.93 (2026-04-17)
+
+### revert: editor title focus ring 보정 되돌리기
+
+- `src/components/admin/panels/PostsPanel.tsx`, `src/components/admin/panels/PortfolioPanel.tsx`: v0.11.88의 title+slug `focus-within` inset ring wrapper 변경 제거
+
+## v0.11.92 (2026-04-17)
+
+### feat: Gantt Chart comment 표시 토글 추가
+
+- `src/components/admin/panels/GanttChartPanel.tsx`: 툴바에 "Comments ON/OFF" 토글 버튼 추가 (기본 OFF) — ON 시 각 task 아래에 full comment 노출, bar track 높이 44→60px 확장
+
+## v0.11.91 (2026-04-17)
+
+### fix: Gantt Chart task row를 compact 수평 레이아웃으로 변경
+
+- `src/components/admin/panels/GanttChartPanel.tsx`: task name + category tag를 한 줄에, 날짜+comment를 한 줄로 통합 / bar track 높이 64→44px, bar pill 높이 40→32px로 축소해 행 높이 최소화
+
+## v0.11.90 (2026-04-17)
+
+### feat: Gantt Chart 각 task에 category tag 표시
+
+- `src/components/admin/panels/GanttChartPanel.tsx`: `GanttChartPreview` task 좌측 정보 영역에 category를 solid 배경 pill tag로 표시, 색상은 `categoryColors` 매핑 적용
+
+## v0.11.89 (2026-04-17)
+
+### fix: GanttChartCategoryColorModal 색상 picker가 color square 옆에 열리도록 수정
+
+- `src/components/admin/panels/GanttChartCategoryColorModal.tsx`: hidden input + ref trigger 패턴 제거 → color input을 color square 버튼 내부에 `absolute inset-0 opacity-0` overlay로 삽입, picker가 버튼 위치 기준으로 열리도록 수정
+
+## v0.11.88 (2026-04-17)
+
+### fix: editor title 영역 focus ring 좌우 clipping 보정
+
+- `src/components/admin/panels/PostsPanel.tsx`, `src/components/admin/panels/PortfolioPanel.tsx`: title + slug 영역을 `focus-within` inset ring wrapper로 감싸고 좌우 padding을 추가해 focus ring이 상위 `overflow-hidden` 구조에서 잘리지 않도록 수정
+
+## v0.11.87 (2026-04-17)
+
+### fix: Sonner toast font와 success icon 시각 피드백 보정
+
+- `src/components/ui/sonner.tsx`: toast에 프로젝트 기본 `--font-sans` 적용
+- `src/components/ui/sonner.tsx`: success icon을 green `CheckCircle2`로 교체해 성공 상태를 시각적으로 구분
+
+## v0.11.86 (2026-04-17)
+
+### fix: Sonner toast 위치를 top-center로 변경
+
+- `src/components/ui/sonner.tsx`: 전역 `Toaster` 기본 위치를 `bottom-right`에서 `top-center`로 변경
+
+## v0.11.85 (2026-04-17)
+
+### fix: thumbnail 설정 성공 시 Sonner toast 추가
+
+- `sonner` 의존성 추가, `src/components/ui/sonner.tsx` 신규, `src/app/layout.tsx`에 전역 `Toaster` 연결
+- `src/components/admin/RichMarkdownEditor.tsx`: `썸네일로 설정` 클릭 후 `toast.success("썸네일로 설정됨")` 호출로 성공 피드백 추가
+
+## v0.11.84 (2026-04-17)
+
+### fix: Gantt Chart JPG export 줌 무관하게 항상 100% 크기로 캡처
+
+- `src/components/admin/panels/GanttChartPanel.tsx`: 캡처 전 `transform`을 `scale(1)`로 임시 교체, `finally`에서 복원 — 줌 상태와 무관하게 여백 없는 전체 차트 export
+
+## v0.11.83 (2026-04-17)
+
+### fix: RichMarkdownEditor thumbnail 버튼 위치를 이미지 표시 영역 기준으로 보정
+
+- `src/components/admin/RichMarkdownEditor.tsx`: image NodeView에 실제 이미지 크기를 따라가는 내부 wrapper를 추가하고 `썸네일로 설정` 버튼을 그 wrapper 기준 absolute overlay로 재배치
+- `src/styles/global.css`: editor 내부 image node 전용 `max-width`, `margin: 0`, `height: auto` 스타일 추가로 `prose` 기본 이미지 스타일이 overlay 기준을 흔들지 않도록 수정
+
+## v0.11.82 (2026-04-17)
+
+### feat: GanttChartPanel 전면 개편 — 모달 기반 생성/편집 + 카테고리 색상
+
+- `src/lib/gantt-chart.ts`: `GanttChartArchive`, `GanttChartBarStyle` 타입 export 추가
+- `src/components/admin/panels/GanttChartCreateModal.tsx`: 차트 생성/편집 겸용 모달 신규 (80vw×80vh, Excel 스타일 테이블, CSV import, 미저장 경고)
+- `src/components/admin/panels/GanttChartCategoryColorModal.tsx`: 카테고리별 이름/색상 편집 모달 신규 (50vw×80vh, native color picker)
+- `src/components/admin/panels/GanttChartPanel.tsx`: CSV 업로드 제거, 생성/편집/Category Colors 버튼 추가, Color Scheme 드롭다운 제거, 카테고리별 bar 색상 렌더링
+
+## v0.11.81 (2026-04-17)
+
+### feat: GanttChartTask category 필드 추가 및 5컬럼 CSV 파서
+
+- `src/lib/gantt-chart.ts`: `GanttChartTask`에 `category` 필드 추가, CSV 헤더 5컬럼(`task name,category,start date,end date,comment`)으로 확장, `parseGanttCsv`/`normalizeStoredGanttTasks` 업데이트
+- `src/lib/migrations.ts`: `gantt_chart_archives.category_colors JSONB` 컬럼 마이그레이션 추가 (v0.11.81)
+- `src/__tests__/gantt-chart.test.ts`: 5컬럼 포맷으로 테스트 케이스 업데이트
+
+## v0.11.80 (2026-04-17)
+
+### fix: thumbnail 버튼 이미지 내부 렌더링 위치 및 accent 색상 수정
+
+- `src/components/admin/RichMarkdownEditor.tsx`: NodeViewWrapper에 `align-top leading-none` 추가, `<img>`에 `block` 추가로 버튼이 이미지 내부에 정확히 위치하도록 수정
+- 버튼 배경색을 `--color-accent` / `--color-on-accent` CSS 변수로 교체 (다크/라이트 테마 대응)
+
+## v0.11.79 (2026-04-17)
+
+### chore: next.config R2_PUBLIC_URL remotePattern 추가 및 Supabase storage 항목 제거
+
+- `next.config.ts`: `R2_PUBLIC_URL` 환경 변수에서 호스트네임을 파싱해 `images.remotePatterns`에 동적 추가, 더 이상 사용하지 않는 `*.supabase.co` 항목 제거
+
+## v0.11.78 (2026-04-17)
+
+### fix: avatar placeholder 로컬화 및 UserMenu 이미지 로드 실패 폴백 추가
+
+- `public/avatar-placeholder.svg`: Supabase Storage URL 의존 제거, 로컬 SVG 신규 추가
+- `src/components/UserMenu.tsx`: placeholder를 로컬 경로로 교체, `onError` 핸들러 추가 (실패 시 sessionStorage 캐시 삭제 + placeholder 폴백)
+- `src/components/AboutView.tsx`: placeholder를 로컬 경로로 교체
+
+## v0.11.77 (2026-04-17)
+
+### feat: RichMarkdownEditor 이미지 thumbnail 선택 기능 추가
+
+- `src/components/admin/RichMarkdownEditor.tsx`: `onSetThumbnail` prop 추가, Tiptap Image 확장을 ReactNodeViewRenderer 기반으로 교체하여 WYSIWYG hover 시 "Set as thumbnail" 버튼 표시
+- `src/components/admin/panels/PostsPanel.tsx`: `onSetThumbnail` prop 연결
+- `src/components/admin/panels/PortfolioPanel.tsx`: `onSetThumbnail` prop 연결
+
+## v0.11.76 (2026-04-17)
+
+### fix: MigrationsPanel 미적용 안내 영역 우측 padding 보정
+
+- `src/components/admin/panels/MigrationsPanel.tsx`: 안내 문구와 자동 적용 버튼이 우측 가장자리에 붙는 현상을 막기 위해 상단 안내 row에 `pr-4` 추가
+
+## v0.11.75 (2026-04-17)
+
+### fix: Gantt Chart panel refresh 시 archive별 draft 설정 유지
+
+- `src/components/admin/panels/GanttChartPanel.tsx`: title, color scheme, bar shape draft를 archive id 기준으로 분리 저장하도록 수정
+- `src/components/admin/panels/GanttChartPanel.tsx`: refresh와 archive 전환 이후에도 각 entry의 draft 설정이 서로 덮어쓰지 않도록 동작 보정
+
 ## v0.11.74 (2026-04-16)
 
 ### feat: Gantt Chart panel에 bar shape 설정과 최종 chart 정리 반영

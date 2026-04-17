@@ -183,7 +183,7 @@ export default function MigrationsPanel() {
                         <h3 className="mb-3 text-xs font-bold tracking-widest text-amber-600 uppercase">
                             미적용 ({pending.length})
                         </h3>
-                        <div className="mb-4 flex items-center gap-3">
+                        <div className="mb-4 flex items-center gap-3 pr-4">
                             <p className="flex-1 text-sm text-(--color-muted)">
                                 아래 SQL을 Supabase SQL Editor에서 순서대로
                                 실행하거나, 자동 적용 버튼을 누르세요.

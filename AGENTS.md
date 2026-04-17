@@ -322,7 +322,8 @@ src/
 │           ├── AgentTokensPanel.tsx    # MCP Agent 토큰 관리
 │           ├── PromptLibraryPanel.tsx  # MCP 프롬프트 라이브러리
 │           ├── MigrationsPanel.tsx
-│           └── SnapshotsPanel.tsx      # DB 스냅샷 관리
+│           ├── SnapshotsPanel.tsx      # DB 스냅샷 관리
+│           └── GanttChartPanel.tsx     # Gantt Chart archive 관리 (CSV import + 미리보기)
 ├── lib/                                # 유틸리티 모듈
 │   ├── supabase.ts                     # serverClient (service_role) + browserClient (anon)
 │   ├── queries.ts                      # React cache() 기반 Supabase 쿼리
@@ -339,6 +340,7 @@ src/
 │   ├── toc.ts                          # 목차 생성
 │   ├── r2.ts                           # Cloudflare R2 S3 호환 client (Vercel 서버 런타임)
 │   ├── image-upload.ts                 # 이미지 업로드 (R2 API route 경유) + 에셋 이전/삭제
+│   ├── gantt-chart.ts                  # Gantt Chart CSV 파싱 + timeline 빌드 + bar/color scheme 정의
 │   ├── job-field.ts                    # 직군 필드 유틸
 │   ├── mermaid-render.ts               # Mermaid 렌더링
 │   ├── mermaid-themes.ts               # Mermaid 테마 설정 (컬러 스킴 동기화)
@@ -364,6 +366,7 @@ src/
     ├── mdx-directive-converter.test.ts
     ├── mermaid-themes.test.ts
     ├── tailwind-colors.test.ts
+    ├── gantt-chart.test.ts
     └── tiptap-utils.test.ts
 
 e2e/                                    # Playwright E2E 테스트

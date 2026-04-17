@@ -612,6 +612,9 @@ export default function PostsPanel({
                         storageKey={`post_${form.slug || "new"}`}
                         onEditorReady={setEditorInstance}
                         transferring={transferring}
+                        onSetThumbnail={(url) =>
+                            setForm((f) => ({ ...f, thumbnail: url }))
+                        }
                     />
                 </div>
 

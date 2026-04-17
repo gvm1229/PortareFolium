@@ -14,8 +14,7 @@ export interface AboutData {
     competencySections?: Record<string, string[]>;
 }
 
-const PLACEHOLDER_IMAGE =
-    "https://urqqfjxocxfrvuozgobi.supabase.co/storage/v1/object/public/images/legacy/avatar-placeholder-c9516fa9.svg";
+const PLACEHOLDER_IMAGE = "/avatar-placeholder.svg";
 
 interface Props {
     data: AboutData;

@@ -678,6 +678,9 @@ export default function PortfolioPanel({
                         storageKey={`portfolio_${form.slug || "new"}`}
                         onEditorReady={setEditorInstance}
                         transferring={transferring}
+                        onSetThumbnail={(url) =>
+                            setForm((f) => ({ ...f, thumbnail: url }))
+                        }
                     />
                 </div>
 

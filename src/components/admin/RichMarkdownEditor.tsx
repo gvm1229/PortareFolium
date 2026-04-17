@@ -1,10 +1,17 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
+import {
+    useEditor,
+    EditorContent,
+    NodeViewWrapper,
+    ReactNodeViewRenderer,
+} from "@tiptap/react";
 import type { Editor } from "@tiptap/react";
+import type { NodeViewProps } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
+import { toast } from "sonner";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
@@ -39,6 +46,7 @@ interface RichMarkdownEditorProps {
     storageKey?: string;
     onEditorReady?: (editor: Editor) => void;
     transferring?: boolean;
+    onSetThumbnail?: (url: string) => void;
 }
 
 export default function RichMarkdownEditor({
@@ -50,6 +58,7 @@ export default function RichMarkdownEditor({
     storageKey,
     onEditorReady,
     transferring = false,
+    onSetThumbnail,
 }: RichMarkdownEditorProps) {
     const AUTOSAVE_KEY = `portare_autosave_editor_${storageKey ?? "default"}`;
 
@@ -129,6 +138,63 @@ export default function RichMarkdownEditor({
         onChange(directiveToJsx(val));
     };
 
+    // onSetThumbnail 최신 콜백 유지 (extension 재생성 없이 ref로 접근)
+    const onSetThumbnailRef = useRef(onSetThumbnail);
+    onSetThumbnailRef.current = onSetThumbnail;
+
+    // Image extension with NodeView: WYSIWYG hover 시 thumbnail 선택 버튼 표시
+    const ImageWithThumbnail = useMemo(
+        () =>
+            Image.extend({
+                addNodeView() {
+                    return ReactNodeViewRenderer(({ node }: NodeViewProps) => (
+                        <NodeViewWrapper
+                            as="span"
+                            className="editor-image-node group inline-block max-w-full align-top"
+                        >
+                            <span
+                                contentEditable={false}
+                                className="relative inline-flex max-w-full align-top leading-none"
+                            >
+                                <img
+                                    src={node.attrs.src as string}
+                                    alt={(node.attrs.alt as string) ?? ""}
+                                    title={
+                                        (node.attrs.title as string) ||
+                                        undefined
+                                    }
+                                    className="block h-auto max-w-full"
+                                />
+                                {onSetThumbnailRef.current &&
+                                    node.attrs.src && (
+                                        <button
+                                            type="button"
+                                            contentEditable={false}
+                                            onMouseDown={(e) =>
+                                                e.preventDefault()
+                                            }
+                                            onClick={() => {
+                                                onSetThumbnailRef.current?.(
+                                                    node.attrs.src as string
+                                                );
+                                                toast.success(
+                                                    "썸네일로 설정됨"
+                                                );
+                                            }}
+                                            className="absolute top-3 right-3 z-10 rounded bg-(--color-accent) px-2 py-1 text-xs font-medium whitespace-nowrap text-(--color-on-accent) opacity-0 transition-opacity group-hover:opacity-100"
+                                        >
+                                            썸네일로 설정
+                                        </button>
+                                    )}
+                            </span>
+                        </NodeViewWrapper>
+                    ));
+                },
+            }).configure({ inline: true, allowBase64: true }),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        []
+    );
+
     const initialContent = useMemo(() => {
         if (!value) return "";
         // Tiptap JSON 형식
@@ -157,7 +223,7 @@ export default function RichMarkdownEditor({
                 codeBlock: { languageClassPrefix: "language-" },
             }),
             Markdown.configure({ html: true, tightLists: true }),
-            Image.configure({ inline: true, allowBase64: true }),
+            ImageWithThumbnail,
             TextAlign.configure({ types: ["heading", "paragraph"] }),
             TextStyle,
             Color,
