@@ -53,7 +53,11 @@ Before calling `gh pr create`, build the PR body from the actual changes in this
 Use this exact section layout (in order):
 
 1. **`## Release v<target>`** — one-line intro: `이 PR은 \`main\`에 머지되면 v<target> 태그가 붙고 GitHub Release 워크플로우가 트리거됩니다.`
-2. **`## Highlights`** — 3~6개 bullet. 이번 minor 구간에서 머지된 패치들(`docs/CHANGES.md`의 `v<prev-minor>.*` 엔트리)을 훑어 주제별로 그룹핑. 방금 Step 3에서 추가한 changelog 블록의 bullet들을 그대로 사용해도 좋고, 필요하면 한두 줄씩 덧붙여 컨텍스트 보강. 각 bullet은 "무엇이 달라졌는지" + "사용자/개발자 관점에서의 효과"를 드러낼 것.
+2. **`## Highlights`** — 3~6개 bullet. 직전 minor 이후(`docs/CHANGES.md`의 `v<prev-minor>.*` 전체 엔트리)를 훑어 **주제별로 그룹핑해 추상화**. 작성 규칙:
+    - **개별 버전/커밋 번호 인용 금지** (예: `(v0.11.82, 89–90)` 같은 레퍼런스 금지) — 상세 내역은 `docs/CHANGES.md`에 있으므로 PR 본문은 독자가 한눈에 "이 minor에서 뭐가 바뀌었나"를 이해하는 요약이어야 함.
+    - 한 bullet = **하나의 major 테마**, 한 문장 또는 짧은 두 문장 이내. 내부 nitpick/patch-level 수정(예: 단일 CSS 값 보정, revert)은 별도 bullet로 띄우지 말고 상위 테마에 녹이거나 생략.
+    - 작은 인프라/문서/내부 리팩터링은 하나의 "내부 개선" bullet으로 통합.
+    - 각 bullet은 **"무엇이 달라졌는지"** + **"사용자/개발자 관점에서의 효과"**를 드러낼 것. 파일 경로/함수명 나열 금지.
 3. **`## Changelog`** — 아래 두 줄만 넣는다:
     - `- Version: \`<prev>\` → \`<target>\``
     - `- 세부 내역: [\`docs/CHANGES.md\`](./docs/CHANGES.md)의 \`v<target>\` 블록 및 그 아래의 패치 로그 참고`
