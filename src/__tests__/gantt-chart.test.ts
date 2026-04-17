@@ -9,12 +9,14 @@ import {
 
 describe("parseGanttCsv", () => {
     it("parses a valid csv", () => {
-        const result = parseGanttCsv(`task name,start date,end date,comment
-Design,2026-04-01,2026-04-03,Wireframe`);
+        const result = parseGanttCsv(
+            `task name,category,start date,end date,comment\nDesign,Frontend,2026-04-01,2026-04-03,Wireframe`
+        );
 
         expect(result).toEqual([
             {
                 taskName: "Design",
+                category: "Frontend",
                 startDate: "2026-04-01",
                 endDate: "2026-04-03",
                 comment: "Wireframe",
@@ -23,23 +25,26 @@ Design,2026-04-01,2026-04-03,Wireframe`);
     });
 
     it("supports quoted commas in comment", () => {
-        const result = parseGanttCsv(`task name,start date,end date,comment
-Build,2026-04-05,2026-04-06,"UI, API, QA"`);
+        const result = parseGanttCsv(
+            `task name,category,start date,end date,comment\nBuild,Backend,2026-04-05,2026-04-06,"UI, API, QA"`
+        );
 
         expect(result[0]?.comment).toBe("UI, API, QA");
     });
 
     it("throws on invalid header", () => {
         expect(() =>
-            parseGanttCsv(`task,start date,end date,comment
-Build,2026-04-05,2026-04-06,UI`)
+            parseGanttCsv(
+                `task,category,start date,end date,comment\nBuild,Backend,2026-04-05,2026-04-06,UI`
+            )
         ).toThrow("CSV 헤더는");
     });
 
     it("throws when end date is before start date", () => {
         expect(() =>
-            parseGanttCsv(`task name,start date,end date,comment
-Build,2026-04-06,2026-04-05,UI`)
+            parseGanttCsv(
+                `task name,category,start date,end date,comment\nBuild,Backend,2026-04-06,2026-04-05,UI`
+            )
         ).toThrow("end date가 start date보다 빠릅니다");
     });
 });
@@ -49,6 +54,7 @@ describe("normalizeStoredGanttTasks", () => {
         const result = normalizeStoredGanttTasks([
             {
                 taskName: "Deploy",
+                category: "Ops",
                 startDate: "2026-04-08",
                 endDate: "2026-04-09",
                 comment: "Release",
@@ -57,6 +63,7 @@ describe("normalizeStoredGanttTasks", () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]?.taskName).toBe("Deploy");
+        expect(result[0]?.category).toBe("Ops");
     });
 
     it("throws on invalid stored shape", () => {
@@ -69,6 +76,7 @@ describe("buildGanttTimeline", () => {
         const { days, months } = buildGanttTimeline([
             {
                 taskName: "Sprint",
+                category: "Dev",
                 startDate: "2026-04-29",
                 endDate: "2026-05-02",
                 comment: "",
@@ -93,6 +101,7 @@ describe("misc gantt helpers", () => {
         expect(
             countTaskDays({
                 taskName: "QA",
+                category: "QA",
                 startDate: "2026-04-10",
                 endDate: "2026-04-12",
                 comment: "",

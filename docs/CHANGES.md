@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.11.81 (2026-04-17)
+
+### feat: GanttChartTask category 필드 추가 및 5컬럼 CSV 파서
+
+- `src/lib/gantt-chart.ts`: `GanttChartTask`에 `category` 필드 추가, CSV 헤더 5컬럼(`task name,category,start date,end date,comment`)으로 확장, `parseGanttCsv`/`normalizeStoredGanttTasks` 업데이트
+- `src/lib/migrations.ts`: `gantt_chart_archives.category_colors JSONB` 컬럼 마이그레이션 추가 (v0.11.81)
+- `src/__tests__/gantt-chart.test.ts`: 5컬럼 포맷으로 테스트 케이스 업데이트
+
 ## v0.11.80 (2026-04-17)
 
 ### fix: thumbnail 버튼 이미지 내부 렌더링 위치 및 accent 색상 수정
