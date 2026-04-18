@@ -138,9 +138,19 @@ export const ImageDropPaste = Extension.create<ImageDropPasteOptions>({
 
 // source mode 텍스트의 bare image URL을 markdown image 문법으로 변환
 // source → WYSIWYG 전환 시 호출
+// 주의: lead에 `(` 포함 금지 — 이미 ![](url)로 감싸진 URL을 한 번 더 wrap하면 ![](![](url)) 손상 발생
 export function bareImageUrlsToMarkdown(text: string): string {
-    return text.replace(
-        /(^|[\s(])(https?:\/\/\S+?\.(?:png|jpe?g|gif|webp|avif|svg))(?=[\s)]|$)/gi,
+    const repaired = repairDoubleWrappedImages(text);
+    return repaired.replace(
+        /(^|\s)(https?:\/\/\S+?\.(?:png|jpe?g|gif|webp|avif|svg))(?=[\s)]|$)/gi,
         (_, lead, url) => `${lead}![](${url})`
+    );
+}
+
+// 과거 버그로 ![](![](url)) 또는 ![](![]\(url\)) 형태로 손상된 콘텐츠 복원
+export function repairDoubleWrappedImages(text: string): string {
+    return text.replace(
+        /!\[\]\(!\[\]\\?\(([^()\\]+)\\?\)\)/g,
+        (_, url) => `![](${url})`
     );
 }

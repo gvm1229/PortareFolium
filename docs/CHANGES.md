@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.12.17 (2026-04-18)
+
+### fix: source → WYSIWYG 전환 시 이미지 double-wrap 방지
+
+- `src/extensions/ImageDropPaste.ts` `bareImageUrlsToMarkdown`: lead 정규식에서 `(` 제거 — 이전엔 기존 `![](url)`의 URL이 한 번 더 wrap돼 `![](![](url))` 손상 발생. 이제 `^` / `\s` 만 lead로 인식
+- `repairDoubleWrappedImages` 신규: 과거 버그로 손상된 `![](![](url))` / `![](![]\(url\))` 형태를 `![](url)`로 복원. exitSourceMode에서 자동 적용
+- `src/__tests__/image-url-conversion.test.ts`: 11개 회귀 케이스 (기존 markdown image 보존, 다중 이미지, 확장자 종류, escape 처리)
+
 ## v0.12.16 (2026-04-18)
 
 ### feat: 본문 이미지 hover 시 trash 삭제 버튼 추가
