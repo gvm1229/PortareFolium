@@ -1,5 +1,12 @@
 # CHANGES
 
+## v0.12.19 (2026-04-18)
+
+### chore: gh PR body 전달 시 cat/HEREDOC 금지 + body-file 강제
+
+- `AGENTS.md` PR Conventions: `--body "$(cat ...)"` 및 HEREDOC 패턴 금지 HARD 규칙 추가, `--body-file <path>` 사용 강제 — Bash 도구가 파일 내용을 conversation context로 다시 읽어 토큰 낭비하는 문제 차단
+- `.claude/commands/custom-release.md` Step 4b: HEREDOC 예시 제거, 본문을 임시 파일 저장 후 `--body-file` 사용하도록 변경
+
 ## v0.12.18 (2026-04-18)
 
 ### test: WYSIWYG ↔ source mode roundtrip 회귀 테스트 추가 (SVG fixture)
