@@ -278,6 +278,7 @@ src/
 │   ├── TableOfContents.tsx             # 인라인 목차
 │   ├── GithubToc.tsx                   # GitHub 스타일 목차
 │   ├── MermaidRenderer.tsx             # Mermaid 다이어그램 렌더러
+│   ├── ImageLightbox.tsx               # 본문 이미지 lightbox (blog/portfolio slug 전용, portal + DOM scan)
 │   ├── MarkdownImage.tsx               # MDX img 대체 (SSR 호환 — plain img, lazy loading)
 │   ├── ColoredTable.tsx                # 커스텀 테이블 컴포넌트
 │   ├── ColoredTableColorSync.tsx       # 테이블 컬러 테마 동기화

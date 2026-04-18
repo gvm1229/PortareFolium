@@ -1,5 +1,17 @@
 # CHANGES
 
+## v0.12.4 (2026-04-18)
+
+### feat: 본문 이미지 lightbox
+
+- `src/components/ImageLightbox.tsx` 신규: blog/portfolio 상세 페이지 본문 이미지 클릭 시 lightbox 모달로 full-resolution 표시. backdrop `z-[120] bg-black/80`, 이미지 `max-w-[80vw] max-h-[80vh] object-contain`
+- 네비게이션: 좌/우 arrow 버튼 + ArrowLeft/ArrowRight 키, 첫/마지막에서 disabled (wrap 없음), Escape / backdrop click 으로 닫기
+- Filmstrip: 현재 index 기준 ±5 고정 11개 window, 현재 항목 accent border + scale 강조
+- Blur-up loading: 동일 src를 `blur-xl` 배경으로 먼저 표시 후 full-res fade-in
+- Caption: 이미지 `alt` 텍스트 lightbox 하단에 표시
+- DOM scan + click delegation + `MutationObserver` 로 Mermaid/lazy-load late render 대응
+- `src/app/(frontend)/blog/[slug]/page.tsx`, `src/app/(frontend)/portfolio/[slug]/page.tsx` 에 mount — 상단 thumbnail은 content wrapper 외부라 자동 제외
+
 ## v0.12.3 (2026-04-17)
 
 ### fix: stale refresh token 에러 처리
