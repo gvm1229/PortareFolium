@@ -1,5 +1,12 @@
 # CHANGES
 
+## v0.12.11 (2026-04-18)
+
+### feat: storage-ops delete-keys action + deleteStorageKeys helper
+
+- `src/app/api/storage-ops/route.ts`: `action === "delete-keys"` 분기 추가 — 명시 key 배열만 R2에서 삭제. S3 DeleteObjects 한도 1000 chunk 처리. 빈 배열 안전 처리
+- `src/lib/image-upload.ts`: `deleteStorageKeys(keys)` helper 추가 — orphan-cleanup이 base + sidecar key 정밀 삭제할 수 있는 client API
+
 ## v0.12.10 (2026-04-18)
 
 ### chore: ship command의 분리 commit 규칙 명시

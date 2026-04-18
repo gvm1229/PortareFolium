@@ -148,6 +148,20 @@ export async function deleteStorageFolder(folder: string): Promise<void> {
     });
 }
 
+// R2 특정 key 목록 삭제
+export async function deleteStorageKeys(keys: string[]): Promise<void> {
+    if (keys.length === 0) return;
+    const token = await getAccessToken();
+    await fetch("/api/storage-ops", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: "delete-keys", keys }),
+    });
+}
+
 // 콘텐츠 내 이미지 URL 폴더 경로 치환
 export function replaceImageUrls(
     content: string,
