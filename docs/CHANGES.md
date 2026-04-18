@@ -1,5 +1,11 @@
 # CHANGES
 
+## v0.12.16 (2026-04-18)
+
+### feat: 본문 이미지 hover 시 trash 삭제 버튼 추가
+
+- `src/components/admin/RichMarkdownEditor.tsx`: image NodeView에 trash 아이콘 삭제 버튼 추가 — 기존 "썸네일로 설정" 버튼 옆 (`flex gap-2`) 우상단에 배치, group-hover 시 동시 표시. 클릭 시 NodeView `deleteNode()` 호출 → 정밀 backspace 없이 노드 단위 삭제, T1 cleanup 자연 트리거
+
 ## v0.12.15 (2026-04-18)
 
 ### feat: editor open T3 안전망 + slug rename snapshot URL rewrite

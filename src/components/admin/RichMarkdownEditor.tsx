@@ -12,6 +12,7 @@ import type { NodeViewProps } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
@@ -181,53 +182,73 @@ export default function RichMarkdownEditor({
         return srcs;
     }, []);
 
-    // Image extension with NodeView: WYSIWYG hover 시 thumbnail 선택 버튼 표시
+    // Image extension with NodeView: WYSIWYG hover 시 thumbnail/delete 버튼 표시
     const ImageWithThumbnail = useMemo(
         () =>
             Image.extend({
                 addNodeView() {
-                    return ReactNodeViewRenderer(({ node }: NodeViewProps) => (
-                        <NodeViewWrapper
-                            as="span"
-                            className="editor-image-node group inline-block max-w-full align-top"
-                        >
-                            <span
-                                contentEditable={false}
-                                className="relative inline-flex max-w-full align-top leading-none"
+                    return ReactNodeViewRenderer(
+                        ({ node, deleteNode }: NodeViewProps) => (
+                            <NodeViewWrapper
+                                as="span"
+                                className="editor-image-node group inline-block max-w-full align-top"
                             >
-                                <img
-                                    src={node.attrs.src as string}
-                                    alt={(node.attrs.alt as string) ?? ""}
-                                    title={
-                                        (node.attrs.title as string) ||
-                                        undefined
-                                    }
-                                    className="block h-auto max-w-full"
-                                />
-                                {onSetThumbnailRef.current &&
-                                    node.attrs.src && (
+                                <span
+                                    contentEditable={false}
+                                    className="relative inline-flex max-w-full align-top leading-none"
+                                >
+                                    <img
+                                        src={node.attrs.src as string}
+                                        alt={(node.attrs.alt as string) ?? ""}
+                                        title={
+                                            (node.attrs.title as string) ||
+                                            undefined
+                                        }
+                                        className="block h-auto max-w-full"
+                                    />
+                                    <span
+                                        contentEditable={false}
+                                        className="absolute top-3 right-3 z-10 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100"
+                                    >
+                                        {onSetThumbnailRef.current &&
+                                            node.attrs.src && (
+                                                <button
+                                                    type="button"
+                                                    contentEditable={false}
+                                                    onMouseDown={(e) =>
+                                                        e.preventDefault()
+                                                    }
+                                                    onClick={() => {
+                                                        onSetThumbnailRef.current?.(
+                                                            node.attrs
+                                                                .src as string
+                                                        );
+                                                        toast.success(
+                                                            "썸네일로 설정됨"
+                                                        );
+                                                    }}
+                                                    className="rounded bg-(--color-accent) px-2 py-1 text-xs font-medium whitespace-nowrap text-(--color-on-accent)"
+                                                >
+                                                    썸네일로 설정
+                                                </button>
+                                            )}
                                         <button
                                             type="button"
                                             contentEditable={false}
+                                            aria-label="이미지 삭제"
                                             onMouseDown={(e) =>
                                                 e.preventDefault()
                                             }
-                                            onClick={() => {
-                                                onSetThumbnailRef.current?.(
-                                                    node.attrs.src as string
-                                                );
-                                                toast.success(
-                                                    "썸네일로 설정됨"
-                                                );
-                                            }}
-                                            className="absolute top-3 right-3 z-10 rounded bg-(--color-accent) px-2 py-1 text-xs font-medium whitespace-nowrap text-(--color-on-accent) opacity-0 transition-opacity group-hover:opacity-100"
+                                            onClick={() => deleteNode()}
+                                            className="rounded bg-red-600 p-1.5 text-white transition-opacity hover:opacity-90"
                                         >
-                                            썸네일로 설정
+                                            <Trash2 className="h-3.5 w-3.5" />
                                         </button>
-                                    )}
-                            </span>
-                        </NodeViewWrapper>
-                    ));
+                                    </span>
+                                </span>
+                            </NodeViewWrapper>
+                        )
+                    );
                 },
             }).configure({ inline: true, allowBase64: true }),
         // eslint-disable-next-line react-hooks/exhaustive-deps
