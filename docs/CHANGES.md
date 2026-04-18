@@ -1,5 +1,15 @@
 # CHANGES
 
+## v0.12.12 (2026-04-18)
+
+### feat: true-orphan cleanup + snapshot-aware lib
+
+- `src/lib/orphan-cleanup.ts` 신규: `cleanupTrueOrphans` / `cleanupSingleKey` 단일 알고리즘 — content + thumbnail + 모든 snapshot 합집합으로 referenced base set 구성, sidecar (`baseKey` regex로 `.thumb.webp` / `.poster.webp` strip + 확장자 strip)는 base가 살아있으면 보존
+- `src/lib/snapshot-cleanup.ts` 신규: `loadSnapshotsContent`로 entity의 모든 snapshot.content 조회, `deleteSnapshotsAndCleanup` 으로 snapshot 삭제 + 후속 cleanup wrapper 통합
+- 안전 가드: list 빈/throw 시 skip, referenced 빈 + content 비-empty 시 skip (parser 오류 wipe 방지)
+- dev mode 한정 `console.log` 진단 출력 (`process.env.NODE_ENV === "development"`)
+- `src/__tests__/orphan-cleanup.test.ts` 신규: baseKey/extractKeysFromText/cleanupTrueOrphans 21개 회귀 케이스
+
 ## v0.12.11 (2026-04-18)
 
 ### feat: storage-ops delete-keys action + deleteStorageKeys helper
