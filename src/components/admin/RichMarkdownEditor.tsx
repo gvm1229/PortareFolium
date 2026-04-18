@@ -34,6 +34,10 @@ import {
 } from "@/extensions/AccordionNode";
 import { jsxToDirective, directiveToJsx } from "@/lib/mdx-directive-converter";
 import { getCleanMarkdown } from "@/lib/tiptap-markdown";
+import {
+    ImageDropPaste,
+    bareImageUrlsToMarkdown,
+} from "@/extensions/ImageDropPaste";
 import EditorToolbar from "@/components/admin/EditorToolbar";
 import TiptapImageUpload from "@/components/admin/TiptapImageUpload";
 
@@ -47,6 +51,8 @@ interface RichMarkdownEditorProps {
     onEditorReady?: (editor: Editor) => void;
     transferring?: boolean;
     onSetThumbnail?: (url: string) => void;
+    // Trigger 1 — 본문에서 image 노드가 제거되면 호출 (1초 debounce, coalesced URL 배열)
+    onImagesRemoved?: (urls: string[]) => void;
 }
 
 export default function RichMarkdownEditor({
@@ -59,6 +65,7 @@ export default function RichMarkdownEditor({
     onEditorReady,
     transferring = false,
     onSetThumbnail,
+    onImagesRemoved,
 }: RichMarkdownEditorProps) {
     const AUTOSAVE_KEY = `portare_autosave_editor_${storageKey ?? "default"}`;
 
@@ -118,7 +125,9 @@ export default function RichMarkdownEditor({
     const exitSourceMode = () => {
         if (!editor) return;
         saveScrollRatio();
-        const jsxContent = directiveToJsx(sourceText);
+        // bare image URL → ![](url) markdown 변환 (paste된 URL이 image로 렌더링되도록)
+        const normalized = bareImageUrlsToMarkdown(sourceText);
+        const jsxContent = directiveToJsx(normalized);
         // directive → HTML 전처리 (YoutubeEmbed, ColoredTableNode parseHTML 호환)
         const directives = jsxToDirective(jsxContent);
         const preprocessed = accordionDirectiveToHtml(
@@ -141,6 +150,36 @@ export default function RichMarkdownEditor({
     // onSetThumbnail 최신 콜백 유지 (extension 재생성 없이 ref로 접근)
     const onSetThumbnailRef = useRef(onSetThumbnail);
     onSetThumbnailRef.current = onSetThumbnail;
+
+    // folderPath 최신값 ref (ImageDropPaste extension closure)
+    const folderPathRef = useRef(folderPath);
+    folderPathRef.current = folderPath;
+
+    // Trigger 1 image-removal 추적 + 1000ms global debounce
+    const onImagesRemovedRef = useRef(onImagesRemoved);
+    onImagesRemovedRef.current = onImagesRemoved;
+    const imagesBeforeRef = useRef<Set<string>>(new Set());
+    const removedQueueRef = useRef<Set<string>>(new Set());
+    const removeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const flushRemoved = useCallback(() => {
+        removeTimerRef.current = null;
+        const urls = Array.from(removedQueueRef.current);
+        removedQueueRef.current.clear();
+        if (urls.length === 0) return;
+        onImagesRemovedRef.current?.(urls);
+    }, []);
+    const collectImageSrcs = useCallback((e: Editor): Set<string> => {
+        const srcs = new Set<string>();
+        e.state.doc.descendants((node) => {
+            if (
+                node.type.name === "image" &&
+                typeof node.attrs.src === "string"
+            ) {
+                srcs.add(node.attrs.src);
+            }
+        });
+        return srcs;
+    }, []);
 
     // Image extension with NodeView: WYSIWYG hover 시 thumbnail 선택 버튼 표시
     const ImageWithThumbnail = useMemo(
@@ -236,6 +275,9 @@ export default function RichMarkdownEditor({
                 placeholder: placeholder ?? "Start writing...",
             }),
             ColoredTableExtension.configure({ resizable: true }),
+            ImageDropPaste.configure({
+                getFolderPath: () => folderPathRef.current,
+            }),
         ],
         content: initialContent,
         editable: !disabled,
@@ -243,8 +285,33 @@ export default function RichMarkdownEditor({
             const md = getCleanMarkdown(e);
             // directive → JSX 변환 후 저장 (DB에는 항상 JSX 형식 유지)
             onChange(directiveToJsx(md));
+
+            // Trigger 1 — image 노드 제거 감지, debounce 후 onImagesRemoved 호출
+            const after = collectImageSrcs(e);
+            const before = imagesBeforeRef.current;
+            for (const src of before) {
+                if (!after.has(src)) removedQueueRef.current.add(src);
+            }
+            imagesBeforeRef.current = after;
+            if (removedQueueRef.current.size > 0) {
+                if (removeTimerRef.current)
+                    clearTimeout(removeTimerRef.current);
+                removeTimerRef.current = setTimeout(flushRemoved, 1000);
+            }
         },
     });
+
+    // editor 준비 시 imagesBefore 초기 snapshot
+    useEffect(() => {
+        if (editor) imagesBeforeRef.current = collectImageSrcs(editor);
+    }, [editor, collectImageSrcs]);
+
+    // unmount 시 debounce timer 정리
+    useEffect(() => {
+        return () => {
+            if (removeTimerRef.current) clearTimeout(removeTimerRef.current);
+        };
+    }, []);
 
     // editor 준비 콜백
     useEffect(() => {

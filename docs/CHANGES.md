@@ -1,5 +1,18 @@
 # CHANGES
 
+## v0.12.13 (2026-04-18)
+
+### feat: RichMarkdownEditor drag-drop + paste 이미지 업로드 + URL handling
+
+- `src/extensions/ImageDropPaste.ts` 신규: Tiptap ProseMirror extension — drop / paste-with-files 이미지를 R2에 업로드 후 drop 위치에 image node 삽입. 다중 drop = `Promise.all` 병렬 업로드 + 원래 순서 sequential insert (pos는 매 insert마다 `node.nodeSize` 증가). text-only image URL paste는 R2 업로드 없이 image node로 삽입. `getFolderPath` getter로 slug rename 후에도 최신 folder 사용
+- `src/extensions/ImageDropPaste.ts` `bareImageUrlsToMarkdown(text)` helper: source mode → WYSIWYG 전환 시 bare image URL을 `![](url)` markdown으로 변환
+- `src/components/admin/RichMarkdownEditor.tsx`:
+    - `ImageDropPaste.configure({ getFolderPath })` extension 등록
+    - `onUpdate`에서 image 노드 src diff → 1000ms global debounce 후 `onImagesRemoved(urls)` 콜백 (Trigger 1)
+    - `exitSourceMode`에서 `bareImageUrlsToMarkdown` preprocess
+    - `onImagesRemoved` prop 추가
+- `src/components/admin/TiptapImageUpload.tsx`: URL 탭 단순화 — "R2에 저장" 경로 (`handleUrlUpload`) 제거, "URL 그대로" → "URL 삽입" 단일 버튼으로 통합. 외부 URL은 R2 업로드 없이 그대로 본문 삽입
+
 ## v0.12.12 (2026-04-18)
 
 ### feat: true-orphan cleanup + snapshot-aware lib
