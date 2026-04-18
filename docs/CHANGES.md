@@ -1,5 +1,11 @@
 # CHANGES
 
+## v0.12.18 (2026-04-18)
+
+### test: WYSIWYG ↔ source mode roundtrip 회귀 테스트 추가 (SVG fixture)
+
+- `src/__tests__/image-url-conversion.test.ts`: dummy SVG URL 기반 roundtrip 6개 케이스 추가 — single roundtrip, 10회 연속 변환 멱등성, 다중 SVG 보존, query/fragment 유지, legacy double-wrap repair 후 안정성, bare URL → wrapped 변환 후 멱등
+
 ## v0.12.17 (2026-04-18)
 
 ### fix: source → WYSIWYG 전환 시 이미지 double-wrap 방지
