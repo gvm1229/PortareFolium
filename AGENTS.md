@@ -88,6 +88,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **PR 제목 형식**: `<source> → <target>: <설명>` (예: `feature/blog-search → main: Blog 검색 모달 + 키보드 단축키`). 70자 이하.
 - **Test plan checklist**는 항상 채울 것 (`pnpm build`, `pnpm test`, E2E 등 해당 변경에 맞춰 조정).
 - **Claude 협력 문구 (Co-Authored-By 등) 절대 포함 금지**.
+- **Branch별 PR 파일 강제**: project root의 PR 본문 파일은 반드시 현재 branch 이름 기반 `PR_<branch-name>.md` 형식만 사용. branch name의 `/`는 `-`로 치환. plain `PR.md` 생성·수정·재사용 금지. legacy `PR.md`가 보이면 branch별 파일로 내용 반영 후 삭제.
 - **HARD: `gh pr create` body 전달 시 `--body "$(cat ...)"` 또는 HEREDOC 절대 사용 금지.** Bash 도구가 파일 내용을 conversation context로 다시 읽어들여 토큰 낭비. 반드시 `--body-file <path>` 옵션 사용:
     ```bash
     gh pr create --base main --head <branch> \

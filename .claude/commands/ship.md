@@ -43,7 +43,7 @@ Commit the current unstaged changes following these rules strictly:
     **여러 독립 변경이 동시에 있을 때**:
     - 각 변경을 별도 commit으로 순차 처리
     - commit마다 해당 변경에 필요한 파일만 stage
-    - `package.json` version, `docs/CHANGES.md`, `PR.md`는 **각 commit 범위에 맞게 따로** 반영
+    - `package.json` version, `docs/CHANGES.md`, `PR_<branch-name>.md`는 **각 commit 범위에 맞게 따로** 반영
     - 첫 번째 commit을 만든 뒤 남은 변경이 있으면, 같은 절차를 반복해 다음 commit 생성
     - 서로 다른 변경을 하나의 version bump나 하나의 CHANGES 항목으로 합치지 말 것
 
@@ -58,7 +58,7 @@ Commit the current unstaged changes following these rules strictly:
 
 3. **Version bump**: Increment the patch version in `package.json` to match the commit message version only IF there are any code changes. If the commit is purely about docs or deleting files, then the version change must not occur. If the git unstaged changes already includes a `package.json` with its version updated, then the version change must not occur.
 
-4. **Update PR.md**: If the current branch is anything other than the `main` branch, add a concise entry to `PR.md` describing what changed. Match the existing section style.
+4. **Update branch-specific PR file**: If the current branch is anything other than the `main` branch, update `PR_<branch-name>.md` in the project root (replace `/` with `-`) with a concise entry describing what changed. Never create or update plain `PR.md`. If a legacy `PR.md` exists, migrate any needed content into the branch-specific file and delete `PR.md`.
 
 5. **Update CHANGES.md**: Add a concise entry to `CHANGES.md` describing what changed. Match the existing section style.
 

@@ -1,5 +1,14 @@
 # CHANGES
 
+## v0.12.36 (2026-04-20)
+
+### chore: branch별 PR 파일 규칙 강제 + legacy PR.md 제거
+
+- `PR_feature-content-image-lightbox.md`: 검증 결과 현재 branch PR 문서가 최신 변경 범위를 이미 반영하고 있음을 확인
+- `AGENTS.md`, `.claude/commands/ship.md`, `.claude/commands/docs.md`: plain `PR.md` 생성 금지, `PR_<branch-name>.md`만 허용, legacy `PR.md` 발견 시 삭제하도록 규칙 강화
+- `PR.md`: branch별 PR 파일 체계로 이관 후 삭제
+- `package.json`: patch version `0.12.36`으로 증가
+
 ## v0.12.35 (2026-04-20)
 
 ### fix: lightbox filmstrip padding 확장 + scrollbar 숨김
