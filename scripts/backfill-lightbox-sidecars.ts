@@ -8,7 +8,7 @@ import { runLightboxSidecarBackfill } from "../src/lib/lightbox-sidecars";
 async function main() {
     const result = await runLightboxSidecarBackfill();
     console.log(
-        `processed=${result.processed} skipped=${result.skipped} thumb=${result.thumbCreated} poster=${result.posterCreated} errors=${result.errors.length}`
+        `processed=${result.processed} skipped=${result.skipped} thumb=${result.thumbCreated} deletedPoster=${result.deletedPoster} errors=${result.errors.length}`
     );
 
     if (result.errors.length > 0) {

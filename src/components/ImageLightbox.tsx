@@ -31,16 +31,11 @@ const SCALE_STEP = 0.25;
 const SWIPE_THRESHOLD = 50;
 
 // filmstrip sidecar path 계산
-function replaceWithSidecar(src: string, suffix: "poster" | "thumb"): string {
+function replaceWithSidecar(src: string, suffix: "thumb"): string {
     const url = new URL(src, window.location.origin);
     const pathname = url.pathname.replace(/\.[^./?#]+$/, `.${suffix}.webp`);
     url.pathname = pathname;
     return url.toString();
-}
-
-// gif 판별
-function isGifSource(src: string): boolean {
-    return /\.gif(?:[?#]|$)/i.test(src);
 }
 
 // YouTube thumbnail path 생성
@@ -61,11 +56,7 @@ type FilmstripThumbnailProps = {
 
 // filmstrip candidate 목록 계산
 function getImageFilmstripCandidates(src: string): string[] {
-    const list = [replaceWithSidecar(src, "thumb")];
-    if (isGifSource(src)) {
-        list.push(replaceWithSidecar(src, "poster"));
-    }
-    return list;
+    return [replaceWithSidecar(src, "thumb")];
 }
 
 // filmstrip thumbnail 렌더

@@ -75,10 +75,7 @@ export function getStoragePath(
 }
 
 // sidecar path 생성
-export function getSidecarPath(
-    path: string,
-    suffix: "poster" | "thumb"
-): string {
+export function getSidecarPath(path: string, suffix: "thumb"): string {
     return path.replace(/\.[^./]+$/, `.${suffix}.webp`);
 }
 
@@ -128,18 +125,6 @@ export async function uploadImage(
             uploadBlobToPath(thumbBlob, getSidecarPath(path, "thumb"), token)
         )
     );
-
-    if (isGif) {
-        sidecarJobs.push(
-            toWebPBlob(file, 0.8).then((posterBlob) =>
-                uploadBlobToPath(
-                    posterBlob,
-                    getSidecarPath(path, "poster"),
-                    token
-                )
-            )
-        );
-    }
 
     const results = await Promise.allSettled(sidecarJobs);
     results.forEach((result) => {

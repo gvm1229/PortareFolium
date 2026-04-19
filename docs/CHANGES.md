@@ -1,5 +1,15 @@
 # CHANGES
 
+## v0.12.31 (2026-04-20)
+
+### feat: lightbox thumb-only 정리 + debug backfill UX 보강
+
+- `src/components/ImageLightbox.tsx`: filmstrip이 `thumb.webp` 하나만 사용하도록 정리하고 `poster.webp` 참조 제거
+- `src/lib/image-upload.ts`, `src/__tests__/image-upload.test.ts`: 업로드 시 `thumb.webp`만 생성하도록 정리
+- `src/lib/lightbox-sidecars.ts`, `scripts/backfill-lightbox-sidecars.ts`: 기존 `poster.webp`를 정리하고 GIF도 첫 프레임 기반 정적 `thumb.webp`만 유지하도록 backfill 로직 변경
+- `src/components/admin/panels/DebugPanel.tsx`: progress bar modal 추가, 성공 summary 설명 보강, free-tier billing 안내 개선
+- `AGENTS.md`: `image-upload.ts` 설명을 thumb-only 구조에 맞게 갱신
+
 ## v0.12.30 (2026-04-19)
 
 ### feat: admin Debug panel에 lightbox sidecar backfill 실행 추가

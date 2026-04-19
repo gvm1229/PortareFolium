@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import {
+    DeleteObjectCommand,
     GetObjectCommand,
     HeadObjectCommand,
     ListObjectsV2Command,
@@ -10,11 +11,18 @@ import { r2Client, R2_BUCKET } from "@/lib/r2";
 const PREFIXES = ["blog/", "portfolio/"] as const;
 
 export type LightboxSidecarBackfillSummary = {
+    deletedPoster: number;
     errors: string[];
-    posterCreated: number;
     processed: number;
     skipped: number;
     thumbCreated: number;
+};
+
+type BackfillProgress = {
+    currentKey: string;
+    prefix: string;
+    processed: number;
+    total: number;
 };
 
 // 지원 확장자 판별
@@ -69,8 +77,12 @@ async function exists(key: string): Promise<boolean> {
 }
 
 // thumb buffer 생성
-async function createThumb(buffer: Buffer): Promise<Buffer> {
-    return sharp(buffer, { animated: true })
+async function createThumb(buffer: Buffer, isGif: boolean): Promise<Buffer> {
+    return sharp(buffer, {
+        animated: isGif,
+        pages: isGif ? 1 : undefined,
+        limitInputPixels: false,
+    })
         .resize({
             width: 256,
             height: 256,
@@ -78,19 +90,6 @@ async function createThumb(buffer: Buffer): Promise<Buffer> {
             withoutEnlargement: true,
         })
         .webp({ quality: 75 })
-        .toBuffer();
-}
-
-// poster buffer 생성
-async function createPoster(buffer: Buffer): Promise<Buffer> {
-    return sharp(buffer, { animated: true, pages: 1 })
-        .resize({
-            width: 1280,
-            height: 1280,
-            fit: "inside",
-            withoutEnlargement: true,
-        })
-        .webp({ quality: 82 })
         .toBuffer();
 }
 
@@ -102,6 +101,16 @@ async function uploadSidecar(key: string, buffer: Buffer): Promise<void> {
             Key: key,
             Body: buffer,
             ContentType: "image/webp",
+        })
+    );
+}
+
+// sidecar 삭제
+async function deleteSidecar(key: string): Promise<void> {
+    await r2Client.send(
+        new DeleteObjectCommand({
+            Bucket: R2_BUCKET,
+            Key: key,
         })
     );
 }
@@ -136,15 +145,15 @@ async function backfillKey(
 ): Promise<
     Pick<
         LightboxSidecarBackfillSummary,
-        "posterCreated" | "processed" | "skipped" | "thumbCreated"
+        "deletedPoster" | "processed" | "skipped" | "thumbCreated"
     >
 > {
     if (!isSupportedImageKey(key) || isSidecarKey(key)) {
         return {
+            deletedPoster: 0,
             processed: 0,
             skipped: 1,
             thumbCreated: 0,
-            posterCreated: 0,
         };
     }
 
@@ -153,13 +162,13 @@ async function backfillKey(
     const isGif = /\.gif$/i.test(key);
 
     const thumbExists = await exists(thumbKey);
-    const posterExists = isGif ? await exists(posterKey) : true;
-    if (thumbExists && posterExists) {
+    const posterExists = await exists(posterKey);
+    if (thumbExists && !posterExists) {
         return {
+            deletedPoster: 0,
             processed: 1,
             skipped: 1,
             thumbCreated: 0,
-            posterCreated: 0,
         };
     }
 
@@ -172,48 +181,62 @@ async function backfillKey(
     const buffer = await toBuffer(object.Body);
 
     let thumbCreated = 0;
-    let posterCreated = 0;
+    let deletedPoster = 0;
 
     if (!thumbExists) {
-        const thumbBuffer = await createThumb(buffer);
+        const thumbBuffer = await createThumb(buffer, isGif);
         await uploadSidecar(thumbKey, thumbBuffer);
         thumbCreated = 1;
     }
 
-    if (isGif && !posterExists) {
-        const posterBuffer = await createPoster(buffer);
-        await uploadSidecar(posterKey, posterBuffer);
-        posterCreated = 1;
+    if (posterExists) {
+        await deleteSidecar(posterKey);
+        deletedPoster = 1;
     }
 
     return {
+        deletedPoster,
         processed: 1,
         skipped: 0,
         thumbCreated,
-        posterCreated,
     };
 }
 
 // lightbox sidecar 전체 backfill 실행
-export async function runLightboxSidecarBackfill(): Promise<LightboxSidecarBackfillSummary> {
+export async function runLightboxSidecarBackfill(
+    onProgress?: (progress: BackfillProgress) => void
+): Promise<LightboxSidecarBackfillSummary> {
     const summary: LightboxSidecarBackfillSummary = {
+        deletedPoster: 0,
         processed: 0,
         skipped: 0,
         thumbCreated: 0,
-        posterCreated: 0,
         errors: [],
     };
+    const prefixKeys = await Promise.all(
+        PREFIXES.map((prefix) => listKeys(prefix))
+    );
+    const total = prefixKeys.reduce((acc, keys) => acc + keys.length, 0);
+    let processedCount = 0;
 
-    for (const prefix of PREFIXES) {
-        const keys = await listKeys(prefix);
+    for (let prefixIndex = 0; prefixIndex < PREFIXES.length; prefixIndex += 1) {
+        const prefix = PREFIXES[prefixIndex];
+        const keys = prefixKeys[prefixIndex] ?? [];
 
         for (const key of keys) {
+            processedCount += 1;
+            onProgress?.({
+                total,
+                processed: processedCount,
+                prefix,
+                currentKey: key,
+            });
             try {
                 const result = await backfillKey(key);
+                summary.deletedPoster += result.deletedPoster;
                 summary.processed += result.processed;
                 summary.skipped += result.skipped;
                 summary.thumbCreated += result.thumbCreated;
-                summary.posterCreated += result.posterCreated;
             } catch (error) {
                 const message =
                     error instanceof Error ? error.message : String(error);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Wrench, AlertTriangle, CheckCircle2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { executeLightboxSidecarBackfill } from "@/app/admin/actions/lightbox-sidecars";
@@ -30,40 +30,21 @@ type RiskIndicator = {
 };
 
 const BACKFILL_INDICATORS: RiskIndicator[] = [
-    {
-        label: "중복 생성",
-        value: "없음",
-        tone: "safe",
-    },
-    {
-        label: "Vercel 함수 실행",
-        value: "중간",
-        tone: "warn",
-    },
-    {
-        label: "Cloudflare R2 사용량",
-        value: "높음",
-        tone: "danger",
-    },
-    {
-        label: "Supabase 영향",
-        value: "없음",
-        tone: "safe",
-    },
-    {
-        label: "권장 실행 횟수",
-        value: "최초 1회",
-        tone: "neutral",
-    },
+    { label: "중복 생성", value: "없음", tone: "safe" },
+    { label: "Vercel 함수 실행", value: "중간", tone: "warn" },
+    { label: "Cloudflare R2 사용량", value: "높음", tone: "danger" },
+    { label: "Supabase 영향", value: "없음", tone: "safe" },
+    { label: "권장 실행 횟수", value: "최초 1회", tone: "neutral" },
 ];
 
 const LIGHTBOX_BACKFILL_DETAIL: DebugEntryDetail = {
     title: "Lightbox sidecar backfill",
-    description: `이 항목은 기존 blog / portfolio 자산을 순회하면서 missing sidecar만 생성합니다.
+    description: `이 항목은 기존 blog / portfolio 자산을 순회하면서 thumb.webp 하나만 남기도록 정리합니다.
 
 - 일반 이미지: .thumb.webp 생성
-- GIF: .poster.webp 생성
-- 이미 sidecar가 있으면 skip
+- GIF: 첫 프레임 기반 정적 .thumb.webp 생성
+- 기존 .poster.webp가 남아 있으면 삭제
+- 이미 정적인 .thumb.webp만 있으면 skip
 
 사용자 영향:
 
@@ -76,9 +57,9 @@ const LIGHTBOX_BACKFILL_DETAIL: DebugEntryDetail = {
 과금 관점:
 
 - 같은 sidecar를 중복 생성하지 않으므로 저장 용량이 불필요하게 늘어나지는 않음
-- 다만 bucket 순회, 존재 확인, 다운로드, 업로드 때문에 Cloudflare R2 요청량과 저장 용량에는 영향이 있을 수 있음
+- 다만 bucket 순회, 존재 확인, 다운로드, 업로드, 삭제 때문에 Cloudflare R2 요청량에는 영향이 있을 수 있음
 - Cloudflare R2 free tier는 Standard storage 기준 월 10 GB storage, Class A 100만 요청, Class B 1,000만 요청까지 무료이므로 대량 실행은 이 quota를 잠식할 수 있음
-- 이 작업에서 ListObjects / PutObject는 Class A, HeadObject / GetObject는 Class B에 해당함
+- 이 작업에서 ListObjects / PutObject는 Class A, HeadObject / GetObject는 Class B, DeleteObject는 무료에 해당함
 - Vercel Hobby는 함수 호출 100만 회, Function Duration 100 GB-Hours 포함이고, 초과 시 일반적으로 바로 과금되는 대신 기능이 리셋 시점까지 제한될 수 있음
 - Supabase free tier quota는 직접 소모하지 않으므로 이 항목의 주된 비용 위험은 아님
 
@@ -104,23 +85,60 @@ function indicatorClassName(tone: RiskIndicator["tone"]): string {
 export default function DebugPanel() {
     const [detail, setDetail] = useState<DebugEntryDetail | null>(null);
     const [infoOpen, setInfoOpen] = useState(false);
+    const [progressOpen, setProgressOpen] = useState(false);
+    const [progressValue, setProgressValue] = useState(0);
+    const [progressLabel, setProgressLabel] = useState("준비 중...");
     const [running, setRunning] = useState(false);
     const [result, setResult] = useState<RunState>(null);
+
+    useEffect(() => {
+        if (!running) return;
+        if (progressValue < 25) {
+            setProgressLabel("bucket 대상 수집 중...");
+            return;
+        }
+        if (progressValue < 70) {
+            setProgressLabel("이미지 sidecar 생성 중...");
+            return;
+        }
+        if (progressValue < 100) {
+            setProgressLabel("결과 정리 중...");
+            return;
+        }
+        setProgressLabel("완료");
+    }, [progressValue, running]);
 
     const handleRunBackfill = async () => {
         setRunning(true);
         setResult(null);
+        setProgressOpen(true);
+        setProgressValue(5);
+        setProgressLabel("bucket 대상 수집 중...");
+
+        const progressTimer = window.setInterval(() => {
+            setProgressValue((current) =>
+                current >= 92 ? current : current + 4
+            );
+        }, 700);
 
         try {
             const summary = await executeLightboxSidecarBackfill();
+            window.clearInterval(progressTimer);
+            setProgressValue(100);
             setResult({ type: "success", summary });
         } catch (error) {
+            window.clearInterval(progressTimer);
             setResult({
                 type: "error",
                 message:
                     error instanceof Error ? error.message : "backfill 실패",
             });
         } finally {
+            window.setTimeout(() => {
+                setProgressOpen(false);
+                setProgressValue(0);
+                setProgressLabel("준비 중...");
+            }, 500);
             setRunning(false);
         }
     };
@@ -163,9 +181,9 @@ export default function DebugPanel() {
                             </p>
                             <p className="mt-1 text-sm leading-6 text-(--color-muted)">
                                 기존 <code>blog</code>, <code>portfolio</code>{" "}
-                                자산을 순회하면서 missing sidecar만 생성합니다.
-                                일반 이미지는 <code>.thumb.webp</code>, GIF는{" "}
-                                <code>.poster.webp</code>를 생성합니다.
+                                자산을 순회하면서 <code>.thumb.webp</code>{" "}
+                                하나만 남기도록 정리합니다. GIF는 첫 프레임 기반
+                                정적 <code>.thumb.webp</code>를 생성합니다.
                                 운영에서는 한 번만 실행하는 것을 권장합니다.
                             </p>
                             <div className="mt-4 flex flex-wrap gap-2">
@@ -210,16 +228,30 @@ export default function DebugPanel() {
                         <div className="flex items-start gap-3">
                             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
                             <div className="space-y-1 text-sm text-green-700 dark:text-green-300">
-                                <p>
-                                    processed={result.summary.processed}{" "}
-                                    skipped=
-                                    {result.summary.skipped}
+                                <p>processed={result.summary.processed}</p>
+                                <p className="text-xs text-green-700/90 dark:text-green-300/90">
+                                    실제로 검사한 원본 자산 수
+                                </p>
+                                <p>skipped={result.summary.skipped}</p>
+                                <p className="text-xs text-green-700/90 dark:text-green-300/90">
+                                    이미 정적인 thumb가 있어서 추가 작업 없이
+                                    건너뛴 수
+                                </p>
+                                <p>thumb={result.summary.thumbCreated}</p>
+                                <p className="text-xs text-green-700/90 dark:text-green-300/90">
+                                    새로 생성된 <code>.thumb.webp</code> 수
                                 </p>
                                 <p>
-                                    thumb={result.summary.thumbCreated} poster=
-                                    {result.summary.posterCreated}
+                                    deletedPoster=
+                                    {result.summary.deletedPoster}
+                                </p>
+                                <p className="text-xs text-green-700/90 dark:text-green-300/90">
+                                    기존 <code>.poster.webp</code>를 정리한 수
                                 </p>
                                 <p>errors={result.summary.errors.length}</p>
+                                <p className="text-xs text-green-700/90 dark:text-green-300/90">
+                                    변환 또는 업로드에 실패한 자산 수
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -285,9 +317,7 @@ export default function DebugPanel() {
                                         불필요한 쓰기 요청 증가로 직접 비용에
                                         연결될 수 있습니다. 중복 생성이 없더라도
                                         실행 과정의 읽기/쓰기 요청은 별도로 과금
-                                        대상일 수 있습니다. free tier 사용자라면
-                                        저장 용량을 불필요하게 늘리지 않는 것이
-                                        중요합니다.
+                                        대상일 수 있습니다.
                                     </p>
                                 </div>
                                 <p>
@@ -322,10 +352,9 @@ export default function DebugPanel() {
                                         Cloudflare R2 사용량
                                     </strong>
                                     : R2의 <code>LIST</code>, <code>HEAD</code>,{" "}
-                                    <code>GET</code>, <code>PUT</code> 요청량이
-                                    늘어날 수 있음을 뜻합니다. bucket 크기와
-                                    객체 수가 많을수록 트래픽과 요청 수가
-                                    커집니다.
+                                    <code>GET</code>, <code>PUT</code>,{" "}
+                                    <code>DELETE</code> 요청량이 늘어날 수
+                                    있음을 뜻합니다.
                                 </p>
                                 <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-800 dark:text-amber-200">
                                     <p className="font-semibold">
@@ -341,13 +370,15 @@ export default function DebugPanel() {
                                         <p>• Storage: 월 10 GB</p>
                                         <p>• Class A: 월 1,000,000 요청</p>
                                         <p>• Class B: 월 10,000,000 요청</p>
+                                        <p>• DeleteObject: 무료</p>
                                         <p>• Egress: 무료</p>
                                     </div>
                                     <p className="mt-2">
                                         이 작업에서 <code>LIST</code>,{" "}
                                         <code>PUT</code>는 Class A,{" "}
                                         <code>HEAD</code>, <code>GET</code>은
-                                        Class B에 해당합니다.
+                                        Class B, <code>DELETE</code>는 무료에
+                                        해당합니다.
                                     </p>
                                 </div>
                                 <p>
@@ -385,9 +416,7 @@ export default function DebugPanel() {
                                         권장 실행 횟수
                                     </strong>
                                     : 동일 작업을 얼마나 자주 실행하는 게
-                                    적절한지 알려줍니다. 최초 1회는 migration
-                                    성격이고, 이후에는 누락이 의심될 때만
-                                    실행하는 것이 좋습니다.
+                                    적절한지 알려줍니다.
                                 </p>
                                 <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-800 dark:text-amber-200">
                                     <p className="font-semibold">
@@ -421,6 +450,34 @@ export default function DebugPanel() {
                             {detail?.description}
                         </DialogDescription>
                     </DialogHeader>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={progressOpen} onOpenChange={() => {}}>
+                <DialogContent
+                    showCloseButton={false}
+                    className="tablet:max-w-lg border-(--color-border) bg-(--color-surface) text-(--color-foreground)"
+                >
+                    <DialogHeader>
+                        <DialogTitle>Backfill 실행 중</DialogTitle>
+                        <DialogDescription>
+                            기존 자산을 순회하면서 missing thumb를 생성하고 기존
+                            poster를 정리하고 있습니다. bucket 크기에 따라
+                            시간이 걸릴 수 있습니다.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-3">
+                        <div className="h-3 overflow-hidden rounded-full bg-(--color-surface-subtle)">
+                            <div
+                                className="h-full rounded-full bg-(--color-accent) transition-[width] duration-500"
+                                style={{ width: `${progressValue}%` }}
+                            />
+                        </div>
+                        <p className="text-sm text-(--color-muted)">
+                            {progressLabel} {progressValue}%
+                        </p>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>
