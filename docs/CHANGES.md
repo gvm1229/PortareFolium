@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.12.25 (2026-04-19)
+
+### feat: lightbox mixed media + blur 제거
+
+- `src/components/ImageLightbox.tsx`: lightbox media 모델을 `image`/`youtube` 공용 구조로 확장하고, YouTube는 정적 thumbnail + play button 방식으로 렌더되도록 변경
+- `src/components/ImageLightbox.tsx`: 기존 blur-up 배경 레이어 제거 — 이미지 edge blur flashing 문제 해소
+- `src/lib/markdown.tsx`: 본문 YouTube embed wrapper에 `data-youtube-id`와 lightbox 진입 버튼 추가
+
 ## v0.12.24 (2026-04-19)
 
 ### fix: Firefox WebKit lightbox E2E 클릭 타이밍 회귀 보정

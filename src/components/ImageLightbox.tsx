@@ -2,12 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, X } from "lucide-react";
 
 type LightboxImage = {
-    src: string;
     alt: string;
+    src: string;
+    type: "image";
 };
+
+type LightboxYoutube = {
+    thumbnailSrc: string;
+    title: string;
+    type: "youtube";
+    videoId: string;
+};
+
+type LightboxMedia = LightboxImage | LightboxYoutube;
 
 type ImageLightboxProps = {
     contentSelector: string;
@@ -30,98 +40,43 @@ function isGifSource(src: string): boolean {
     return /\.gif(?:[?#]|$)/i.test(src);
 }
 
-// gif 정적 preview 생성
-async function createStaticGifPreview(src: string): Promise<string | null> {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
-            try {
-                const canvas = document.createElement("canvas");
-                const width = img.naturalWidth;
-                const height = img.naturalHeight;
-                const scale =
-                    Math.max(width, height) > 256
-                        ? 256 / Math.max(width, height)
-                        : 1;
-
-                canvas.width = Math.max(1, Math.round(width * scale));
-                canvas.height = Math.max(1, Math.round(height * scale));
-                const ctx = canvas.getContext("2d");
-                if (!ctx) {
-                    resolve(null);
-                    return;
-                }
-
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                resolve(canvas.toDataURL("image/webp", 0.75));
-            } catch {
-                resolve(null);
-            }
-        };
-        img.onerror = () => resolve(null);
-        img.src = src;
-    });
+// YouTube thumbnail path 생성
+function getYoutubeThumbnail(videoId: string): string {
+    return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
 }
 
 type FilmstripThumbnailProps = {
     active: boolean;
-    image: LightboxImage;
+    media: LightboxMedia;
     onSelect: () => void;
-    runtimePreviewCacheRef: React.MutableRefObject<Map<string, string>>;
 };
+
+// filmstrip candidate 목록 계산
+function getImageFilmstripCandidates(src: string): string[] {
+    const list = [replaceWithSidecar(src, "thumb")];
+    if (isGifSource(src)) {
+        list.push(replaceWithSidecar(src, "poster"));
+    }
+    list.push(src);
+    return list;
+}
 
 // filmstrip thumbnail 렌더
 function FilmstripThumbnail({
     active,
-    image,
+    media,
     onSelect,
-    runtimePreviewCacheRef,
 }: FilmstripThumbnailProps) {
     const candidates = useMemo(() => {
-        const list = [replaceWithSidecar(image.src, "thumb")];
-        if (isGifSource(image.src)) {
-            list.push(replaceWithSidecar(image.src, "poster"));
-        }
-        return list;
-    }, [image.src]);
+        if (media.type === "youtube") return [media.thumbnailSrc];
+        return getImageFilmstripCandidates(media.src);
+    }, [media]);
     const [candidateIndex, setCandidateIndex] = useState(0);
-    const [thumbSrc, setThumbSrc] = useState(() => {
-        const cached = runtimePreviewCacheRef.current.get(image.src);
-        return cached ?? candidates[0] ?? image.src;
-    });
+    const thumbSrc = candidates[candidateIndex] ?? "";
 
     useEffect(() => {
-        const cached = runtimePreviewCacheRef.current.get(image.src);
         setCandidateIndex(0);
-        setThumbSrc(cached ?? candidates[0] ?? image.src);
-    }, [candidates, image.src, runtimePreviewCacheRef]);
-
-    const handleError = useCallback(async () => {
-        const nextIndex = candidateIndex + 1;
-        if (nextIndex < candidates.length) {
-            setCandidateIndex(nextIndex);
-            setThumbSrc(candidates[nextIndex]);
-            return;
-        }
-
-        if (isGifSource(image.src)) {
-            const cached = runtimePreviewCacheRef.current.get(image.src);
-            if (cached) {
-                setThumbSrc(cached);
-                return;
-            }
-
-            const generated = await createStaticGifPreview(image.src);
-            if (generated) {
-                runtimePreviewCacheRef.current.set(image.src, generated);
-                setThumbSrc(generated);
-                return;
-            }
-        }
-
-        setThumbSrc(image.src);
-    }, [candidateIndex, candidates, image.src, runtimePreviewCacheRef]);
+    }, [candidates]);
 
     return (
         <button
@@ -142,40 +97,97 @@ function FilmstripThumbnail({
                 loading="lazy"
                 decoding="async"
                 onError={() => {
-                    void handleError();
+                    const nextIndex = candidateIndex + 1;
+                    if (nextIndex < candidates.length) {
+                        setCandidateIndex(nextIndex);
+                    }
                 }}
                 className="h-full w-full object-cover"
             />
+            {media.type === "youtube" && (
+                <span className="absolute inset-0 flex items-center justify-center bg-black/25">
+                    <Play className="h-5 w-5 fill-white text-white" />
+                </span>
+            )}
         </button>
     );
 }
 
-// 본문 이미지 lightbox — contentSelector 하위 img 스캔 후 click wiring
+// 본문 media 스캔
+function collectMedia(root: Element): LightboxMedia[] {
+    const nodes = Array.from(
+        root.querySelectorAll<HTMLElement>("img, .youtube-embed-wrapper")
+    );
+    const media: LightboxMedia[] = [];
+
+    nodes.forEach((node) => {
+        if (node.matches("img")) {
+            const image = node as HTMLImageElement;
+            if (!image.src) return;
+            media.push({
+                type: "image",
+                src: image.src,
+                alt: image.alt ?? "",
+            });
+            return;
+        }
+
+        if (node.matches(".youtube-embed-wrapper")) {
+            const videoId = node.getAttribute("data-youtube-id")?.trim();
+            if (!videoId) return;
+            media.push({
+                type: "youtube",
+                videoId,
+                title: "YouTube video",
+                thumbnailSrc: getYoutubeThumbnail(videoId),
+            });
+        }
+    });
+
+    return media;
+}
+
+// 본문 이미지 lightbox — contentSelector 하위 media 스캔 후 click wiring
 export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
-    const [images, setImages] = useState<LightboxImage[]>([]);
+    const [media, setMedia] = useState<LightboxMedia[]>([]);
     const [openIndex, setOpenIndex] = useState<number | null>(null);
-    const [fullLoaded, setFullLoaded] = useState(false);
+    const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
     const mountedRef = useRef(false);
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-    const runtimePreviewCacheRef = useRef(new Map<string, string>());
 
-    // 본문 img 스캔 + 각 img에 click handler 부착
-    const scanImages = useCallback(() => {
+    // 본문 media 스캔 + click target index 부여
+    const scanMedia = useCallback(() => {
         const root = document.querySelector(contentSelector);
         if (!root) return;
-        const imgs = Array.from(
-            root.querySelectorAll<HTMLImageElement>("img")
-        ).filter((el) => el.src);
 
-        const list: LightboxImage[] = imgs.map((el) => ({
-            src: el.src,
-            alt: el.alt ?? "",
-        }));
-        setImages(list);
+        const nextMedia = collectMedia(root);
+        setMedia(nextMedia);
 
-        imgs.forEach((el, idx) => {
-            el.style.cursor = "zoom-in";
-            el.dataset.lightboxIdx = String(idx);
+        let currentIndex = 0;
+        root.querySelectorAll<HTMLElement>(
+            "img, .youtube-embed-wrapper"
+        ).forEach((node) => {
+            if (node.matches("img")) {
+                const image = node as HTMLImageElement;
+                if (!image.src) return;
+                image.style.cursor = "zoom-in";
+                image.dataset.lightboxIdx = String(currentIndex);
+                currentIndex += 1;
+                return;
+            }
+
+            if (node.matches(".youtube-embed-wrapper")) {
+                const videoId = node.getAttribute("data-youtube-id")?.trim();
+                if (!videoId) return;
+                node.setAttribute("data-lightbox-idx", String(currentIndex));
+                const trigger = node.querySelector<HTMLElement>(
+                    '[data-lightbox-open="youtube"]'
+                );
+                if (trigger) {
+                    trigger.dataset.lightboxIdx = String(currentIndex);
+                }
+                currentIndex += 1;
+            }
         });
 
         if (!mountedRef.current) {
@@ -184,30 +196,41 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
         }
     }, [contentSelector]);
 
-    // click delegation — 이벤트 재부착 없이 root 한 곳만 listener 유지
+    // click delegation
     const handleContentClick = useCallback((e: Event) => {
-        const target = e.target as HTMLElement;
-        if (target.tagName !== "IMG") return;
-        const idxAttr = target.dataset.lightboxIdx;
+        const target = e.target as HTMLElement | null;
+        if (!target) return;
+
+        const imageTarget = target.closest<HTMLImageElement>(
+            "img[data-lightbox-idx]"
+        );
+        const youtubeTrigger = target.closest<HTMLElement>(
+            '[data-lightbox-open="youtube"][data-lightbox-idx]'
+        );
+        const source = imageTarget ?? youtubeTrigger;
+        if (!source) return;
+
+        const idxAttr = source.dataset.lightboxIdx;
         if (idxAttr == null) return;
+
         e.preventDefault();
         const idx = Number(idxAttr);
         if (!Number.isFinite(idx)) return;
         setOpenIndex(idx);
-        setFullLoaded(false);
+        setPlayingVideoId(null);
     }, []);
 
     useEffect(() => {
-        scanImages();
+        scanMedia();
         const root = document.querySelector(contentSelector);
         if (!root) return;
 
-        const observer = new MutationObserver(() => scanImages());
+        const observer = new MutationObserver(() => scanMedia());
         observer.observe(root, {
             childList: true,
             subtree: true,
             attributes: true,
-            attributeFilter: ["src"],
+            attributeFilter: ["src", "data-youtube-id"],
         });
 
         return () => {
@@ -215,19 +238,22 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
             root.removeEventListener("click", handleContentClick);
             mountedRef.current = false;
         };
-    }, [contentSelector, scanImages, handleContentClick]);
+    }, [contentSelector, scanMedia, handleContentClick]);
 
-    const close = useCallback(() => setOpenIndex(null), []);
+    const close = useCallback(() => {
+        setOpenIndex(null);
+        setPlayingVideoId(null);
+    }, []);
 
     const goPrev = useCallback(() => {
         setOpenIndex((i) => (i == null || i <= 0 ? i : i - 1));
-        setFullLoaded(false);
+        setPlayingVideoId(null);
     }, []);
 
     const goNext = useCallback(() => {
-        setOpenIndex((i) => (i == null || i >= images.length - 1 ? i : i + 1));
-        setFullLoaded(false);
-    }, [images.length]);
+        setOpenIndex((i) => (i == null || i >= media.length - 1 ? i : i + 1));
+        setPlayingVideoId(null);
+    }, [media.length]);
 
     // keyboard + body scroll lock
     useEffect(() => {
@@ -247,17 +273,16 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
         };
     }, [openIndex, close, goPrev, goNext]);
 
-    if (openIndex == null || images.length === 0) return null;
+    if (openIndex == null || media.length === 0) return null;
     if (typeof document === "undefined") return null;
 
-    const current = images[openIndex];
+    const current = media[openIndex];
     if (!current) return null;
 
     const atFirst = openIndex <= 0;
-    const atLast = openIndex >= images.length - 1;
+    const atLast = openIndex >= media.length - 1;
+    const total = media.length;
 
-    // filmstrip window — 고정 11개, ends에서 window 고정 (사용자 결정 4-A)
-    const total = images.length;
     let winStart = openIndex - FILMSTRIP_RADIUS;
     let winEnd = openIndex + FILMSTRIP_RADIUS + 1;
     if (winStart < 0) {
@@ -269,10 +294,10 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
         winEnd = total;
     }
     winStart = Math.max(0, winStart);
-    const filmstrip = images.slice(winStart, winEnd);
+    const filmstrip = media.slice(winStart, winEnd);
     const shouldShowFilmstrip = total > 1;
-
-    const caption = current.alt?.trim() || "";
+    const caption =
+        current.type === "image" ? current.alt?.trim() || "" : current.title;
 
     return createPortal(
         <div
@@ -282,7 +307,6 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
             className="fixed inset-0 z-[120] flex flex-col bg-black/80 backdrop-blur-sm"
             onClick={close}
         >
-            {/* Close button */}
             <button
                 type="button"
                 aria-label="닫기"
@@ -295,7 +319,6 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
                 <X className="h-5 w-5" />
             </button>
 
-            {/* Prev button */}
             <button
                 type="button"
                 aria-label="이전 이미지"
@@ -309,7 +332,6 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
                 <ChevronLeft className="h-6 w-6" />
             </button>
 
-            {/* Next button */}
             <button
                 type="button"
                 aria-label="다음 이미지"
@@ -323,7 +345,6 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
                 <ChevronRight className="h-6 w-6" />
             </button>
 
-            {/* Image area */}
             <div
                 className="flex flex-1 items-center justify-center px-16 py-8"
                 onClick={(e) => e.stopPropagation()}
@@ -360,27 +381,48 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
                 }}
             >
                 <div className="relative flex max-h-[80vh] max-w-[80vw] items-center justify-center">
-                    {/* blur-up 배경 */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src={current.src}
-                        alt=""
-                        aria-hidden="true"
-                        className="absolute inset-0 h-full w-full scale-110 object-contain blur-xl"
-                    />
-                    {/* full-res 이미지 */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        key={current.src}
-                        src={current.src}
-                        alt={current.alt}
-                        onLoad={() => setFullLoaded(true)}
-                        className={`relative max-h-[80vh] max-w-[80vw] object-contain transition-opacity duration-300 ${fullLoaded ? "opacity-100" : "opacity-0"}`}
-                    />
+                    {current.type === "image" ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            key={current.src}
+                            src={current.src}
+                            alt={current.alt}
+                            className="relative max-h-[80vh] max-w-[80vw] object-contain"
+                        />
+                    ) : playingVideoId === current.videoId ? (
+                        <div className="relative aspect-video w-[80vw] max-w-[1280px] overflow-hidden rounded-2xl bg-black">
+                            <iframe
+                                src={`https://www.youtube-nocookie.com/embed/${current.videoId}?autoplay=1&rel=0`}
+                                title={current.title}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                className="absolute inset-0 h-full w-full border-0"
+                            />
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => setPlayingVideoId(current.videoId)}
+                            className="group relative overflow-hidden rounded-2xl"
+                            aria-label="영상 재생"
+                        >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={current.thumbnailSrc}
+                                alt={current.title}
+                                className="max-h-[80vh] max-w-[80vw] object-contain"
+                            />
+                            <span className="absolute inset-0 bg-black/25 transition-colors group-hover:bg-black/35" />
+                            <span className="absolute inset-0 flex items-center justify-center">
+                                <span className="rounded-full bg-red-600 p-4 text-white shadow-2xl transition-transform group-hover:scale-105">
+                                    <Play className="h-8 w-8 fill-white text-white" />
+                                </span>
+                            </span>
+                        </button>
+                    )}
                 </div>
             </div>
 
-            {/* Caption */}
             {caption && (
                 <div
                     className="px-8 pb-2 text-center text-sm text-white/80"
@@ -390,7 +432,6 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
                 </div>
             )}
 
-            {/* Counter */}
             <div
                 className="px-8 pb-3 text-center text-xs text-white/60"
                 onClick={(e) => e.stopPropagation()}
@@ -398,24 +439,22 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
                 {openIndex + 1} / {total}
             </div>
 
-            {/* Filmstrip */}
             {shouldShowFilmstrip && (
                 <div
                     className="flex justify-center gap-2 px-4 pb-6"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {filmstrip.map((img, i) => {
+                    {filmstrip.map((item, i) => {
                         const realIdx = winStart + i;
                         const active = realIdx === openIndex;
                         return (
                             <FilmstripThumbnail
                                 key={realIdx}
-                                image={img}
+                                media={item}
                                 active={active}
-                                runtimePreviewCacheRef={runtimePreviewCacheRef}
                                 onSelect={() => {
                                     setOpenIndex(realIdx);
-                                    setFullLoaded(false);
+                                    setPlayingVideoId(null);
                                 }}
                             />
                         );
