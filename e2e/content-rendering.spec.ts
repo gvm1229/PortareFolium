@@ -41,6 +41,22 @@ async function getVisibleLightboxImage(page: Page) {
     return null;
 }
 
+// 브라우저 런타임 에러 수집
+function trackRuntimeErrors(page: Page) {
+    const runtimeErrors: string[] = [];
+
+    page.on("pageerror", (error) => {
+        runtimeErrors.push(`pageerror: ${error.message}`);
+    });
+
+    page.on("console", (message) => {
+        if (message.type() !== "error") return;
+        runtimeErrors.push(`console: ${message.text()}`);
+    });
+
+    return runtimeErrors;
+}
+
 test.describe("콘텐츠 렌더링", () => {
     let blogSlug: string | null = null;
 
@@ -57,6 +73,7 @@ test.describe("콘텐츠 렌더링", () => {
 
     test("코드 블록 (Shiki) 하이라이팅", async ({ page }) => {
         test.skip(!blogSlug, "블로그 글 없음");
+        const runtimeErrors = trackRuntimeErrors(page);
         await page.goto(blogSlug!);
         // Shiki가 렌더링한 코드 블록: pre > code with data-language
         const codeBlock = page.locator("pre code[data-language]");
@@ -67,10 +84,12 @@ test.describe("콘텐츠 렌더링", () => {
             const lang = await codeBlock.first().getAttribute("data-language");
             expect(lang).toBeTruthy();
         }
+        expect(runtimeErrors).toEqual([]);
     });
 
     test("이미지 lazy loading", async ({ page }) => {
         test.skip(!blogSlug, "블로그 글 없음");
+        const runtimeErrors = trackRuntimeErrors(page);
         await page.goto(blogSlug!);
         const images = page.locator(".post-content img");
         const count = await images.count();
@@ -82,10 +101,12 @@ test.describe("콘텐츠 렌더링", () => {
             const lazyCount = await lazyImages.count();
             expect(lazyCount).toBeGreaterThan(0);
         }
+        expect(runtimeErrors).toEqual([]);
     });
 
     test("lightbox open/close", async ({ page }) => {
         test.skip(!blogSlug, "블로그 글 없음");
+        const runtimeErrors = trackRuntimeErrors(page);
         await page.goto(blogSlug!);
         const images = page.locator(".post-content img[data-lightbox-idx]");
         const count = await images.count();
@@ -101,10 +122,12 @@ test.describe("콘텐츠 렌더링", () => {
         await expect(dialog.getByText(`1 / ${count}`)).toBeVisible();
         await page.keyboard.press("Escape");
         await expect(dialog).toBeHidden();
+        expect(runtimeErrors).toEqual([]);
     });
 
     test("lightbox navigation + filmstrip", async ({ page }) => {
         test.skip(!blogSlug, "블로그 글 없음");
+        const runtimeErrors = trackRuntimeErrors(page);
         await page.goto(blogSlug!);
         const images = page.locator(".post-content img[data-lightbox-idx]");
         const count = await images.count();
@@ -133,9 +156,11 @@ test.describe("콘텐츠 렌더링", () => {
 
         await dialog.click({ position: { x: 10, y: 10 } });
         await expect(dialog).toBeHidden();
+        expect(runtimeErrors).toEqual([]);
     });
 
     test("YouTube embed lightbox + play button", async ({ page }) => {
+        const runtimeErrors = trackRuntimeErrors(page);
         const response = await page.goto(
             "/blog/console-engine-project-2-review"
         );
@@ -157,10 +182,12 @@ test.describe("콘텐츠 렌더링", () => {
         await expect(playButton).toBeVisible();
         await playButton.click();
         await expect(dialog.locator("iframe")).toBeVisible();
+        expect(runtimeErrors).toEqual([]);
     });
 
     test("목차 (TOC) 생성", async ({ page }) => {
         test.skip(!blogSlug, "블로그 글 없음");
+        const runtimeErrors = trackRuntimeErrors(page);
         await page.goto(blogSlug!);
         // GithubToc 또는 TableOfContents 영역에 anchor 링크 존재
         const tocLinks = page.locator(
@@ -170,10 +197,12 @@ test.describe("콘텐츠 렌더링", () => {
         if (count > 0) {
             await expect(tocLinks.first()).toBeVisible();
         }
+        expect(runtimeErrors).toEqual([]);
     });
 
     test("Mermaid 다이어그램 렌더링", async ({ page }) => {
         test.skip(!blogSlug, "블로그 글 없음");
+        const runtimeErrors = trackRuntimeErrors(page);
         await page.goto(blogSlug!);
         // Mermaid SVG 존재 여부 (해당 글에 Mermaid가 있을 때만)
         const mermaidSvg = page.locator(".post-content svg");
@@ -185,10 +214,12 @@ test.describe("콘텐츠 렌더링", () => {
             // Mermaid 블록이 있으면 SVG로 렌더링되어야 함
             await expect(mermaidSvg.first()).toBeVisible({ timeout: 10_000 });
         }
+        expect(runtimeErrors).toEqual([]);
     });
 
     test("KaTeX 수식 렌더링", async ({ page }) => {
         test.skip(!blogSlug, "블로그 글 없음");
+        const runtimeErrors = trackRuntimeErrors(page);
         await page.goto(blogSlug!);
         // KaTeX 렌더링 결과: .katex 클래스 요소
         const katexElements = page.locator(".post-content .katex");
@@ -196,5 +227,6 @@ test.describe("콘텐츠 렌더링", () => {
         if (count > 0) {
             await expect(katexElements.first()).toBeVisible();
         }
+        expect(runtimeErrors).toEqual([]);
     });
 });

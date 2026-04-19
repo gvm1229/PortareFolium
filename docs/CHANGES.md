@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.12.28 (2026-04-19)
+
+### fix: ImageLightbox Hook 순서 오류와 runtime 검증 누락 보정
+
+- `src/components/ImageLightbox.tsx`: `openIndex` 조건부 return 아래에 있던 `useEffect`를 상단으로 이동 — blog slug 페이지 방문 시 발생하던 Hook order 오류 수정
+- `e2e/content-rendering.spec.ts`: browser `console` error와 `pageerror`를 수집해 assertion 추가 — page load visibility만 보고 통과하던 runtime 오류 누락 방지
+- `AGENTS.md`: frontend route / client component 수정 시 `pnpm dev` 기준 route smoke와 browser console/pageerror 0 확인을 필수 gate로 명시
+
 ## v0.12.27 (2026-04-19)
 
 ### feat: lightbox sidecar backfill + YouTube E2E 추가

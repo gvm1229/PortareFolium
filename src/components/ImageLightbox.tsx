@@ -339,6 +339,12 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
         };
     }, [openIndex, close, goPrev, goNext]);
 
+    useEffect(() => {
+        if (openIndex == null) return;
+        setPlayingVideoId(null);
+        resetImageTransform();
+    }, [openIndex, resetImageTransform]);
+
     if (openIndex == null || media.length === 0) return null;
     if (typeof document === "undefined") return null;
 
@@ -364,11 +370,6 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
     const shouldShowFilmstrip = total > 1;
     const caption =
         current.type === "image" ? current.alt?.trim() || "" : current.title;
-
-    useEffect(() => {
-        setPlayingVideoId(null);
-        resetImageTransform();
-    }, [openIndex, resetImageTransform]);
 
     return createPortal(
         <div

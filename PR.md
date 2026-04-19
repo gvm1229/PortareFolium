@@ -78,3 +78,4 @@ Gantt Chart 패널 전면 재설계. CSV 업로드 방식을 폐기하고 Excel 
 - **v0.12.25**: lightbox mixed media 지원 — YouTube를 정적 thumbnail + play button 방식으로 포함, 기존 edge blur 레이어 제거
 - **v0.12.26**: lightbox 이미지 zoom 추가 — PC `+/-/Reset` 및 wheel, mobile pinch + drag pan 지원
 - **v0.12.27**: runtime 없는 sidecar 방식으로 정리 — `blog`/`portfolio` 자산 backfill script, USER_TASKS, YouTube lightbox E2E 추가
+- **v0.12.28**: `ImageLightbox` Hook order 오류 수정, `content-rendering` spec에 browser console/pageerror assertion 추가, AGENTS frontend runtime gate 보강
