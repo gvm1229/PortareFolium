@@ -13,6 +13,7 @@ import {
     Archive,
     MessageSquare,
     ExternalLink,
+    Bug,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -45,6 +46,7 @@ const SECTIONS = [
                 label: "프롬프트 라이브러리",
                 icon: MessageSquare,
             },
+            { id: "debug", label: "Debug", icon: Bug },
             { id: "config", label: "사이트 설정", icon: Settings },
         ],
     },
@@ -61,6 +63,7 @@ export type TabId =
     | "snapshots"
     | "agent-tokens"
     | "prompts"
+    | "debug"
     | "config";
 
 interface AdminSidebarProps {

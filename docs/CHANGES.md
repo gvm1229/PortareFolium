@@ -1,5 +1,15 @@
 # CHANGES
 
+## v0.12.30 (2026-04-19)
+
+### feat: admin Debug panel에 lightbox sidecar backfill 실행 추가
+
+- `src/lib/lightbox-sidecars.ts` 신규: `thumb.webp` / `poster.webp` sidecar backfill 공용 로직 추가
+- `src/app/admin/actions/lightbox-sidecars.ts` 신규: admin panel에서 backfill 실행용 server action 추가
+- `src/components/admin/panels/DebugPanel.tsx` 신규: lightbox sidecar backfill 실행 버튼과 실행 결과 요약/실패 목록 표시 패널 추가
+- `src/components/admin/AdminSidebar.tsx`, `src/components/admin/AdminDashboard.tsx`: `Prompt Library`와 `Site Config` 사이에 `Debug` 탭 추가
+- `scripts/backfill-lightbox-sidecars.ts`: 공용 lib 호출 구조로 정리
+
 ## v0.12.29 (2026-04-19)
 
 ### feat: lightbox control row + loop toggle + wide prev next hit-area

@@ -16,6 +16,7 @@ import MigrationsPanel from "@/components/admin/panels/MigrationsPanel";
 import AgentTokensPanel from "@/components/admin/panels/AgentTokensPanel";
 import SnapshotsPanel from "@/components/admin/panels/SnapshotsPanel";
 import PromptLibraryPanel from "@/components/admin/panels/PromptLibraryPanel";
+import DebugPanel from "@/components/admin/panels/DebugPanel";
 import type { TabId } from "@/components/admin/AdminSidebar";
 
 // 비활동 제한 시간 (1시간)
@@ -36,6 +37,7 @@ const VALID_TABS: TabId[] = [
     "snapshots",
     "agent-tokens",
     "prompts",
+    "debug",
     "config",
 ];
 
@@ -82,6 +84,7 @@ export default function AdminDashboard() {
         activeTab === "snapshots" ||
         activeTab === "agent-tokens" ||
         activeTab === "prompts" ||
+        activeTab === "debug" ||
         activeTab === "config";
 
     useEffect(() => {
@@ -185,6 +188,7 @@ export default function AdminDashboard() {
                             activeTab === "snapshots" ||
                             activeTab === "agent-tokens" ||
                             activeTab === "prompts" ||
+                            activeTab === "debug" ||
                             activeTab === "config"
                                 ? "overflow-hidden"
                                 : "overflow-y-auto"
@@ -239,6 +243,9 @@ export default function AdminDashboard() {
                             )}
                             {activeTab === "prompts" && (
                                 <PromptLibraryPanel key={`prompts-${tabKey}`} />
+                            )}
+                            {activeTab === "debug" && (
+                                <DebugPanel key={`debug-${tabKey}`} />
                             )}
                             {activeTab === "config" && (
                                 <SiteConfigPanel key={`config-${tabKey}`} />
