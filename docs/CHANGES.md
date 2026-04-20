@@ -1,5 +1,13 @@
 # CHANGES
 
+## v0.12.46 (2026-04-20)
+
+### fix: Vercel Analytics / SpeedInsights를 Vercel env에서만 render
+
+- Root cause: `src/app/layout.tsx`의 `<Analytics />` + `<SpeedInsights />`가 모든 환경에서 `<script src="/_vercel/insights/script.js">` + `/_vercel/speed-insights/script.js`를 inject. 해당 path는 Vercel production runtime에서만 serve됨. Vercel 외 환경 (local `pnpm start`, GitHub Actions CI runner) 에서 404 발생. 이 404는 v0.7.18부터 상시 발생했으나 v0.12.28에서 E2E `trackRuntimeErrors` + `expect(runtimeErrors).toEqual([])` strict assertion을 도입하면서 처음으로 test fail로 가시화됨
+- `src/app/layout.tsx`: `<SpeedInsights />` + `<Analytics />`를 `{process.env.VERCEL && (...)}`로 감싸 Vercel build에서만 render. 외부 환경에서는 script inject 자체가 발생 안 함 → 404 원천 제거
+- `package.json`: patch version `0.12.46`로 증가
+
 ## v0.12.45 (2026-04-20)
 
 ### revert: v0.12.43~44 E2E debugging 제거 (CI R2 secret 주입으로 불필요)
