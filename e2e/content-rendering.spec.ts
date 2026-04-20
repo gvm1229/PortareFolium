@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 // 콘텐츠 렌더링 검증 — 블로그 글에서 MDX 렌더링 요소 확인
 // 블로그 목록에서 첫 번째 글을 사용 (데이터 독립적)
@@ -55,6 +55,22 @@ function trackRuntimeErrors(page: Page) {
     });
 
     return runtimeErrors;
+}
+
+// button tooltip 검증
+async function expectButtonTooltip(
+    page: Page,
+    button: Locator,
+    tooltipText: string
+) {
+    await button.hover({ force: true });
+    const tooltip = page
+        .locator('[data-slot="tooltip-content"]')
+        .filter({ hasText: tooltipText })
+        .last();
+    await expect(tooltip).toBeVisible();
+    const className = await tooltip.getAttribute("class");
+    expect(className).toContain("z-[130]");
 }
 
 test.describe("콘텐츠 렌더링", () => {
@@ -141,8 +157,39 @@ test.describe("콘텐츠 렌더링", () => {
         );
         await expect(dialog).toBeVisible();
 
+        await expectButtonTooltip(
+            page,
+            dialog.getByRole("button", { name: "축소" }),
+            "축소"
+        );
+        await expectButtonTooltip(
+            page,
+            dialog.getByRole("button", { name: "확대" }),
+            "확대"
+        );
+        await expectButtonTooltip(
+            page,
+            dialog.getByRole("button", { name: "확대 초기화" }),
+            "확대 초기화"
+        );
+        await expectButtonTooltip(
+            page,
+            dialog.getByRole("button", { name: "닫기" }),
+            "닫기"
+        );
+        await expectButtonTooltip(
+            page,
+            dialog.getByRole("button", { name: "다음 이미지" }),
+            "다음 이미지"
+        );
+
         await dialog.getByRole("button", { name: "다음 이미지" }).click();
         await expect(dialog.getByText(`2 / ${count}`)).toBeVisible();
+        await expectButtonTooltip(
+            page,
+            dialog.getByRole("button", { name: "이전 이미지" }),
+            "이전 이미지"
+        );
 
         const filmstripButtons = dialog.getByRole("button", {
             name: "filmstrip 이미지로 이동",
@@ -152,6 +199,40 @@ test.describe("콘텐츠 렌더링", () => {
 
         const targetIndex = Math.min(1, filmstripCount - 1);
         await filmstripButtons.nth(targetIndex).click();
+        await expect(dialog).toBeVisible();
+
+        await dialog.locator("[data-lightbox-controls]").evaluate((element) => {
+            element.dispatchEvent(
+                new MouseEvent("click", {
+                    bubbles: true,
+                    cancelable: true,
+                })
+            );
+        });
+        await expect(dialog).toBeVisible();
+
+        await dialog
+            .locator("[data-lightbox-bottom-panel]")
+            .evaluate((element) => {
+                element.dispatchEvent(
+                    new MouseEvent("click", {
+                        bubbles: true,
+                        cancelable: true,
+                    })
+                );
+            });
+        await expect(dialog).toBeVisible();
+
+        await dialog
+            .locator("[data-lightbox-filmstrip]")
+            .evaluate((element) => {
+                element.dispatchEvent(
+                    new MouseEvent("click", {
+                        bubbles: true,
+                        cancelable: true,
+                    })
+                );
+            });
         await expect(dialog).toBeVisible();
 
         await dialog.click({ position: { x: 10, y: 10 } });
@@ -180,6 +261,7 @@ test.describe("콘텐츠 렌더링", () => {
 
         const playButton = dialog.getByRole("button", { name: "영상 재생" });
         await expect(playButton).toBeVisible();
+        await expectButtonTooltip(page, playButton, "영상 재생");
         await playButton.click();
         await expect(dialog.locator("iframe")).toBeVisible();
         expect(runtimeErrors).toEqual([]);

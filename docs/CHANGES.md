@@ -1,5 +1,61 @@
 # CHANGES
 
+## v0.12.42 (2026-04-20)
+
+### refactor: shadcn/ui token registration via @theme inline + AGENTS.md directive
+
+- `src/styles/global.css`: `@theme inline` block 추가. shadcn token (`--color-background`, `--color-foreground`, `--color-card`, `--color-popover`, `--color-primary`, `--color-secondary`, `--color-muted`, `--color-accent`, `--color-destructive`, `--color-border`, `--color-input`, `--color-ring`, `--radius-*` 등)을 Tailwind v4 utility layer에 노출 → `bg-foreground`, `text-background`, `fill-foreground` 등 shadcn canonical className이 CSS로 정상 생성됨
+- `src/components/ui/tooltip.tsx`: v0.12.41에서 도입한 arbitrary CSS var syntax (`bg-(--color-foreground)` 등)를 shadcn canonical className으로 복원 (`bg-foreground text-background fill-foreground`). `@theme inline` 도입으로 동일하게 동작하면서 shadcn CLI generated 코드와 diff가 없어져 향후 shadcn component 추가 시 수동 교체 불필요. `arrowClassName` prop은 lightbox override 용도로 유지
+- `AGENTS.md`: "Known Pitfalls"에 shadcn/ui + Tailwind v4 token registration directive 추가. 새 shadcn primitive 추가 시 (1) `@theme inline` token 등록 여부, (2) `tw-animate-css` 존재 여부, (3) `TooltipTrigger asChild`에 span wrap 금지 원칙을 check list로 명시해 동일 regression 재발 방지
+- `package.json`: patch version `0.12.42`로 증가
+
+## v0.12.41 (2026-04-20)
+
+### fix: lightbox tooltip invisible body + theme-independent color
+
+- Root cause: shadcn tooltip default className `bg-foreground text-background fill-foreground`는 Tailwind v3 shadcn pattern. Tailwind v4는 `@theme`에 등록된 `--color-*` 변수만 utility를 생성하는데, 이 프로젝트의 `--foreground` / `--background`는 `:root`에만 정의되어 있어 해당 utility들이 아예 CSS로 생성되지 않음. 결과적으로 tooltip body는 transparent bg + 상속된 text color로 lightbox overlay 위에서 invisible, SVG `<polygon>` 기본 fill만 작은 검정 diamond arrow로 노출됨
+- Secondary cause: `LightboxTooltipButton`이 `<span className="inline-flex">`로 button을 wrap한 뒤 `TooltipTrigger asChild`로 전달 → Radix hover detection이 span level에서 간헐적으로 fail. Span wrapper 제거 후 button을 asChild에 직접 전달하니 `data-state="delayed-open"`과 `aria-describedby` 정상 주입 확인
+- `src/components/ui/tooltip.tsx`: tooltip default className을 Tailwind v4 arbitrary CSS var syntax `bg-(--color-foreground) text-(--color-surface)` / `fill-(--color-foreground)`로 교체해 프로젝트 컬러 스킴 변수와 호환. Arrow 색상을 외부에서 override할 수 있도록 `arrowClassName` prop 추가
+- `src/components/ImageLightbox.tsx`: `LightboxTooltipButton` span wrapper 제거. 모든 tooltip (`LightboxTooltipButton`, prev, next)에 `className="z-[130] bg-white text-black"` + `arrowClassName="bg-white fill-white"` 지정해 dark/light mode 무관하게 흰 배경 + 검정 글자로 고정
+- `src/styles/global.css`: `@import "tw-animate-css"` 추가. shadcn이 의존하는 `animate-in` / `fade-in-0` / `zoom-in-95` / `slide-in-from-*` utility를 활성화해 tooltip opening animation이 실제로 동작하도록 함
+- `package.json`: `tw-animate-css` 의존성 추가, patch version `0.12.41`로 증가
+
+## v0.12.40 (2026-04-20)
+
+### fix: lightbox tooltip stacking 복구
+
+- `src/components/ImageLightbox.tsx`: lightbox 전용 tooltip content z-index class를 `z-[130]`으로 올려 overlay `z-[120]` 위에서 실제로 보이도록 수정
+- `e2e/content-rendering.spec.ts`: tooltip hover 시 visible 상태와 `z-[130]` class 적용을 함께 검증해 overlay 뒤에 가려지는 회귀를 방지
+- `package.json`: patch version `0.12.40`로 증가
+
+## v0.12.39 (2026-04-20)
+
+### feat: lightbox action button tooltip 추가
+
+- `src/components/ImageLightbox.tsx`: shadcn `Tooltip`을 적용해 zoom, close, prev/next, YouTube play button에 hover tooltip 추가
+- `src/components/ImageLightbox.tsx`: loop button과 filmstrip button은 요구사항대로 tooltip 대상에서 제외
+- `e2e/content-rendering.spec.ts`: image lightbox와 YouTube lightbox에서 tooltip 노출 regression 검증 추가
+- `package.json`: patch version `0.12.39`로 증가
+
+## v0.12.38 (2026-04-20)
+
+### fix: lightbox 빈 영역 click 닫기 복구
+
+- `src/components/ImageLightbox.tsx`: viewport 전체 frame의 click 전파 차단을 제거해 filmstrip, image, control 바깥 빈 영역 click이 overlay close로 전달되도록 복구
+- `src/components/ImageLightbox.tsx`: bottom panel 전체 click 전파 차단을 추가해 caption 영역 click도 lightbox close 예외로 처리
+- `src/components/ImageLightbox.tsx`: filmstrip strip wrapper와 top control row는 click 전파 차단을 유지해 thumbnail 사이 gap이나 control 사이 빈 공간 click으로 lightbox가 닫히지 않도록 보정
+- `e2e/content-rendering.spec.ts`: bottom panel click, filmstrip wrapper click, control row click이 lightbox를 닫지 않고, 빈 overlay click만 닫히는지 regression 검증 추가
+- `package.json`: patch version `0.12.38`로 증가
+
+## v0.12.37 (2026-04-20)
+
+### fix: lightbox 빈 영역 click 닫기 복구
+
+- `src/components/ImageLightbox.tsx`: viewport 전체 frame의 click 전파 차단을 제거해 filmstrip, image, control 바깥 빈 영역 click이 overlay close로 전달되도록 복구
+- `src/components/ImageLightbox.tsx`: filmstrip strip wrapper와 top control row는 click 전파 차단을 유지해 thumbnail 사이 gap이나 control 사이 빈 공간 click으로 lightbox가 닫히지 않도록 보정
+- `e2e/content-rendering.spec.ts`: filmstrip wrapper click과 control row click이 lightbox를 닫지 않고, 빈 overlay click만 닫히는지 regression 검증 추가
+- `package.json`: patch version `0.12.37`로 증가
+
 ## v0.12.36 (2026-04-20)
 
 ### chore: branch별 PR 파일 규칙 강제 + legacy PR.md 제거

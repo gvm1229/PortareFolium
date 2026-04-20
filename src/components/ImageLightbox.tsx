@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { createPortal } from "react-dom";
 import {
     ChevronLeft,
@@ -12,6 +19,12 @@ import {
     ZoomIn,
     ZoomOut,
 } from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type LightboxImage = {
     alt: string;
@@ -84,6 +97,12 @@ type FilmstripThumbnailProps = {
     onSelect: () => void;
 };
 
+type LightboxTooltipButtonProps = {
+    children: ReactNode;
+    label: string;
+    side?: "top" | "right" | "bottom" | "left";
+};
+
 // filmstrip candidate 목록 계산
 function getImageFilmstripCandidates(src: string): string[] {
     return [replaceWithSidecar(src, "thumb")];
@@ -111,7 +130,10 @@ function FilmstripThumbnail({
             type="button"
             aria-label="filmstrip 이미지로 이동"
             aria-current={active ? "true" : undefined}
-            onClick={onSelect}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect();
+            }}
             className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
                 active
                     ? "scale-105 border-(--color-accent)"
@@ -138,6 +160,27 @@ function FilmstripThumbnail({
                 </span>
             )}
         </button>
+    );
+}
+
+// lightbox action tooltip wrapper
+function LightboxTooltipButton({
+    children,
+    label,
+    side = "top",
+}: LightboxTooltipButtonProps) {
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>{children}</TooltipTrigger>
+            <TooltipContent
+                side={side}
+                sideOffset={8}
+                className="z-[130] bg-white text-black"
+                arrowClassName="bg-white fill-white"
+            >
+                {label}
+            </TooltipContent>
+        </Tooltip>
     );
 }
 
@@ -491,357 +534,413 @@ export default function ImageLightbox({ contentSelector }: ImageLightboxProps) {
         "absolute top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white transition-colors hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-25";
 
     return createPortal(
-        <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="이미지 확대 보기"
-            className="fixed inset-0 z-[120] bg-black/88 backdrop-blur-sm"
-            onClick={close}
-        >
+        <TooltipProvider delayDuration={120}>
             <div
-                className="flex h-full w-full items-center justify-center"
-                onTouchStart={(e) => {
-                    if (current.type !== "image") {
+                role="dialog"
+                aria-modal="true"
+                aria-label="이미지 확대 보기"
+                className="fixed inset-0 z-[120] bg-black/88 backdrop-blur-sm"
+                onClick={close}
+            >
+                <div
+                    className="flex h-full w-full items-center justify-center"
+                    onTouchStart={(e) => {
+                        if (current.type !== "image") {
+                            const touch = e.touches[0];
+                            if (!touch) return;
+                            swipeStartRef.current = {
+                                x: touch.clientX,
+                                y: touch.clientY,
+                            };
+                            return;
+                        }
+
+                        if (e.touches.length === 2) {
+                            const [a, b] = [e.touches[0], e.touches[1]];
+                            if (!a || !b) return;
+                            pinchRef.current = {
+                                distance: Math.hypot(
+                                    a.clientX - b.clientX,
+                                    a.clientY - b.clientY
+                                ),
+                                startScale: scale,
+                            };
+                            swipeStartRef.current = null;
+                            panRef.current = null;
+                            return;
+                        }
+
                         const touch = e.touches[0];
                         if (!touch) return;
+
+                        if (canPanImage) {
+                            panRef.current = {
+                                x: touch.clientX,
+                                y: touch.clientY,
+                                startTranslateX: translate.x,
+                                startTranslateY: translate.y,
+                            };
+                            setIsDragging(true);
+                            return;
+                        }
+
                         swipeStartRef.current = {
                             x: touch.clientX,
                             y: touch.clientY,
                         };
-                        return;
-                    }
+                    }}
+                    onTouchMove={(e) => {
+                        if (current.type !== "image") return;
 
-                    if (e.touches.length === 2) {
-                        const [a, b] = [e.touches[0], e.touches[1]];
-                        if (!a || !b) return;
-                        pinchRef.current = {
-                            distance: Math.hypot(
+                        if (e.touches.length === 2 && pinchRef.current) {
+                            const [a, b] = [e.touches[0], e.touches[1]];
+                            if (!a || !b) return;
+                            const distance = Math.hypot(
                                 a.clientX - b.clientX,
                                 a.clientY - b.clientY
-                            ),
-                            startScale: scale,
-                        };
+                            );
+                            const nextScale =
+                                pinchRef.current.startScale *
+                                (distance / pinchRef.current.distance);
+                            applyScale(nextScale);
+                            return;
+                        }
+
+                        if (
+                            e.touches.length === 1 &&
+                            panRef.current &&
+                            canPanImage
+                        ) {
+                            const touch = e.touches[0];
+                            if (!touch) return;
+                            const nextTranslate = {
+                                x:
+                                    panRef.current.startTranslateX +
+                                    (touch.clientX - panRef.current.x),
+                                y:
+                                    panRef.current.startTranslateY +
+                                    (touch.clientY - panRef.current.y),
+                            };
+                            setTranslate(clampTranslate(scale, nextTranslate));
+                        }
+                    }}
+                    onTouchEnd={(e) => {
+                        if (
+                            current.type === "image" &&
+                            e.touches.length === 0
+                        ) {
+                            pinchRef.current = null;
+                            panRef.current = null;
+                            setIsDragging(false);
+                        }
+
+                        const touch = e.changedTouches[0];
+                        const start = swipeStartRef.current;
                         swipeStartRef.current = null;
-                        panRef.current = null;
-                        return;
-                    }
+                        if (!touch || !start) return;
 
-                    const touch = e.touches[0];
-                    if (!touch) return;
+                        if (current.type === "image" && canPanImage) return;
 
-                    if (canPanImage) {
-                        panRef.current = {
-                            x: touch.clientX,
-                            y: touch.clientY,
-                            startTranslateX: translate.x,
-                            startTranslateY: translate.y,
-                        };
-                        setIsDragging(true);
-                        return;
-                    }
+                        const deltaX = touch.clientX - start.x;
+                        const deltaY = touch.clientY - start.y;
 
-                    swipeStartRef.current = {
-                        x: touch.clientX,
-                        y: touch.clientY,
-                    };
-                }}
-                onTouchMove={(e) => {
-                    if (current.type !== "image") return;
+                        if (
+                            Math.abs(deltaX) < SWIPE_THRESHOLD ||
+                            Math.abs(deltaX) <= Math.abs(deltaY)
+                        ) {
+                            return;
+                        }
 
-                    if (e.touches.length === 2 && pinchRef.current) {
-                        const [a, b] = [e.touches[0], e.touches[1]];
-                        if (!a || !b) return;
-                        const distance = Math.hypot(
-                            a.clientX - b.clientX,
-                            a.clientY - b.clientY
-                        );
-                        const nextScale =
-                            pinchRef.current.startScale *
-                            (distance / pinchRef.current.distance);
-                        applyScale(nextScale);
-                        return;
-                    }
-
-                    if (
-                        e.touches.length === 1 &&
-                        panRef.current &&
-                        canPanImage
-                    ) {
-                        const touch = e.touches[0];
-                        if (!touch) return;
-                        const nextTranslate = {
-                            x:
-                                panRef.current.startTranslateX +
-                                (touch.clientX - panRef.current.x),
-                            y:
-                                panRef.current.startTranslateY +
-                                (touch.clientY - panRef.current.y),
-                        };
-                        setTranslate(clampTranslate(scale, nextTranslate));
-                    }
-                }}
-                onTouchEnd={(e) => {
-                    if (current.type === "image" && e.touches.length === 0) {
-                        pinchRef.current = null;
-                        panRef.current = null;
-                        setIsDragging(false);
-                    }
-
-                    const touch = e.changedTouches[0];
-                    const start = swipeStartRef.current;
-                    swipeStartRef.current = null;
-                    if (!touch || !start) return;
-
-                    if (current.type === "image" && canPanImage) return;
-
-                    const deltaX = touch.clientX - start.x;
-                    const deltaY = touch.clientY - start.y;
-
-                    if (
-                        Math.abs(deltaX) < SWIPE_THRESHOLD ||
-                        Math.abs(deltaX) <= Math.abs(deltaY)
-                    ) {
-                        return;
-                    }
-
-                    if (deltaX > 0) {
-                        goPrev();
-                        return;
-                    }
-
-                    goNext();
-                }}
-            >
-                <div
-                    ref={mediaFrameRef}
-                    className="relative flex h-full w-full items-center justify-center overflow-hidden"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-start justify-between p-4 sm:p-6">
-                        <div className="rounded-full bg-black/65 px-4 py-2 text-sm font-medium whitespace-nowrap text-white">
-                            {openIndex + 1} / {total}
-                        </div>
-
-                        <div className="pointer-events-auto flex items-center gap-2">
-                            {current.type === "image" && (
-                                <>
-                                    <button
-                                        type="button"
-                                        aria-label="축소"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            applyScale(
-                                                (currentScale) =>
-                                                    currentScale - SCALE_STEP
-                                            );
-                                        }}
-                                        className={controlButtonClass}
-                                    >
-                                        <ZoomOut className="h-4 w-4" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        aria-label="확대"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            applyScale(
-                                                (currentScale) =>
-                                                    currentScale + SCALE_STEP
-                                            );
-                                        }}
-                                        className={controlButtonClass}
-                                    >
-                                        <ZoomIn className="h-4 w-4" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        aria-label="확대 초기화"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            resetImageTransform();
-                                        }}
-                                        className={controlButtonClass}
-                                    >
-                                        <RotateCcw className="h-4 w-4" />
-                                    </button>
-                                </>
-                            )}
-
-                            <button
-                                type="button"
-                                aria-label="loop 토글"
-                                aria-pressed={loopEnabled}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setLoopEnabled((value) => !value);
-                                }}
-                                className={`${pillButtonClass} ${
-                                    loopEnabled ? "bg-(--color-accent)" : ""
-                                }`}
-                            >
-                                <Repeat className="h-4 w-4" />
-                                <span>
-                                    {loopEnabled ? "Loop On" : "Loop Off"}
-                                </span>
-                            </button>
-
-                            <button
-                                type="button"
-                                aria-label="닫기"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    close();
-                                }}
-                                className={controlButtonClass}
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-                    </div>
-
-                    <button
-                        type="button"
-                        aria-label="이전 이미지"
-                        disabled={!canGoPrev}
-                        onClick={(e) => {
-                            e.stopPropagation();
+                        if (deltaX > 0) {
                             goPrev();
-                        }}
-                        className={`${navButtonClass} left-4 sm:left-6`}
-                    >
-                        <ChevronLeft className="h-7 w-7" />
-                    </button>
+                            return;
+                        }
 
-                    <button
-                        type="button"
-                        aria-label="다음 이미지"
-                        disabled={!canGoNext}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            goNext();
-                        }}
-                        className={`${navButtonClass} right-4 sm:right-6`}
+                        goNext();
+                    }}
+                >
+                    <div
+                        ref={mediaFrameRef}
+                        className="relative flex h-full w-full items-center justify-center overflow-hidden"
                     >
-                        <ChevronRight className="h-7 w-7" />
-                    </button>
+                        <div className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-start justify-between p-4 sm:p-6">
+                            <div className="rounded-full bg-black/65 px-4 py-2 text-sm font-medium whitespace-nowrap text-white">
+                                {openIndex + 1} / {total}
+                            </div>
 
-                    {current.type === "image" ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            ref={imageRef}
-                            key={current.src}
-                            src={current.src}
-                            alt={current.alt}
-                            draggable={false}
-                            onLoad={() => syncPanCapability()}
-                            onClick={(e) => e.stopPropagation()}
-                            onWheel={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                applyScale(
-                                    (currentScale) =>
-                                        currentScale +
-                                        (e.deltaY < 0
-                                            ? SCALE_STEP
-                                            : -SCALE_STEP)
-                                );
-                            }}
-                            onMouseDown={(e) => {
-                                if (!canPanImage) return;
-                                e.stopPropagation();
-                                panRef.current = {
-                                    x: e.clientX,
-                                    y: e.clientY,
-                                    startTranslateX: translate.x,
-                                    startTranslateY: translate.y,
-                                };
-                                setIsDragging(true);
-                            }}
-                            className={`relative max-h-screen max-w-screen object-contain select-none ${
-                                canPanImage
-                                    ? isDragging
-                                        ? "cursor-grabbing"
-                                        : "cursor-grab"
-                                    : "cursor-default"
-                            }`}
-                            style={{
-                                transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
-                                transformOrigin: "center center",
-                            }}
-                        />
-                    ) : playingVideoId === current.videoId ? (
-                        <div
-                            className="relative h-full w-full overflow-hidden bg-black"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <iframe
-                                src={`https://www.youtube-nocookie.com/embed/${current.videoId}?autoplay=1&rel=0`}
-                                title={current.title}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                                className="absolute inset-0 h-full w-full border-0"
-                            />
+                            <div
+                                data-lightbox-controls
+                                className="pointer-events-auto flex items-center gap-2"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {current.type === "image" && (
+                                    <>
+                                        <LightboxTooltipButton label="축소">
+                                            <button
+                                                type="button"
+                                                aria-label="축소"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    applyScale(
+                                                        (currentScale) =>
+                                                            currentScale -
+                                                            SCALE_STEP
+                                                    );
+                                                }}
+                                                className={controlButtonClass}
+                                            >
+                                                <ZoomOut className="h-4 w-4" />
+                                            </button>
+                                        </LightboxTooltipButton>
+                                        <LightboxTooltipButton label="확대">
+                                            <button
+                                                type="button"
+                                                aria-label="확대"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    applyScale(
+                                                        (currentScale) =>
+                                                            currentScale +
+                                                            SCALE_STEP
+                                                    );
+                                                }}
+                                                className={controlButtonClass}
+                                            >
+                                                <ZoomIn className="h-4 w-4" />
+                                            </button>
+                                        </LightboxTooltipButton>
+                                        <LightboxTooltipButton label="확대 초기화">
+                                            <button
+                                                type="button"
+                                                aria-label="확대 초기화"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    resetImageTransform();
+                                                }}
+                                                className={controlButtonClass}
+                                            >
+                                                <RotateCcw className="h-4 w-4" />
+                                            </button>
+                                        </LightboxTooltipButton>
+                                    </>
+                                )}
+
+                                <button
+                                    type="button"
+                                    aria-label="loop 토글"
+                                    aria-pressed={loopEnabled}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setLoopEnabled((value) => !value);
+                                    }}
+                                    className={`${pillButtonClass} ${
+                                        loopEnabled ? "bg-(--color-accent)" : ""
+                                    }`}
+                                >
+                                    <Repeat className="h-4 w-4" />
+                                    <span>
+                                        {loopEnabled ? "Loop On" : "Loop Off"}
+                                    </span>
+                                </button>
+
+                                <LightboxTooltipButton label="닫기">
+                                    <button
+                                        type="button"
+                                        aria-label="닫기"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            close();
+                                        }}
+                                        className={controlButtonClass}
+                                    >
+                                        <X className="h-5 w-5" />
+                                    </button>
+                                </LightboxTooltipButton>
+                            </div>
                         </div>
-                    ) : (
-                        <button
-                            type="button"
-                            aria-label="영상 재생"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setPlayingVideoId(current.videoId);
-                            }}
-                            className="group relative overflow-hidden rounded-[1.5rem]"
-                        >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    type="button"
+                                    aria-label="이전 이미지"
+                                    disabled={!canGoPrev}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        goPrev();
+                                    }}
+                                    className={`${navButtonClass} left-4 sm:left-6`}
+                                >
+                                    <ChevronLeft className="h-7 w-7" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent
+                                side="right"
+                                sideOffset={8}
+                                className="z-[130] bg-white text-black"
+                                arrowClassName="bg-white fill-white"
+                            >
+                                이전 이미지
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    type="button"
+                                    aria-label="다음 이미지"
+                                    disabled={!canGoNext}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        goNext();
+                                    }}
+                                    className={`${navButtonClass} right-4 sm:right-6`}
+                                >
+                                    <ChevronRight className="h-7 w-7" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent
+                                side="left"
+                                sideOffset={8}
+                                className="z-[130] bg-white text-black"
+                                arrowClassName="bg-white fill-white"
+                            >
+                                다음 이미지
+                            </TooltipContent>
+                        </Tooltip>
+
+                        {current.type === "image" ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
-                                src={current.thumbnailSrc}
-                                alt={current.title}
-                                className="max-h-screen max-w-screen object-contain"
+                                ref={imageRef}
+                                key={current.src}
+                                src={current.src}
+                                alt={current.alt}
+                                draggable={false}
+                                onLoad={() => syncPanCapability()}
+                                onClick={(e) => e.stopPropagation()}
+                                onWheel={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    applyScale(
+                                        (currentScale) =>
+                                            currentScale +
+                                            (e.deltaY < 0
+                                                ? SCALE_STEP
+                                                : -SCALE_STEP)
+                                    );
+                                }}
+                                onMouseDown={(e) => {
+                                    if (!canPanImage) return;
+                                    e.stopPropagation();
+                                    panRef.current = {
+                                        x: e.clientX,
+                                        y: e.clientY,
+                                        startTranslateX: translate.x,
+                                        startTranslateY: translate.y,
+                                    };
+                                    setIsDragging(true);
+                                }}
+                                className={`relative max-h-screen max-w-screen object-contain select-none ${
+                                    canPanImage
+                                        ? isDragging
+                                            ? "cursor-grabbing"
+                                            : "cursor-grab"
+                                        : "cursor-default"
+                                }`}
+                                style={{
+                                    transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
+                                    transformOrigin: "center center",
+                                }}
                             />
-                            <span className="absolute inset-0 bg-black/25 transition-colors group-hover:bg-black/35" />
-                            <span className="absolute inset-0 flex items-center justify-center">
-                                <span className="rounded-full bg-red-600 p-4 text-white shadow-2xl transition-transform group-hover:scale-105">
-                                    <Play className="h-8 w-8 fill-white text-white" />
-                                </span>
-                            </span>
-                        </button>
-                    )}
+                        ) : playingVideoId === current.videoId ? (
+                            <div
+                                className="relative h-full w-full overflow-hidden bg-black"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <iframe
+                                    src={`https://www.youtube-nocookie.com/embed/${current.videoId}?autoplay=1&rel=0`}
+                                    title={current.title}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    className="absolute inset-0 h-full w-full border-0"
+                                />
+                            </div>
+                        ) : (
+                            <LightboxTooltipButton label="영상 재생">
+                                <button
+                                    type="button"
+                                    aria-label="영상 재생"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPlayingVideoId(current.videoId);
+                                    }}
+                                    className="group relative overflow-hidden rounded-[1.5rem]"
+                                >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={current.thumbnailSrc}
+                                        alt={current.title}
+                                        className="max-h-screen max-w-screen object-contain"
+                                    />
+                                    <span className="absolute inset-0 bg-black/25 transition-colors group-hover:bg-black/35" />
+                                    <span className="absolute inset-0 flex items-center justify-center">
+                                        <span className="rounded-full bg-red-600 p-4 text-white shadow-2xl transition-transform group-hover:scale-105">
+                                            <Play className="h-8 w-8 fill-white text-white" />
+                                        </span>
+                                    </span>
+                                </button>
+                            </LightboxTooltipButton>
+                        )}
 
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 bg-linear-to-t from-black/88 via-black/45 to-transparent px-4 pt-24 pb-4 sm:px-6 sm:pb-6">
-                        <div className="pointer-events-auto mx-auto flex w-full max-w-4xl flex-col items-center gap-3">
-                            {caption && (
-                                <div className="text-center text-sm text-white/82">
-                                    {caption}
-                                </div>
-                            )}
-
-                            {shouldShowFilmstrip && (
-                                <div className="w-full max-w-full overflow-hidden px-2 py-2">
-                                    <div className="flex max-w-full justify-center gap-2 overflow-x-auto px-2 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                                        {filmstrip.map((item, i) => {
-                                            const realIdx = winStart + i;
-                                            const active =
-                                                realIdx === openIndex;
-                                            return (
-                                                <FilmstripThumbnail
-                                                    key={realIdx}
-                                                    media={item}
-                                                    active={active}
-                                                    onSelect={() => {
-                                                        setOpenIndex(realIdx);
-                                                        setPlayingVideoId(null);
-                                                    }}
-                                                />
-                                            );
-                                        })}
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 bg-linear-to-t from-black/88 via-black/45 to-transparent px-4 pt-24 pb-4 sm:px-6 sm:pb-6">
+                            <div
+                                data-lightbox-bottom-panel
+                                className="pointer-events-auto mx-auto flex w-full max-w-4xl flex-col items-center gap-3"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {caption && (
+                                    <div className="text-center text-sm text-white/82">
+                                        {caption}
                                     </div>
-                                </div>
-                            )}
+                                )}
+
+                                {shouldShowFilmstrip && (
+                                    <div className="w-full max-w-full overflow-hidden px-2 py-2">
+                                        <div
+                                            data-lightbox-filmstrip
+                                            className="flex max-w-full justify-center gap-2 overflow-x-auto px-2 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            {filmstrip.map((item, i) => {
+                                                const realIdx = winStart + i;
+                                                const active =
+                                                    realIdx === openIndex;
+                                                return (
+                                                    <FilmstripThumbnail
+                                                        key={realIdx}
+                                                        media={item}
+                                                        active={active}
+                                                        onSelect={() => {
+                                                            setOpenIndex(
+                                                                realIdx
+                                                            );
+                                                            setPlayingVideoId(
+                                                                null
+                                                            );
+                                                        }}
+                                                    />
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>,
+        </TooltipProvider>,
         document.body
     );
 }
