@@ -15,6 +15,25 @@ export default function robots(): MetadataRoute.Robots {
                 allow: "/",
                 disallow: ["/admin", "/api"],
             },
+            // SEO 비공헌 + R2 Class B op 소모 위험 있는 aggressive crawler 차단
+            {
+                userAgent: [
+                    "SemrushBot",
+                    "AhrefsBot",
+                    "DotBot",
+                    "MJ12bot",
+                    "PetalBot",
+                    "DataForSeoBot",
+                    "Bytespider",
+                    "GPTBot",
+                    "ClaudeBot",
+                    "anthropic-ai",
+                    "CCBot",
+                    "Amazonbot",
+                    "meta-externalagent",
+                ],
+                disallow: "/",
+            },
         ],
         sitemap: `${baseUrl}/sitemap.xml`,
     };

@@ -15,11 +15,21 @@ import {
 } from "@/lib/mdx-directive-converter";
 import { unescapeJsxBrackets } from "@/lib/tiptap-markdown";
 import MarkdownImage from "@/components/MarkdownImage";
+import ImageGroup from "@/components/ImageGroup";
 
 function YouTube({ id }: { id?: string }) {
     if (!id) return null;
     return (
-        <div className="youtube-embed-wrapper">
+        <div className="youtube-embed-wrapper" data-youtube-id={id}>
+            <button
+                type="button"
+                data-lightbox-open="youtube"
+                data-youtube-id={id}
+                className="absolute top-3 right-3 z-10 rounded-lg bg-black/75 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
+                aria-label="영상 확대 보기"
+            >
+                Lightbox
+            </button>
             <iframe
                 src={`https://www.youtube.com/embed/${id}`}
                 title="YouTube video"
@@ -192,6 +202,7 @@ const components = {
     img: MarkdownImage,
     // 콘텐츠 내 <Image> JSX 사용 시 next/image 대신 안전한 컴포넌트로 대체
     Image: MarkdownImage,
+    ImageGroup,
 };
 
 // 코드 블록 밖의 홀로 남은 { } 를 라인 단위로 이스케이프

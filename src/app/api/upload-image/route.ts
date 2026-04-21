@@ -31,12 +31,15 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
+    // UUID 파일명 = immutable asset으로 1년 cache + immutable directive
+    // Cloudflare edge cache hit ratio 최상향 → R2 Class B op 호출 회수 최소화
     await r2Client.send(
         new PutObjectCommand({
             Bucket: R2_BUCKET,
             Key: path,
             Body: buffer,
             ContentType: file.type || "application/octet-stream",
+            CacheControl: "public, max-age=31536000, immutable",
         })
     );
 

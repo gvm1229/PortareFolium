@@ -67,8 +67,12 @@ export default async function RootLayout({
                 {children}
                 <Toaster />
                 <ColoredTableColorSync />
-                <SpeedInsights />
-                <Analytics />
+                {process.env.VERCEL && (
+                    <>
+                        <SpeedInsights />
+                        <Analytics />
+                    </>
+                )}
             </body>
         </html>
     );

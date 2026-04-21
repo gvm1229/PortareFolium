@@ -24,7 +24,8 @@ Update project documentation to reflect recent code changes. Run the following s
     - **Summary**: 1-3 bullet points describing what changed and why
     - **Changed Files**: Grouped by category (feat/fix/refactor/docs/test)
     - **Test Plan**: Checklist of verification steps
-5. Match the tone and format of the existing `PR.md` if one exists.
+5. Never create or update plain `PR.md`. If a legacy `PR.md` exists, migrate any needed content into the current branch file and delete `PR.md`.
+6. Match the tone and format of the existing branch-specific PR file if one exists. If not, follow the nearest existing `PR_<branch>.md` example in the repo.
 
 ## Step 3: Update AGENTS.md project structure
 

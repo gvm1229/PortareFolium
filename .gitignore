@@ -8,6 +8,7 @@
 !README.md
 PROMPT_*.md
 prompt/
+KEDITOR-0.7.21/
 
 # Dependencies
 node_modules/
@@ -53,3 +54,4 @@ test-results/
 
 # OMC
 .omc
+.omx

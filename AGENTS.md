@@ -19,6 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
     - **Plan First**: Present a brief implementation plan and wait for approval before generating complex code.
     - **Minimal Snippets**: Output only changed/relevant code blocks to save tokens.
 - **Manual Tasks**: Record any non-code (Deployment, etc.) tasks in `USER_TASKS.md` for the user to follow.
+- **Discord Message Acknowledgement**: When a user message arrives via the Discord channel (messages wrapped in `<channel source="plugin:discord:discord" ...>`), send a brief acknowledgement reply (e.g., "확인했습니다 — 작업 시작합니다.") through the Discord `reply` tool before starting the task. The ack should be a single short line so the user sees the message was received; then proceed with the work and send the actual result as a follow-up reply.
 
 ### Coding Rules
 
@@ -52,14 +53,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Testing Gate
 
-- **Commit gate (느슨)**: `git commit` 전에는 `pnpm exec vitest run` (unit + integration)만 통과하면 된다. pre-commit hook(husky + lint-staged)이 이미 이 수준을 강제함. 빠른 iteration을 위해 E2E는 요구하지 않는다.
-- **Push gate (엄격)**: `git push` 전에는 반드시 **전체 크로스 브라우저 E2E**를 통과시켜야 한다.
-    - 최소 요구: `pnpm exec playwright test --project=chromium --project=firefox --project=webkit --project=authenticated-chromium --project=authenticated-firefox --project=authenticated-webkit` 0 failure. 3개 엔진(Chromium/Firefox/WebKit) 모두 통과 필수 — 단일 엔진만 실행하여 push하지 말 것.
-    - 변경 범위가 admin / resume / portfolio / blog 등 특정 도메인에 한정되면 해당 spec만 집중 실행 가능하지만, 3개 엔진 모두에서 한 건이라도 실패하면 push 금지.
-    - `test.skip()`이 늘어나면 원인을 기록 (CI DB 시드 부재 등). 조용히 skip만 누적시키지 말 것.
-    - CI가 fail하면 push 후에라도 즉시 재현 → 수정 → push 루프를 실행한다.
-- **예외**: `docs`-only 또는 파일 삭제만 있는 push에서는 E2E 스킵 허용. 그 외 코드/설정 변경을 포함한 push는 전부 엄격 모드.
-- **Push 중 regression 발견 시**: origin 반영 전 로컬에서 고칠 것. `--no-verify`로 hook/검증을 건너뛰지 않는다.
+- **Commit gate (로컬)**: `git commit` 전에는 `pnpm exec vitest run` (unit + integration)만 통과하면 된다. pre-commit hook(husky + lint-staged)이 이미 이 수준을 강제함.
+- **Push gate (로컬 strict)**: `git push` 전에 `.husky/pre-push`가 `pnpm exec playwright test --project=chromium --project=authenticated-chromium` 자동 실행. E2E 통과 못 하면 push 차단. CI E2E workflow (`.github/workflows/e2e.yml`)는 v0.12.50에서 제거됨 — Cloudflare R2 `pub-*.r2.dev` 가 GitHub Actions IP를 abuse filter로 차단해 Next.js image optimization이 항상 400 반환하던 문제 때문. local push gate가 유일한 E2E 통과 검증 수단이므로 `--no-verify`로 hook 우회 금지.
+- **Frontend runtime gate (필수)**: frontend route, `src/components/**/*.tsx` client component, lightbox/editor 같은 브라우저 인터랙션 코드를 수정했으면 `pnpm dev` 기준으로 실제 대상 route를 열어 browser console error / `pageerror` / redbox 0개를 직접 확인해야 함. build 통과만으로 런타임 검증을 대체하지 말 것.
+- **E2E runtime assertions**: 새 E2E나 기존 E2E를 수정할 때는 가능하면 browser console error 와 `pageerror`를 수집해 assertion에 포함. 단순 visibility check만으로 "all tests good" 판단 금지.
+- `test.skip()`이 늘어나면 원인을 기록 (DB 시드 부재 등). 조용히 skip만 누적시키지 말 것.
 
 ### Commit Conventions
 
@@ -90,6 +88,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **PR 제목 형식**: `<source> → <target>: <설명>` (예: `feature/blog-search → main: Blog 검색 모달 + 키보드 단축키`). 70자 이하.
 - **Test plan checklist**는 항상 채울 것 (`pnpm build`, `pnpm test`, E2E 등 해당 변경에 맞춰 조정).
 - **Claude 협력 문구 (Co-Authored-By 등) 절대 포함 금지**.
+- **Branch별 PR 파일 강제**: project root의 PR 본문 파일은 반드시 현재 branch 이름 기반 `PR_<branch-name>.md` 형식만 사용. branch name의 `/`는 `-`로 치환. plain `PR.md` 생성·수정·재사용 금지. legacy `PR.md`가 보이면 branch별 파일로 내용 반영 후 삭제.
+- **HARD: `gh pr create` body 전달 시 `--body "$(cat ...)"` 또는 HEREDOC 절대 사용 금지.** Bash 도구가 파일 내용을 conversation context로 다시 읽어들여 토큰 낭비. 반드시 `--body-file <path>` 옵션 사용:
+    ```bash
+    gh pr create --base main --head <branch> \
+      --title "<title>" \
+      --body-file PR_<branch>.md
+    ```
+    이 규칙은 `gh pr edit --body-file`, `gh issue create --body-file` 등 모든 gh 명령에 동일 적용.
 
 ### Implementation Specifics
 
@@ -255,6 +261,7 @@ src/
 │   │   ├── login/page.tsx
 │   │   └── actions/                    # Server Actions
 │   │       ├── agent-tokens.ts         # Agent token CRUD
+│   │       ├── lightbox-sidecars.ts    # Lightbox sidecar backfill 실행
 │   │       ├── revalidate.ts           # On-Demand revalidation (revalidatePost, revalidatePortfolioItem, revalidateBook, revalidateHome, revalidateResume)
 │   │       └── snapshots.ts            # DB 스냅샷 관리
 │   └── api/
@@ -277,6 +284,8 @@ src/
 │   ├── TableOfContents.tsx             # 인라인 목차
 │   ├── GithubToc.tsx                   # GitHub 스타일 목차
 │   ├── MermaidRenderer.tsx             # Mermaid 다이어그램 렌더러
+│   ├── ImageLightbox.tsx               # 본문 이미지 lightbox (blog/portfolio slug 전용, portal + DOM scan)
+│   ├── ImageGroup.tsx                  # 본문/에디터 공용 다중 이미지 렌더러 (stack/slider)
 │   ├── MarkdownImage.tsx               # MDX img 대체 (SSR 호환 — plain img, lazy loading)
 │   ├── ColoredTable.tsx                # 커스텀 테이블 컴포넌트
 │   ├── ColoredTableColorSync.tsx       # 테이블 컬러 테마 동기화
@@ -299,6 +308,8 @@ src/
 │       ├── CommandPalette.tsx          # Cmd+K 커맨드 팔레트
 │       ├── LoginForm.tsx               # returnUrl 지원
 │       ├── RichMarkdownEditor.tsx      # Tiptap 기반 에디터
+│       ├── ImageLayoutModal.tsx        # 다중 이미지 레이아웃 선택 모달
+│       ├── ImageDeleteConfirmDialog.tsx # 이미지/이미지 그룹 삭제 확인 모달
 │       ├── TiptapImageUpload.tsx       # 이미지 업로드 모달
 │       ├── LatexEditorModal.tsx        # KaTeX 수식 편집 모달
 │       ├── ImageUploader.tsx
@@ -321,6 +332,7 @@ src/
 │           ├── SiteConfigPanel.tsx
 │           ├── AgentTokensPanel.tsx    # MCP Agent 토큰 관리
 │           ├── PromptLibraryPanel.tsx  # MCP 프롬프트 라이브러리
+│           ├── DebugPanel.tsx          # Lightbox sidecar backfill 실행
 │           ├── MigrationsPanel.tsx
 │           ├── SnapshotsPanel.tsx      # DB 스냅샷 관리
 │           └── GanttChartPanel.tsx     # Gantt Chart archive 관리 (CSV import + 미리보기)
@@ -339,7 +351,10 @@ src/
 │   ├── agent-token.ts                  # Agent 토큰 검증 유틸
 │   ├── toc.ts                          # 목차 생성
 │   ├── r2.ts                           # Cloudflare R2 S3 호환 client (Vercel 서버 런타임)
-│   ├── image-upload.ts                 # 이미지 업로드 (R2 API route 경유) + 에셋 이전/삭제
+│   ├── image-upload.ts                 # 이미지 업로드 (R2 API route 경유) + thumb sidecar 생성 + 에셋 이전/삭제 + deleteStorageKeys
+│   ├── lightbox-sidecars.ts            # Lightbox sidecar backfill 공용 로직
+│   ├── orphan-cleanup.ts               # content/thumbnail/snapshot 참조 union 기반 true-orphan R2 key 삭제 (sidecar-aware)
+│   ├── snapshot-cleanup.ts             # editor_states snapshot 조회 + slug rename 시 URL 재작성 + editor open 시 안전망 cleanup
 │   ├── gantt-chart.ts                  # Gantt Chart CSV 파싱 + timeline 빌드 + bar/color scheme 정의
 │   ├── job-field.ts                    # 직군 필드 유틸
 │   ├── mermaid-render.ts               # Mermaid 렌더링
@@ -367,7 +382,9 @@ src/
     ├── mermaid-themes.test.ts
     ├── tailwind-colors.test.ts
     ├── gantt-chart.test.ts
-    └── tiptap-utils.test.ts
+    ├── tiptap-utils.test.ts
+    ├── orphan-cleanup.test.ts
+    └── image-url-conversion.test.ts
 
 e2e/                                    # Playwright E2E 테스트
 ├── auth.setup.ts                       # Supabase 로그인 + storageState 저장
@@ -387,6 +404,7 @@ supabase/
 └── migration-whole.sql                 # 구버전 DB → 현재 스키마 일괄 업데이트
 public/                                 # 정적 에셋 (favicon 등)
 docs/CHANGES.md                         # 변경 이력 (기능/디자인 변경 시 항상 업데이트)
+docs/IMAGE_ORPHAN_CLEANUP.md            # true-orphan cleanup 트리거/판정 규칙 문서
 docs/TEST.md                            # 테스트 전략 (수동 체크리스트 + E2E 구조 + 확장 기준)
 docs/SEO.md                             # Google + NAVER 검색 엔진 등록 가이드
 ```
@@ -429,6 +447,7 @@ PDF 내보내기는 `PdfPreviewModal.tsx`의 `paginateBlocks()`가 `data-pdf-blo
 - **JSX 속성값의 `[`/`]` backslash-escape (tiptap-markdown 잔재)**: tiptap-markdown serializer는 Tiptap 상태를 markdown으로 직렬화할 때 JSX attribute `{'...'}` 내부 문자열도 일반 prose로 취급해 `[`, `]`를 markdown link 문법 충돌 회피용으로 `\[`, `\]` 이스케이프함. 이 escape가 DB에 들어가면 프론트엔드 render 시 acorn JSX expression 파서가 `Could not parse expression with acorn` 에러를 냄. **방어 layer 4단 (v0.11.36+)**: (1) `src/lib/tiptap-markdown.ts`의 `getCleanMarkdown(editor)` wrapper로 editor의 `getMarkdown()` 호출 지점 모두 감쌈, (2) `mdx-directive-converter.ts`의 jsxToDirective / directiveToJsx 양방향에서 ColoredTable 속성값 `\[`/`\]` unescape, (3) `markdown.tsx` `renderMarkdown()` 진입부에 `unescapeJsxBrackets(content)` 호출 (render time safety net), (4) `mcp-tools.ts`의 create/update post·portfolio_item 핸들러에서 `sanitizeContentField(fields)` 적용. 새 진입 경로 추가 시 이 layer 중 하나에는 반드시 포함시킬 것.
 - **JSX 속성값의 `$` 가 inline math로 오인되는 문제 (v0.11.39)**: `mdx-directive-converter.ts`의 `transformOutsideCodeBlocks`는 math/code block을 보존하기 위해 split 정규식을 사용. 이 정규식에 self-closing JSX 태그 (`<Tag ... />`) 패턴을 **반드시 포함**해야 함 — 그렇지 않으면 속성값 안의 `"$0.01/GB"` 같은 `$` 포함 문자열이 inline math로 매칭되어 JSX 태그가 중간에서 쪼개짐. 쪼개진 뒷부분은 `escapeStrayCurlyBraces`의 JSX 라인 감지에 걸리지 않아 `{`/`}` 가 `\{`/`\}` 로 escape되고, acorn이 "Expecting Unicode escape sequence \\uXXXX" 혹은 유사한 parser 오류를 뱉음. 현재 split 정규식: `/(```[\s\S]*?```|<[A-Z]\w*[\s\S]*?\/>|\$\$[\s\S]*?\$\$|\$(?!\$)[^\n$]+?\$)/g` — alternative에서 JSX 패턴 제거 금지.
 - **MDX 렌더 에러 진단 (`renderMarkdown` catch)**: `src/lib/markdown.tsx`의 catch 블록은 acorn 에러 발생 시 line±40 content, col±10 codepoint hex dump, `cause.pos`±60 global content를 `[mdx-debug]` prefix로 `console.error`에 덤프. 새 MDX 렌더 에러가 나면 dev 터미널의 이 출력으로 정확한 문자 위치 + codepoint를 바로 식별 가능.
+- **shadcn/ui + Tailwind v4 token registration (v0.12.41)**: Tailwind v4는 `@theme` 또는 `@theme inline` block에 등록된 `--color-*` 변수만 utility(`bg-foreground`, `text-background`, `fill-foreground` 등)를 생성함. shadcn CLI가 내놓는 default component className은 이 utility들을 전제로 작성되어 있으므로 **새 shadcn primitive를 추가할 때는 반드시** `src/styles/global.css`의 `@theme inline` block에 필요한 shadcn token (`--color-<name>: var(--<name>)`)이 등록되어 있는지 먼저 확인할 것. 누락 시 해당 class들이 CSS로 생성되지 않아 component가 transparent bg + 상속 text color로 invisible 렌더됨 (tooltip v0.12.41 regression의 원인). `shadcn add <component>` 실행 직후 다음 두 가지를 체크: (1) 새 컴포넌트가 쓰는 shadcn token이 `:root` + `@theme inline`에 모두 존재하는지, (2) `animate-in` / `fade-in-0` / `zoom-in-95` / `slide-in-from-*` 같은 animation utility를 쓴다면 `tw-animate-css`가 `package.json` dependency + `global.css` `@import "tw-animate-css"`에 등록되어 있는지. 추가하지 않으면 animation 없는 상태가 아니라 **아예 렌더 안 되는 edge case**로 이어질 수 있음. 또한 shadcn Radix primitive를 `TooltipTrigger asChild` 등으로 쓸 때 child를 `<span>`으로 wrap 하지 말고 실제 interactive element(button/link)를 직접 넘길 것 — Radix hover/focus detection이 wrapper element 단계에서 간헐 실패함 (disabled 상태에서 pointer event가 필요한 경우에만 예외적으로 span wrap).
 
 ## MCP Agent Guide
 
